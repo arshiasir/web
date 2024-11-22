@@ -43,7 +43,56 @@
   <script src="flutter_bootstrap.js" async></script>
   <script src="main.dart.js" type="application/javascript"
     onendload="document.getElementById('loader').remove();"></script>
-
 </body>
 
 </html>
+
+
+
+<body>
+  <div id="loader">
+    <h1 id="loader-title"></h1>
+    <div class="lds-dual-ring"></div>
+  </div>
+  <script>
+    const text = "arshia_sir";
+    const loaderTitle = document.getElementById("loader-title");
+    let index = 0;
+
+    function typeText() {
+      if (index < text.length) {
+        loaderTitle.textContent += text.charAt(index);
+        index++;
+        setTimeout(typeText, 100);
+      }
+    }
+
+    typeText();
+
+    document.querySelector('script[src="main.dart.js"]').onload = () => {
+      document.getElementById('loader').remove();
+    };
+  </script>
+
+  <style>
+    #loader-title {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid black;
+      width: 12ch;
+      margin: 0 auto;
+      animation: blink 0.5s step-end infinite alternate;
+    }
+
+    @keyframes blink {
+      50% {
+        border-color: transparent;
+      }
+    }
+  </style>
+  <script src="flutter_bootstrap.js" async></script>
+  <script src="main.dart.js" type="application/javascript"></script>
+</body>
