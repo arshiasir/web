@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+  <link rel="stylesheet" href="loader.css">
   <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
@@ -27,12 +29,58 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
   <title>web</title>
   <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
+  <div id="loader">
+    <h1 id="loader-title"></h1>
+    <div class="lds-dual-ring"></div>
+  </div>
+  <script>
+    const text = "arshia_sir";
+    const loaderTitle = document.getElementById("loader-title");
+    let index = 0;
+
+    function typeText() {
+      if (index < text.length) {
+        loaderTitle.textContent += text.charAt(index);
+        index++;
+        setTimeout(typeText, 300);
+      }
+    }
+
+    typeText();
+
+    document.querySelector('script[src="main.dart.js"]').onload = () => {
+      document.getElementById('loader').remove();
+    };
+  </script>
+
+  <style>
+    #loader-title {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid black;
+      width: 12ch;
+      margin: 0 auto;
+      animation: blink 0.5s step-end infinite alternate;
+    }
+
+    @keyframes blink {
+      50% {
+        border-color: transparent;
+      }
+    }
+  </style>
   <script src="flutter_bootstrap.js" async></script>
+  <script src="main.dart.js" type="application/javascript"></script>
 </body>
+
 </html>
