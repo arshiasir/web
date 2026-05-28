@@ -1,86 +1,71 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arshia Khani | Professional Systems & Mobile Engineer Portfolio</title>
+    
+    <!-- Preconnect to Google Fonts and static origins for extreme loading performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Core SEO Meta Tags -->
+    <meta name="description" content="Arshia Khani - Senior Systems Analyst, Fullstack Flutter Expert, and Backend Systems Developer. Explore advanced system architectures, real-time dispatch systems, and high-performance cross-platform software." />
+    <meta name="keywords" content="Arshia Khani, Senior Fullstack Engineer, Flutter Expert, System Architect, DevOps, Tehran, Software Architect, Fast API, Dart Client, آرشیا خانی, برنامه نویس فلاتر, معمار سامانه‌ها, بک اند پایتون" />
+    <meta name="author" content="Arshia Khani" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph (OG) Meta Tags for Facebook, LinkedIn, Discord -->
+    <meta property="og:title" content="Arshia Khani | Systems & Mobile Systems Engineer" />
+    <meta property="og:description" content="Explore advanced bilingual topologies, edge biometric setups, high-performance backends, and beautiful mobile architectures designed by Arshia Khani." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Arshia Khani Portfolio" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="fa_IR" />
 
-<head>
-  <link rel="stylesheet" href="loader.css">
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="/web/">
-
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="web">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png" />
-
-  <title>web</title>
-  <link rel="manifest" href="manifest.json">
-</head>
-
-<body>
-  <div id="loader">
-    <h1 id="loader-title"></h1>
-    <div class="lds-dual-ring"></div>
-  </div>
-  <script>
-    const text = "arshia_sir";
-    const loaderTitle = document.getElementById("loader-title");
-    let index = 0;
-
-    function typeText() {
-      if (index < text.length) {
-        loaderTitle.textContent += text.charAt(index);
-        index++;
-        setTimeout(typeText, 300);
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Arshia Khani | Senior Systems & Mobile Engineer" />
+    <meta name="twitter:description" content="Discover professional bilingual mockups, architectural topologies, and low-latency systems engineered by Arshia Khani." />
+    
+    <!-- Structured Data: JSON-LD for rich Google indexing matching Arshia Khani's profile -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Arshia Khani",
+        "jobTitle": "Senior Fullstack & Mobile Systems Engineer",
+        "url": "https://arshia.dev/",
+        "image": "https://ais-pre-2s2tndgqsckzr5nz6jc556-727453971826.europe-west2.run.app/src/assets/images/arshia_portrait_1779712892816.png",
+        "description": "Senior Fullstack Engineer and Mobile Systems Analyst specialising in Flutter, FastAPI, Redis Streams, PostgreSQL geo-indexing, and interactive high-performance architectures.",
+        "gender": "Male",
+        "nationality": {
+          "@type": "Country",
+          "name": "Iran"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Tehran",
+          "addressCountry": "Iran"
+        },
+        "knowsAbout": [
+          "Flutter",
+          "Dart",
+          "Python",
+          "FastAPI",
+          "Nginx & Kong API Gateways",
+          "Redis Streams",
+          "RabbitMQ Event Queues",
+          "PostgreSQL & PostGIS",
+          "Docker & Kubernetes",
+          "Computer Vision & CUDA YOLO"
+        ]
       }
-    }
-
-    typeText();
-
-    document.querySelector('script[src="main.dart.js"]').onload = () => {
-      document.getElementById('loader').remove();
-    };
-  </script>
-
-  <style>
-    #loader-title {
-      font-size: 2rem;
-      font-weight: bold;
-      text-align: center;
-      overflow: hidden;
-      white-space: nowrap;
-      border-right: 2px solid black;
-      width: 12ch;
-      margin: 0 auto;
-      animation: blink 0.5s step-end infinite alternate;
-    }
-
-    @keyframes blink {
-      50% {
-        border-color: transparent;
-      }
-    }
-  </style>
-  <script src="flutter_bootstrap.js" async></script>
-  <script src="main.dart.js" type="application/javascript"></script>
-</body>
-
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
+
