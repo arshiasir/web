@@ -668,7 +668,7 @@ export default function App() {
 
             <div className="h-10 flex items-center">
               <span className="text-lg md:text-xl font-medium tracking-wide bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                {lang === 'en' ? 'Expert' : 'متخصص'} <span className="underline decoration-2 transition-colors duration-500 font-bold" style={{ decorationColor: accentColor }}>{titles[activeTitleIdx]}</span>
+                {lang === 'en' ? 'Expert' : 'متخصص'} <span className="underline decoration-2 transition-colors duration-500 font-bold" style={{ textDecorationColor: accentColor }}>{titles[activeTitleIdx]}</span>
               </span>
             </div>
 
@@ -1446,7 +1446,7 @@ export default function App() {
               {t.services.title}
             </h2>
             <p className="text-gray-400 text-sm max-w-lg mt-1 font-light">
-              {t.services.subtitle}
+              {t.services.sub}
             </p>
           </div>
 
