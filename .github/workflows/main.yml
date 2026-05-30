@@ -31,13 +31,8 @@ jobs:
           node-version: "20.19.0"
           cache: npm
 
-      - name: Pin npm (workaround for npm "Exit handler never called")
-        run: |
-          npm i -g npm@10.9.2
-          npm --version
-
       - name: Install dependencies
-        run: npm ci --include=dev
+        run: npm ci --no-audit --no-fund
 
       - name: Typecheck (lint)
         run: npm run lint
