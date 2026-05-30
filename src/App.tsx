@@ -43,16 +43,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import { translations } from './data/translations';
 import { projectsData } from './data/projectsData';
 import { walkthroughData } from './data/walkthroughData';
+import { imageLinks } from './data/imageLinks';
 
-// Imported Images generated in the turn
-import arshiaPortrait from './assets/images/arshia_portrait_1779712892816.png';
-import aboutGeometric from './assets/images/about_geometric_shapes_1779712914711.png';
-
-import calkiloMockup from './assets/images/calkilo_mockup_1779713789930.png';
-import couchiniMockup from './assets/images/couchini_mockup_1779713805197.png';
-import tipaxMockup from './assets/images/tipax_mockup_1779713822171.png';
-import hyperstarMockup from './assets/images/hyperstar_mockup_1779713838569.png';
-import faceauthMockup from './assets/images/faceauth_mockup_1779713858799.png';
+const arshiaPortrait = imageLinks.arshiaPortrait;
+const aboutGeometric = imageLinks.aboutGeometric;
+const calkiloMockup = imageLinks.calkiloMockup;
+const couchiniMockup = imageLinks.couchiniMockup;
+const tipaxMockup = imageLinks.tipaxMockup;
+const hyperstarMockup = imageLinks.hyperstarMockup;
+const faceauthMockup = imageLinks.faceauthMockup;
 
 export default function App() {
   // Global Bilingual State ('en' for English LTR, 'fa' for Persian / Farsi RTL)
