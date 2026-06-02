@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -57,6 +57,7 @@ export default function App() {
   // Global Bilingual State ('en' for English LTR, 'fa' for Persian / Farsi RTL)
   const [lang, setLang] = useState<'en' | 'fa'>('en');
   const t = translations[lang];
+  const isFa = lang === 'fa';
 
   // Mobile vs Backend active mode focus selector state
   const [mode, setMode] = useState<'MOBILE' | 'BACKEND'>('MOBILE');
@@ -65,10 +66,9 @@ export default function App() {
   const [roleFilter, setRoleFilter] = useState<'ALL' | 'FULLSTACK' | 'MOBILE' | 'BACKEND'>('ALL');
 
   const [activeTitleIdx, setActiveTitleIdx] = useState(0);
-  const titles = lang === 'en' 
+  const titles = lang === 'en'
     ? ['Flutter Engineer', 'Backend Developer', 'System Architect', 'AI Integrator']
-    : ['مهندس ارشد فلاتر', 'توسعه‌دهنده بک‌اند', 'معمار سامانه‌ها', 'کارشناس هوش مصنوعی'];
-
+    : ['مهندس ارشد فلاتر', 'توسعه‌دهنده بک‌اند', 'معمار سیستم', 'یکپارچه‌ساز هوش مصنوعی'];
   // Project overlay popup state
   const [selectedProjId, setSelectedProjId] = useState<string | null>(null);
 
@@ -486,7 +486,7 @@ export default function App() {
     {
       icon: <Sparkles className="w-6 h-6" />,
       title: t.services.items[4] ? t.services.items[4].title : (lang === 'en' ? 'Intelligent AI Shards' : 'اجزای هوشمند یادگیری ماشین'),
-      desc: t.services.items[4] ? t.services.items[4].desc : (lang === 'en' ? 'Embedding computer vision detectors and recommendation indices on-device and on backend.' : 'استقرار مدل‌های لبه وب برای تشخیص تصویر و پیشنهاد یادگیری ماشین.'),
+      desc: t.services.items[4] ? t.services.items[4].desc : (lang === 'en' ? 'Embedding computer vision detectors and recommendation indices on-device and on backend.' : 'استقرار مدل‌های بینایی ماشین و پیشنهاددهی هم روی دستگاه و هم روی بک‌اند.'),
       focus: t.services.items[4] ? t.services.items[4].focus : (lang === 'en' ? 'Predictive Models' : 'مدل‌های هوش مصنوعی')
     }
   ];
@@ -519,6 +519,19 @@ export default function App() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const subject = isFa ? 'پیام از وبسایت' : 'Message from website';
+    const body = [
+      `${isFa ? 'نام' : 'Name'}: ${formState.name}`,
+      `${isFa ? 'ایمیل' : 'Email'}: ${formState.email}`,
+      '',
+      `${isFa ? 'پیام' : 'Message'}:`,
+      formState.message,
+    ].join('\n');
+
+    const mailto = `mailto:khaniarshia7@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+
     setFormSent(true);
     setTimeout(() => {
       setFormSent(false);
@@ -586,17 +599,21 @@ export default function App() {
                 ? 'bg-[#9EFF00]/10 border-[#9EFF00]/40 text-[#9EFF00] shadow-[0_0_12px_rgba(158,255,0,0.2)]' 
                 : 'bg-white/5 border-white/5 hover:border-white/15 hover:bg-white/10 text-gray-300'
             }`}
-            title="Toggle Layout Inspector (Dev Mode)"
+            title={isFa ? 'فعال/غیرفعال کردن حالت توسعه' : 'Toggle Layout Inspector (Dev Mode)'}
           >
             <Terminal className="w-3.5 h-3.5" style={{ color: devMode ? '#9EFF00' : '#888' }} />
-            <span>{devMode ? 'INSPECT: ON' : 'DEV MODE'}</span>
+            <span>
+              {devMode
+                ? (isFa ? 'بازرس: روشن' : 'INSPECT: ON')
+                : (isFa ? 'حالت توسعه' : 'DEV MODE')}
+            </span>
           </button>
 
           {/* Global Bilingual Switcher Toggle Button */}
           <button 
             onClick={() => setLang(lang === 'en' ? 'fa' : 'en')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 hover:border-white/15 hover:bg-white/10 text-[10px] font-black tracking-widest uppercase transition-all duration-300 text-gray-300 cursor-pointer"
-            title="Toggle Language / تغییر زبان"
+            title={isFa ? 'تغییر زبان' : 'Toggle language'}
           >
             <Globe className="w-3.5 h-3.5 text-gray-400 rotate-0 hover:rotate-45 transition-transform" />
             <span>{lang === 'en' ? 'فارسی' : 'English'}</span>
@@ -606,24 +623,24 @@ export default function App() {
           <div className="flex items-center gap-1 bg-white/5 border border-white/5 py-1 px-1 rounded-full shadow-inner scale-90 md:scale-100">
             <button 
               onClick={() => setMode('MOBILE')}
-              className={`px-3 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase transition-all duration-300 ${
+              className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all duration-300 ${isFa ? '' : 'tracking-wider uppercase'} ${
                 mode === 'MOBILE' 
                   ? 'bg-[#7B61FF] text-white shadow-[0_0_12px_rgba(123,97,255,0.4)]' 
                   : 'text-gray-400 hover:text-white'
               }`}
             >
-              mobile
+              {isFa ? 'موبایل' : 'MOBILE'}
             </button>
             
             <button 
               onClick={() => setMode('BACKEND')}
-              className={`px-3 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase transition-all duration-300 ${
+              className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all duration-300 ${isFa ? '' : 'tracking-wider uppercase'} ${
                 mode === 'BACKEND' 
                   ? 'bg-[#9EFF00] text-black shadow-[0_0_12px_rgba(158,255,0,0.4)] font-extrabold' 
                   : 'text-gray-400 hover:text-white'
               }`}
             >
-              backend
+              {isFa ? 'بک‌اند' : 'BACKEND'}
             </button>
           </div>
 
@@ -654,7 +671,7 @@ export default function App() {
           <div className="lg:col-span-4 flex flex-col justify-center items-start space-y-6">
             <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase text-gray-300">
               <Sparkles className="w-3.5 h-3.5" style={{ color: accentColor }} />
-              <span>{lang === 'en' ? 'Fullstack & Mobile Specialist' : 'متخصص سیستم‌های ارشد و کلاینت'}</span>
+              <span>{lang === 'en' ? 'Fullstack & Mobile Specialist' : 'متخصص فول‌استک و موبایل'}</span>
             </div>
             
             <div className="space-y-1 text-left rtl:text-right">
@@ -770,9 +787,9 @@ export default function App() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: accentColor }} />
-                  <span className="text-[10px] tracking-widest font-bold uppercase text-gray-400">
+                  <span className={`text-[10px] font-bold text-gray-400 ${isFa ? '' : 'tracking-widest uppercase'}`}>
                     {mode === 'MOBILE' 
-                      ? (lang === 'en' ? 'CLIENT INTERACTION' : 'رابط تعاملی کاربر') 
+                      ? (lang === 'en' ? 'CLIENT INTERACTION' : 'رابط تعاملی کاربر')
                       : (lang === 'en' ? 'CORE SERVICES ENGINE' : 'موتور سرویس‌های هسته')}
                   </span>
                 </div>
@@ -784,17 +801,17 @@ export default function App() {
               </div>
 
               {/* Heading matching the mock illustration */}
-              <h3 className="text-xl md:text-2xl font-bold uppercase text-white tracking-tight flex items-center gap-2">
+              <h3 className={`text-xl md:text-2xl font-bold text-white tracking-tight flex items-center gap-2 ${isFa ? '' : 'uppercase'}`}>
                 {mode === 'MOBILE' 
-                  ? (lang === 'en' ? 'MOBILE SUITE' : 'مجموعه کلاینت') 
-                  : (lang === 'en' ? 'BACKEND SWARM' : 'خوشه سرور بک‌اند')}
+                  ? (lang === 'en' ? 'MOBILE SUITE' : 'مجموعه موبایل')
+                  : (lang === 'en' ? 'BACKEND SWARM' : 'خوشه بک‌اند')}
                 <Sparkles className="w-5 h-5 shrink-0" style={{ color: accentColor }} />
               </h3>
               
               <p className="text-gray-400 text-xs mt-2 mb-6 leading-relaxed max-w-sm">
                 {mode === 'MOBILE' 
-                  ? (lang === 'en' ? 'Beautiful, high-framerate, cross-platform Android & iOS experiences engineered with clean code.' : 'رابط‌های کاربری زنده، ۶۰ فریم و بومی برای اندروید و iOS با مهندسی الگوریتم‌های رندر روان موبایل.')
-                  : (lang === 'en' ? 'Highly concurrent system layers, lightning-fast database routers, and persistent queue states.' : 'لایه‌های سیستم بسیار همزمان، وب‌سوکت‌ها، کوئری‌های بهینه دیتابیس و مدیریت فعال صف‌های مبادلاتی.')}
+                  ? (lang === 'en' ? 'Beautiful, high-framerate, cross-platform Android & iOS experiences engineered with clean code.' : 'تجربه‌های روان و کراس‌پلتفرم Android و iOS با فریم‌ریت بالا و کد تمیز.')
+                  : (lang === 'en' ? 'Highly concurrent system layers, lightning-fast database routers, and persistent queue states.' : 'لایه‌های بسیار همزمان، روترهای دیتابیس فوق‌سریع و صف‌های پایدار برای پردازش.')}
               </p>
 
               {/* REAL LIVE CSS MOCKUPS of Mobile screens or Terminal nodes inside the card */}
@@ -823,7 +840,7 @@ export default function App() {
                             <div className="w-3 h-1.5 bg-white/30 rounded-xs absolute top-0.5" />
                           </div>
                         </div>
-                        <div className="text-gray-400 text-[6px]">{lang === 'en' ? 'Find your ride' : 'یافتن خودرو'}</div>
+                        <div className="text-gray-400 text-[6px]">{lang === 'en' ? 'Find your ride' : 'خودروتو پیدا کن'}</div>
                       </div>
 
                       {/* Sub-mockup 2: FitTrack dashboard */}
@@ -885,7 +902,7 @@ export default function App() {
                         </div>
                         <div className="flex justify-between items-center text-[#9EFF00] bg-[#9EFF00]/5 px-1 py-0.5 rounded mt-1">
                           <span>WebSocket Active:</span>
-                          <span>{lang === 'en' ? '12,402 listening' : '۱۲،۴۰۲ شنونده فعال'}</span>
+                          <span>{lang === 'en' ? '12,402 listening' : '۱۲٬۴۰۲ شنونده فعال'}</span>
                         </div>
                       </div>
 
@@ -1176,7 +1193,7 @@ export default function App() {
                         ))}
                         {proj.tech.length > 4 && (
                           <span className="text-[9px] font-bold uppercase tracking-wider bg-white/5 border border-white/5 px-2 py-1 rounded text-gray-400 hover:border-white/15 transition-colors">
-                            +{proj.tech.length - 4} {lang === 'en' ? 'MORE' : 'بیشتر'}
+                            +{proj.tech.length - 4} {lang === 'en' ? 'MORE' : 'ب�Rشتر'}
                           </span>
                         )}
                       </div>
@@ -1184,7 +1201,7 @@ export default function App() {
                       {/* Highly polished footer and CTA */}
                       <div className="pt-3 flex items-center justify-between text-xs text-white">
                         <span className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase font-black text-gray-500 transition-colors group-hover:text-white font-sans">
-                          <span>{lang === 'en' ? 'Enter System Details' : 'مشاهده عمیق مشخصات سیستم'}</span>
+                          <span>{lang === 'en' ? 'Enter System Details' : '�&شا�!د�! ع�&�R� �&شخصات س�Rست�&'}</span>
                           <MousePointerClick className="w-3.5 h-3.5" style={{ color: proj.color }} />
                         </span>
                         <span className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-white group-hover:bg-white/10 group-hover:scale-105 transition-all duration-300">
@@ -3025,23 +3042,36 @@ LIMIT 5;`
             <div className="lg:col-span-6 flex flex-col justify-center space-y-6">
               <div className="flex items-center gap-2">
                 <span className="w-6 h-0.5 animate-pulse" style={{ backgroundColor: accentColor }} />
-                <span className="text-xs tracking-widest uppercase font-black" style={{ color: accentColor }}>Get in Touch</span>
+                <span className={`text-xs font-black ${isFa ? '' : 'tracking-widest uppercase'}`} style={{ color: accentColor }}>
+                  {isFa ? 'ارتباط بگیریم' : 'Get in Touch'}
+                </span>
               </div>
-              
+               
               <h2 className="text-5xl md:text-6xl xl:text-7xl font-black uppercase text-white tracking-tighter leading-none">
-                LET'S BUILD <br />
-                SOMETHING <br />
+                {isFa ? (
+                  <>
+                    بیایید <br />
+                    چیزی <br />
+                  </>
+                ) : (
+                  <>
+                    LET&apos;S BUILD <br />
+                    SOMETHING <br />
+                  </>
+                )}
                 <span className="bg-gradient-to-r bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(90deg, #D7E2EA 0%, ${accentColor} 100%)` }}>
-                  POWERFUL
+                  {isFa ? 'قدرتمند' : 'POWERFUL'}
                 </span>
               </h2>
 
               <p className="text-gray-400 text-sm max-w-sm leading-relaxed">
-                Whether you need a high-end Flutter application deployed to the App Store or an ultra-fast FastAPI real-time architecture capable of millions of hits, I am ready to engineer it.
+                {isFa
+                  ? 'چه یک اپ Flutter سطح‌بالا برای انتشار در اپ‌استور بخواهید، چه یک معماری FastAPI فوق‌سریع و بلادرنگ برای ترافیک بالا—آماده‌ام آن را مهندسی کنم.'
+                  : 'Whether you need a high-end Flutter application deployed to the App Store or an ultra-fast FastAPI real-time architecture capable of millions of hits, I am ready to engineer it.'}
               </p>
 
               {/* Dynamic contact lists metrics widgets */}
-              <div className="grid grid-cols-2 gap-4 max-w-md pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md pt-4">
                 
                 <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
                   <span className="text-[10px] text-gray-500 uppercase block font-mono">system_email</span>
@@ -3051,23 +3081,37 @@ LIMIT 5;`
                 </div>
 
                 <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">social_github</span>
-                  <a href="https://github.com" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
-                    github.com/arshiakhani
+                  <span className="text-[10px] text-gray-500 uppercase block font-mono">system_phone</span>
+                  <a href="tel:+989038510475" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1 truncate">
+                    09038510475
                   </a>
                 </div>
 
                 <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">social_linkedin</span>
-                  <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
-                    linkedin.com/in/arshiakhani
+                  <span className="text-[10px] text-gray-500 uppercase block font-mono">social_github</span>
+                  <a href="https://github.com/arshiasir" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
+                    github.com/arshiasir
+                  </a>
+                </div>
+
+                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
+                  <span className="text-[10px] text-gray-500 uppercase block font-mono">social_x</span>
+                  <a href="https://x.com/arshia_sir" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
+                    x.com/arshia_sir
                   </a>
                 </div>
 
                 <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
                   <span className="text-[10px] text-gray-500 uppercase block font-mono">telegram_broker</span>
-                  <a href="https://t.me" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
-                    @arshiakhani
+                  <a href="https://t.me/arshia_sir" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
+                    t.me/arshia_sir
+                  </a>
+                </div>
+
+                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
+                  <span className="text-[10px] text-gray-500 uppercase block font-mono">social_youtube</span>
+                  <a href="https://m.youtube.com/@arshia_sir/playlists" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1 truncate">
+                    youtube.com/@arshia_sir
                   </a>
                 </div>
 
@@ -3080,17 +3124,21 @@ LIMIT 5;`
                 
                 <div className="flex items-center gap-2 mb-6 text-gray-400">
                   <MessageSquare className="w-4 h-4" />
-                  <span className="text-[10px] tracking-widest font-black uppercase text-gray-400">secured_communication_tunnel</span>
+                  <span className={`text-[10px] font-black text-gray-400 ${isFa ? '' : 'tracking-widest uppercase'} ${isFa ? 'text-right w-full' : ''}`}>
+                    {isFa ? 'کانال ارتباط امن' : 'secured_communication_tunnel'}
+                  </span>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   
                   <div>
-                    <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400 block mb-2">Sender Name</label>
+                    <label className={`text-[10px] text-gray-400 block mb-2 ${isFa ? '' : 'font-mono uppercase tracking-wider'}`}>
+                      {isFa ? 'نام' : 'Sender Name'}
+                    </label>
                     <input 
                       type="text" 
                       required
-                      placeholder="e.g. Satoshi Nakamoto" 
+                      placeholder={isFa ? 'مثلاً: علی رضایی' : 'e.g. Satoshi Nakamoto'} 
                       value={formState.name}
                       onChange={(e) => setFormState({ ...formState, name: e.target.value })}
                       className="w-full bg-[#0b0b0d] border border-white/5 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-white/20 transition-all"
@@ -3098,11 +3146,13 @@ LIMIT 5;`
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400 block mb-2">Sender Email Address</label>
+                    <label className={`text-[10px] text-gray-400 block mb-2 ${isFa ? '' : 'font-mono uppercase tracking-wider'}`}>
+                      {isFa ? 'ایمیل' : 'Sender Email Address'}
+                    </label>
                     <input 
                       type="email" 
                       required
-                      placeholder="e.g. satoshi@bitcoin.org" 
+                      placeholder={isFa ? 'مثلاً: name@example.com' : 'e.g. satoshi@bitcoin.org'} 
                       value={formState.email}
                       onChange={(e) => setFormState({ ...formState, email: e.target.value })}
                       className="w-full bg-[#0b0b0d] border border-white/5 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-white/20 transition-all"
@@ -3110,11 +3160,13 @@ LIMIT 5;`
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-mono uppercase tracking-wider text-gray-400 block mb-2">Transmission Message payload</label>
+                    <label className={`text-[10px] text-gray-400 block mb-2 ${isFa ? '' : 'font-mono uppercase tracking-wider'}`}>
+                      {isFa ? 'پیام' : 'Transmission Message payload'}
+                    </label>
                     <textarea 
                       rows={4}
                       required
-                      placeholder="Type details about your project architecture request..." 
+                      placeholder={isFa ? 'جزئیات پروژه یا نیازمندی‌ها را بنویسید…' : 'Type details about your project architecture request...'} 
                       value={formState.message}
                       onChange={(e) => setFormState({ ...formState, message: e.target.value })}
                       className="w-full bg-[#0b0b0d] border border-white/5 rounded-lg p-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-white/20 transition-all resize-none"
@@ -3129,7 +3181,7 @@ LIMIT 5;`
                       boxShadow: `0 8px 32px -8px ${accentColor}`
                     }}
                   >
-                    <span>Transmit Message Payload</span>
+                    <span>{isFa ? 'ارسال پیام' : 'Transmit Message Payload'}</span>
                     <Send className="w-3.5 h-3.5 shrink-0 text-black group-hover/btn:translate-x-1 transition-transform" />
                   </button>
 
@@ -3148,9 +3200,13 @@ LIMIT 5;`
                       <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
                         <CheckCircle className="w-6 h-6 text-emerald-400" />
                       </div>
-                      <h4 className="text-lg font-bold text-white uppercase tracking-tight">Transmission complete!</h4>
+                      <h4 className={`text-lg font-bold text-white tracking-tight ${isFa ? '' : 'uppercase'}`}>
+                        {isFa ? 'ارسال انجام شد' : 'Transmission complete!'}
+                      </h4>
                       <p className="text-gray-400 text-xs max-w-xs mt-2 leading-relaxed">
-                        Message packet has been successfully published to Arshia's personal inbox. I will reply to you in under 12 hours.
+                        {isFa
+                          ? 'پیام شما با موفقیت ثبت شد. در اسرع وقت پاسخ می‌دهم.'
+                          : "Message packet has been successfully published to Arshia's personal inbox. I will reply to you in under 12 hours."}
                       </p>
                       <span className="text-[9px] text-[#9EFF00] font-mono uppercase tracking-widest mt-4">SYS_PACKET_STDOUT: 202_ACCEPTED</span>
                     </motion.div>
@@ -3164,10 +3220,10 @@ LIMIT 5;`
 
           {/* Simple footer credentials matching layout */}
           <div className="border-t border-white/5 pt-8 mt-16 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500 font-mono">
-            <span>© 2026 ARSHIA KHANI. ALL SYSTEM CHANNELS RESERVED.</span>
+            <span>© 2026 ARSHIA KHANI. ALL RIGHTS RESERVED.</span>
             <div className="flex gap-4">
               <span className="text-[#9EFF00]/80">LATENCY: 1ms</span>
-              <span>HOST: AIR_STUDIO</span>
+              <span>HOST: GITHUB_PAGES</span>
               <span>v1.2.0-stable</span>
             </div>
           </div>
