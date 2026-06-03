@@ -40,7 +40,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { translations } from './data/translations';
+import { translations, languageMeta, supportedLanguages } from './data/translations';
 import { projectsData } from './data/projectsData';
 import { walkthroughData } from './data/walkthroughData';
 import { imageLinks } from './data/imageLinks';
@@ -55,9 +55,18 @@ const faceauthMockup = imageLinks.faceauthMockup;
 
 export default function App() {
   // Global Bilingual State ('en' for English LTR, 'fa' for Persian / Farsi RTL)
-  const [lang, setLang] = useState<'en' | 'fa'>('en');
-  const t = translations[lang];
-  const isFa = lang === 'fa';
+  const initialLang = supportedLanguages.includes(navigator.language.slice(0, 2))
+    ? navigator.language.slice(0, 2)
+    : 'en';
+  const [lang, setLang] = useState<string>(initialLang);
+  const languageKey = supportedLanguages.includes(lang) ? (lang as 'en' | 'fa') : 'en';
+  const t = translations[languageKey] || translations.en;
+  const localeMeta = languageMeta[lang] || languageMeta.en;
+  const isFa = localeMeta.direction === 'rtl';
+  const currentLanguageIndex = supportedLanguages.indexOf(lang);
+  const nextLang = supportedLanguages[
+    currentLanguageIndex >= 0 ? (currentLanguageIndex + 1) % supportedLanguages.length : 0
+  ] || 'en';
 
   // Mobile vs Backend active mode focus selector state
   const [mode, setMode] = useState<'MOBILE' | 'BACKEND'>('MOBILE');
@@ -69,8 +78,9 @@ export default function App() {
   const titles = lang === 'en'
     ? ['Flutter Engineer', 'Backend Developer', 'System Architect', 'AI Integrator']
     : ['مهندس ارشد فلاتر', 'توسعه‌دهنده بک‌اند', 'معمار سیستم', 'یکپارچه‌ساز هوش مصنوعی'];
-  // Project overlay popup state
+  // Project detail page state
   const [selectedProjId, setSelectedProjId] = useState<string | null>(null);
+  const [currentPath, setCurrentPath] = useState<string>(() => window.location.pathname);
 
   // Floating Developer HUD console states
   const [devMode, setDevMode] = useState<boolean>(false);
@@ -157,6 +167,35 @@ export default function App() {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
   }, [lang]);
+
+  useEffect(() => {
+    const syncPath = () => setCurrentPath(window.location.pathname);
+    window.addEventListener('popstate', syncPath);
+    return () => window.removeEventListener('popstate', syncPath);
+  }, []);
+
+  useEffect(() => {
+    const projectMatch = currentPath.match(/^\/projects\/([^/]+)\/?$/);
+    setSelectedProjId(projectMatch ? projectMatch[1] : null);
+  }, [currentPath]);
+
+  useEffect(() => {
+    if (!selectedProjId) return;
+    const timer = window.setTimeout(() => {
+      document.getElementById('project-deep-dive')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 50);
+
+    return () => window.clearTimeout(timer);
+  }, [selectedProjId]);
+
+  const openProjectPage = (projectId: string) => {
+    setSelectedProjId(projectId);
+    window.history.pushState({}, '', `/projects/${projectId}`);
+    setCurrentPath(window.location.pathname);
+  };
 
   // Global cursor location tracker for Quantum Laser Overlay (Dev Mode)
   useEffect(() => {
@@ -539,6 +578,199 @@ export default function App() {
     }, 4000);
   };
 
+  const projectRouteMatch = currentPath.match(/^\/projects\/([^/]+)\/?$/);
+
+  if (projectRouteMatch) {
+    const projectId = projectRouteMatch[1];
+    const project = projectsData.find((item) => item.id === projectId);
+
+    if (!project) {
+      return (
+        <div dir={lang === 'fa' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#070707] text-white flex items-center justify-center px-4">
+          <div className="max-w-lg w-full rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-center space-y-4">
+            <h1 className="text-3xl font-black uppercase">Project not found</h1>
+            <p className="text-gray-400 text-sm">
+              {lang === 'en' ? 'The requested project page does not exist.' : 'صفحهٔ پروژهٔ درخواستی پیدا نشد.'}
+            </p>
+            <button
+              onClick={() => {
+                window.history.pushState({}, '', '/');
+                setCurrentPath(window.location.pathname);
+              }}
+              className="px-5 py-3 rounded-full bg-white text-black font-black uppercase tracking-wider text-xs"
+            >
+              {lang === 'en' ? 'Back to Home' : 'بازگشت به صفحهٔ اصلی'}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    const projectLocal = project[languageKey] || project.en;
+    const highlights = lang === 'en' ? project.en.highlights : project.fa.highlights;
+
+    return (
+      <div dir={lang === 'fa' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#070707] text-[#D7E2EA] overflow-x-hidden relative">
+        <div className="absolute top-0 left-0 w-full h-[120vh] pointer-events-none overflow-hidden z-0">
+          <div className="absolute -top-[20%] left-[10%] w-[500px] h-[500px] rounded-full blur-[140px] opacity-25" style={{ backgroundColor: project.color }} />
+          <div className="absolute top-[40%] -right-[10%] w-[600px] h-[600px] rounded-full blur-[180px] opacity-[0.12]" style={{ backgroundColor: secondaryAccent }} />
+        </div>
+
+        <main className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-10">
+          <div className="flex items-center justify-between gap-4 mb-8">
+            <button
+              onClick={() => {
+                window.history.pushState({}, '', '/');
+                setCurrentPath(window.location.pathname);
+                setSelectedProjId(null);
+              }}
+              className="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs uppercase tracking-wider font-black text-white transition-colors"
+            >
+              {lang === 'en' ? 'Back to Projects' : 'بازگشت به پروژه‌ها'}
+            </button>
+
+            <button
+              onClick={() => {
+                window.history.pushState({}, '', '/');
+                setCurrentPath(window.location.pathname);
+                setSelectedProjId(null);
+                window.setTimeout(() => {
+                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50);
+              }}
+              className="px-4 py-2 rounded-full bg-white text-black text-xs uppercase tracking-wider font-black hover:bg-white/90 transition-colors"
+            >
+              {lang === 'en' ? 'Contact Me' : 'تماس'}
+            </button>
+          </div>
+
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-5 space-y-6">
+              <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/60">
+                <img src={project.visual} alt={projectLocal.title} referrerPolicy="no-referrer" className="w-full h-[360px] object-cover" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {project.metrics.map((metric, metricIdx) => {
+                  const metricLabel = metric.label[languageKey] || metric.label.en;
+                  return (
+                    <div key={metricIdx} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                      <span className="text-[10px] uppercase tracking-widest text-gray-500 font-mono block mb-2">{metricLabel}</span>
+                      <span className="text-2xl font-black" style={{ color: project.color }}>{metric.value}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="lg:col-span-7 space-y-6">
+              <div className="rounded-3xl border border-white/10 bg-black/50 p-6 md:p-8">
+                <div className="flex flex-col gap-3 mb-5">
+                  <span className="text-[10px] uppercase tracking-widest font-black text-gray-500 font-mono">{project.scope}</span>
+                  <h1 className="text-4xl md:text-5xl font-black uppercase text-white tracking-tight">{projectLocal.title}</h1>
+                  <p className="text-gray-400 text-sm leading-relaxed max-w-3xl">
+                    {lang === 'en'
+                      ? 'This case study is structured to answer the questions recruiters scan for first: what the project solves, what you owned, what stack was used, and what proof exists.'
+                      : 'این case study طوری چیده شده که سؤال‌های اصلی خواننده را سریع جواب دهد: پروژه چه مشکلی را حل می‌کند، شما چه بخشی را مالک بودید، چه استکی استفاده شده، و چه مدرکی برای اثرش وجود دارد.'}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">
+                      {lang === 'en' ? 'Problem / Context' : 'مسئله / زمینه'}
+                    </div>
+                    <p className="text-sm leading-relaxed text-gray-300">{projectLocal.desc}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">
+                      {lang === 'en' ? 'My Role' : 'نقش من'}
+                    </div>
+                    <p className="text-sm leading-relaxed text-gray-300">{projectLocal.role}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">
+                      {lang === 'en' ? 'Proof / Outcome' : 'مدرک / نتیجه'}
+                    </div>
+                    <div className="space-y-2">
+                      {project.metrics.map((metric, metricIdx) => {
+                  const metricLabel = metric.label[languageKey] || metric.label.en;
+                        return (
+                          <div key={metricIdx} className="flex items-center justify-between gap-3">
+                            <span className="text-[10px] uppercase tracking-wider text-gray-500">{metricLabel}</span>
+                            <span className="text-sm font-black" style={{ color: project.color }}>{metric.value}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {project.tech.map((tech, techIdx) => (
+                    <span key={techIdx} className="text-[9px] font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-2.5 py-1 rounded-full text-gray-300">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { label: lang === 'en' ? 'Process / Architecture' : 'فرآیند / معماری', value: projectLocal.architectureHighlights.join(' • ') },
+                    { label: lang === 'en' ? 'Real-time signals' : 'سیگنال‌های بلادرنگ', value: projectLocal.realtimeFeatures },
+                    { label: lang === 'en' ? 'AI / automation' : 'هوش مصنوعی / اتوماسیون', value: projectLocal.aiFeatures },
+                    { label: lang === 'en' ? 'Scale / performance' : 'مقیاس / کارایی', value: `${projectLocal.scalabilityDetails} ${projectLocal.performanceOptimizations}` },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                      <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">{item.label}</div>
+                      <p className="text-sm leading-relaxed text-gray-300">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                  <h2 className="text-xs uppercase tracking-widest font-black text-white mb-3">
+                    {lang === 'en' ? 'What I Built' : 'آنچه ساختم'}
+                  </h2>
+                  <div className="space-y-2">
+                    {highlights.map((item, itemIdx) => (
+                      <div key={itemIdx} className="flex gap-2 text-sm text-gray-300 leading-relaxed">
+                        <span className="text-[10px] mt-1" style={{ color: project.color }}>●</span>
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                  <h2 className="text-xs uppercase tracking-widest font-black text-white mb-3">
+                    {lang === 'en' ? 'Why It Works for a Portfolio' : 'چرا برای پورتفولیو جواب می‌دهد'}
+                  </h2>
+                  <div className="space-y-3 text-sm text-gray-300 leading-relaxed">
+                    <p>
+                      {lang === 'en'
+                        ? 'It gives a recruiter a 30-second scan path: problem, role, stack, proof, then deeper engineering detail.'
+                        : 'برای خواننده یک مسیر ۳۰ ثانیه‌ای می‌سازد: مسئله، نقش، استک، مدرک، و بعد جزئیات فنی عمیق‌تر.'}
+                    </p>
+                    <p>
+                      {lang === 'en'
+                        ? 'That is the right balance between attractive presentation and practical signal.'
+                        : 'این همان تعادل درست بین ارائهٔ جذاب و سیگنال کاربردی است.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div 
       dir={lang === 'fa' ? 'rtl' : 'ltr'} 
@@ -611,12 +843,12 @@ export default function App() {
 
           {/* Global Bilingual Switcher Toggle Button */}
           <button 
-            onClick={() => setLang(lang === 'en' ? 'fa' : 'en')}
+            onClick={() => setLang(nextLang)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 hover:border-white/15 hover:bg-white/10 text-[10px] font-black tracking-widest uppercase transition-all duration-300 text-gray-300 cursor-pointer"
             title={isFa ? 'تغییر زبان' : 'Toggle language'}
           >
             <Globe className="w-3.5 h-3.5 text-gray-400 rotate-0 hover:rotate-45 transition-transform" />
-            <span>{lang === 'en' ? 'فارسی' : 'English'}</span>
+            <span>{localeMeta.label}</span>
           </button>
 
           {/* Dynamic Mode Switcher on Navigation Bar */}
@@ -1067,7 +1299,7 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10">
             <AnimatePresence mode="popLayout">
               {sortedProjects.map((proj, idx) => {
-                const projLocal = proj[lang] || proj.en;
+                const projLocal = proj[languageKey] || proj.en;
                 return (
                   <motion.div 
                     layout
@@ -1076,10 +1308,13 @@ export default function App() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: '-100px' }}
                     transition={{ duration: 0.6, delay: idx * 0.1, ease: 'easeOut' }}
-                    onClick={() => setSelectedProjId(proj.id)}
+                    onClick={() => openProjectPage(proj.id)}
+                    aria-pressed={selectedProjId === proj.id}
                     className="group relative cursor-pointer flex flex-col justify-between bg-zinc-950/60 rounded-3xl overflow-hidden border border-white/5 hover:border-white/15 transition-all duration-500 min-h-[580px] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]"
                     style={{
-                      boxShadow: `inset 0 1px 1px rgba(255,255,255,0.05)`
+                      boxShadow: selectedProjId === proj.id
+                        ? `inset 0 0 0 1px ${proj.color}55, 0 24px 70px -25px ${proj.color}30`
+                        : `inset 0 1px 1px rgba(255,255,255,0.05)`
                     }}
                   >
                     {/* Subtle lighting reflection sweep effect on card hover */}
@@ -1175,7 +1410,7 @@ export default function App() {
 
                       <div className="grid grid-cols-2 gap-3.5 py-3 border-y border-white/5 font-mono">
                         {proj.metrics.map((metric, mIdx) => {
-                          const metLabel = metric.label[lang] || metric.label.en;
+                          const metLabel = metric.label[languageKey] || metric.label.en;
                           return (
                             <div key={mIdx} className="space-y-0.5">
                               <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold block">{metLabel}</span>
@@ -1201,7 +1436,7 @@ export default function App() {
                       {/* Highly polished footer and CTA */}
                       <div className="pt-3 flex items-center justify-between text-xs text-white">
                         <span className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase font-black text-gray-500 transition-colors group-hover:text-white font-sans">
-                          <span>{lang === 'en' ? 'Enter System Details' : '�&شا�!د�! ع�&�R� �&شخصات س�Rست�&'}</span>
+                          <span>{lang === 'en' ? 'Open Case Study' : 'باز کردن مطالعهٔ پروژه'}</span>
                           <MousePointerClick className="w-3.5 h-3.5" style={{ color: proj.color }} />
                         </span>
                         <span className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-white group-hover:bg-white/10 group-hover:scale-105 transition-all duration-300">
@@ -1219,6 +1454,184 @@ export default function App() {
 
         </div>
       </section>
+
+      {false && selectedProjId && (() => {
+        const project = projectsData.find((item) => item.id === selectedProjId);
+        if (!project) return null;
+
+        const projectLocal = project[languageKey] || project.en;
+        const highlights = lang === 'en' ? project.en.highlights : project.fa.highlights;
+        const summaryItems = [
+          projectLocal.realtimeFeatures,
+          projectLocal.aiFeatures,
+          projectLocal.scalabilityDetails,
+          projectLocal.performanceOptimizations,
+        ];
+        const summaryLabels = lang === 'en'
+          ? ['Real-time delivery', 'AI / automation', 'Scale / reliability', 'Performance']
+          : ['تحویل بلادرنگ', 'هوش مصنوعی / اتوماسیون', 'مقیاس‌پذیری / پایداری', 'کارایی'];
+
+        return (
+          <section id="project-deep-dive" className="py-20 relative z-10 scroll-mt-20">
+            <div className="max-w-7xl mx-auto px-4 md:px-8">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                <div className="space-y-2 text-left rtl:text-right">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-0.5" style={{ backgroundColor: project.color }} />
+                    <span className="text-xs tracking-widest uppercase font-black" style={{ color: project.color }}>
+                      {lang === 'en' ? 'Selected Case Study' : 'مطالعهٔ انتخاب‌شده'}
+                    </span>
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-black uppercase text-white tracking-tight">
+                    {projectLocal.title}
+                  </h3>
+                  <p className="text-gray-400 text-sm max-w-2xl leading-relaxed">
+                    {lang === 'en'
+                      ? 'This section is intentionally written as a portfolio case study: product value, my role, and the technical depth are visible on one page.'
+                      : 'این بخش عمداً مثل یک case study رزومه طراحی شده: ارزش محصول، نقش من و عمق فنی همه در یک صفحه دیده می‌شوند.'}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => setSelectedProjId(null)}
+                    className="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs uppercase tracking-wider font-black text-white transition-colors"
+                  >
+                    {lang === 'en' ? 'Clear Selection' : 'حذف انتخاب'}
+                  </button>
+                  <a
+                    href="#contact"
+                    className="px-4 py-2 rounded-full bg-white text-black border border-white/10 text-xs uppercase tracking-wider font-black hover:bg-white/90 transition-colors"
+                  >
+                    {lang === 'en' ? 'Contact About This Project' : 'تماس دربارهٔ این پروژه'}
+                  </a>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-5 space-y-6">
+                  <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/60">
+                    <img
+                      src={project.visual}
+                      alt={projectLocal.title}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-[320px] object-cover"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {project.metrics.map((metric, metricIdx) => {
+                      const metricLabel = metric.label[languageKey] || metric.label.en;
+                      return (
+                        <div key={metricIdx} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                          <span className="text-[10px] uppercase tracking-widest text-gray-500 font-mono block mb-2">
+                            {metricLabel}
+                          </span>
+                          <span className="text-2xl font-black" style={{ color: project.color }}>
+                            {metric.value}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Workflow className="w-4 h-4" style={{ color: project.color }} />
+                      <h4 className="text-xs uppercase tracking-widest font-black text-white">
+                        {lang === 'en' ? 'Architecture Summary' : 'خلاصهٔ معماری'}
+                      </h4>
+                    </div>
+                    <div className="space-y-2">
+                      {projectLocal.architectureHighlights.map((item, itemIdx) => (
+                        <div key={itemIdx} className="rounded-xl border border-white/5 bg-black/30 px-3 py-2 text-[10px] uppercase tracking-wider text-gray-300">
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-7 space-y-6">
+                  <div className="rounded-3xl border border-white/10 bg-black/50 p-6 md:p-7">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase tracking-widest font-black text-gray-500 font-mono">
+                          {project.scope}
+                        </span>
+                        <h4 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight">
+                          {projectLocal.role}
+                        </h4>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {project.tech.slice(0, 5).map((tech, techIdx) => (
+                          <span
+                            key={techIdx}
+                            className="text-[9px] font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-2.5 py-1 rounded-full text-gray-300"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="text-gray-300 text-sm leading-relaxed max-w-3xl">
+                      {projectLocal.desc}
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                      {summaryItems.map((item, itemIdx) => (
+                        <div key={itemIdx} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                          <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">
+                            {summaryLabels[itemIdx]}
+                          </div>
+                          <p className="text-sm leading-relaxed text-gray-300">
+                            {item}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                      <h4 className="text-xs uppercase tracking-widest font-black text-white mb-3">
+                        {lang === 'en' ? 'What I Built' : 'آنچه ساختم'}
+                      </h4>
+                      <div className="space-y-2">
+                        {highlights.map((item, itemIdx) => (
+                          <div key={itemIdx} className="flex gap-2 text-sm text-gray-300 leading-relaxed">
+                            <span className="text-[10px] mt-1" style={{ color: project.color }}>●</span>
+                            <span>{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                      <h4 className="text-xs uppercase tracking-widest font-black text-white mb-3">
+                        {lang === 'en' ? 'Why It Reads Well in a Resume' : 'چرا برای رزومه خوب می‌خواند'}
+                      </h4>
+                      <div className="space-y-3 text-sm text-gray-300 leading-relaxed">
+                        <p>
+                          {lang === 'en'
+                            ? 'It shows end-to-end ownership: interface, backend, data flow, and performance work in one coherent product.'
+                            : 'مالکیت end-to-end را نشان می‌دهد: رابط، بک‌اند، جریان داده و کار روی عملکرد در یک محصول منسجم.'}
+                        </p>
+                        <p>
+                          {lang === 'en'
+                            ? 'The viewer can understand the problem, the stack, and the engineering depth without opening a dialog.'
+                            : 'بیننده بدون باز کردن دیالوگ، مسئله، استک و عمق مهندسی را می‌فهمد.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* ABOUT ME SECTION (REDESIGNED & DEEP INTERACTIVE BENTO) */}
       <section 
@@ -1722,7 +2135,7 @@ export default function App() {
                     style={{ backgroundColor: blueprintColor }} 
                   />
                   <span className="text-xs font-mono font-bold uppercase tracking-widest text-white flex items-center gap-2">
-                    <span>{currentBlueprint.projectName[lang]}</span>
+                    <span>{currentBlueprint.projectName[languageKey]}</span>
                     <span className="text-gray-500 text-[10px]">({activeBlueprintId}_blueprint.yml)</span>
                   </span>
                 </div>
@@ -1874,7 +2287,7 @@ export default function App() {
                         {lang === 'en' ? `● SIMULATION_ACTIVE: STEP ${activeStepIndex + 1} OF 5` : `● شبیه‌سازی فعال: گام ${activeStepIndex + 1} از ۵`}
                       </span>
                       <h4 className="text-sm font-bold text-white tracking-tight uppercase" style={{ color: blueprintColor }}>
-                        {currentStep?.title[lang]}
+                        {currentStep?.title[languageKey]}
                       </h4>
                     </div>
                   )}
@@ -1975,7 +2388,7 @@ export default function App() {
                           {lang === 'en' ? "TRANSMISSION METADATA" : "جزئیات انتقال بسته"}
                         </span>
                         <p className="text-xs text-[#D7E2EA] font-light leading-relaxed">
-                          {currentStep.desc[lang]}
+                            {currentStep.desc[languageKey]}
                         </p>
                       </div>
 
@@ -2060,7 +2473,7 @@ export default function App() {
                               {lang === 'en' ? 'Why this protocol is chosen for production:' : 'چرا این پروتکل برای محیط پروداکشن انتخاب شده؟'}
                             </h5>
                             <p className="text-xs text-gray-400 font-light leading-relaxed">
-                              {currentStep.reason[lang]}
+                              {currentStep.reason[languageKey]}
                             </p>
                           </div>
                         </div>
@@ -2077,7 +2490,7 @@ export default function App() {
                           </div>
                           
                           <p className="text-xs text-gray-400 font-light leading-relaxed">
-                            {currentStep.challenge[lang]}
+                              {currentStep.challenge[languageKey]}
                           </p>
                         </div>
 
@@ -2485,7 +2898,7 @@ export default function App() {
                                       fa: "خوشه پایگاه‌داده قدرتمند PostgreSQL بهینه‌سازی شده با نماهای برداری pg_vector و هندسی PostGIS. بهره‌برداری از استخر پورت اتصالات جهت ثبت موازی سنگین بدون بروز تداخل بن‌بست."
                                     }
                                   };
-                                  return descriptions[selectedNodeId]?.[lang] || descriptions.client[lang];
+      return descriptions[selectedNodeId]?.[languageKey] || descriptions.client[languageKey];
                                 })()}
                               </p>
 
@@ -2781,10 +3194,10 @@ LIMIT 5;`
 
         {/* IMMERSIVE FULLSCREEN CASE STUDY OVERLAY DASHBOARD */}
         <AnimatePresence>
-          {selectedProjId && (() => {
+          {false && selectedProjId && (() => {
             const project = projectsData.find(p => p.id === selectedProjId);
             if (!project) return null;
-            const projectLocal = project[lang] || project.en;
+            const projectLocal = project[languageKey] || project.en;
 
             return (
               <motion.div 

@@ -28,6 +28,7 @@ export interface ProjectSchema {
   scope: ProjectScope;
   en: ProjectLocalizedData;
   fa: ProjectLocalizedData;
+  [languageCode: string]: any;
 }
 
 export interface TranslationDictionary {
