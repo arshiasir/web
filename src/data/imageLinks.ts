@@ -1,5 +1,5 @@
 import aboutGeometric from '../assets/images/about_geometric_shapes_1779712914711.png';
-import arshiaPortrait from '../assets/images/arshia_portrait_1779712892816.png';
+import arshiaPortrait from '../assets/images/arshia.png';
 import calkiloMockup from '../assets/images/calkilo_mockup_1779713789930.png';
 import couchiniMockup from '../assets/images/couchini_mockup_1779713805197.png';
 import faceauthMockup from '../assets/images/faceauth_mockup_1779713858799.png';
