@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -485,15 +485,6 @@ export default function App() {
   const filteredProjects = projectsData.filter((item) => {
     if (roleFilter === 'ALL') return true;
     return item.scope === roleFilter;
-  });
-
-  const sortedProjects = [...filteredProjects].sort((a, b) => {
-    // Reorder projects depending on active prioritized mode (Mobile puts client apps first, Backend puts service infrastructures first)
-    const aMatchesMode = (a.scope === 'MOBILE' && mode === 'MOBILE') || (a.scope === 'BACKEND' && mode === 'BACKEND');
-    const bMatchesMode = (b.scope === 'MOBILE' && mode === 'MOBILE') || (b.scope === 'BACKEND' && mode === 'BACKEND');
-    if (aMatchesMode && !bMatchesMode) return -1;
-    if (bMatchesMode && !aMatchesMode) return 1;
-    return 0;
   });
 
   // Services list mapping dynamic translations items
@@ -1269,183 +1260,137 @@ export default function App() {
         )}
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
-            <div className="flex flex-col space-y-2 text-left rtl:text-right font-sans">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
+            <div className="flex flex-col space-y-3 text-left rtl:text-right font-sans max-w-xl">
               <div className="flex items-center gap-2">
-                <span className="w-6 h-0.5 animate-pulse" style={{ backgroundColor: accentColor }} />
+                <span className="w-8 h-0.5 rounded-full" style={{ backgroundColor: accentColor }} />
                 <span className="text-xs tracking-widest uppercase font-black" style={{ color: accentColor }}>
-                  {lang === 'en' ? 'Premium Showcases' : 'نمونه کارهای ارشد متمایز'}
+                  {t.projects.title}
                 </span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-black uppercase text-white tracking-tight">
-                {lang === 'en' ? 'Featured Work' : 'پروژه‌های شاخص'}
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white tracking-tight">
+                {t.projects.heading}
               </h2>
-              <p className="text-gray-400 text-sm max-w-sm font-light mt-1">
-                {lang === 'en' ? 'Luxury vertical showcases detailing real engineering layers and live telemetry blocks.' : 'کلکسیونی از سیستم‌های مهندسی با کارایی برتر، لاگ داده‌ها و رندرهای کلاینت.'}
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light">
+                {t.projects.sub}
               </p>
-            </div>
-            
-            <div className="flex items-center gap-4 font-mono">
-              <div className="flex items-center gap-3 bg-white/5 border border-white/10 p-2.5 rounded-xl text-xs">
-                <span className="text-gray-500 font-bold">{lang === 'en' ? 'Priority View:' : 'اولویت نمایش:'}</span>
-                <span className="px-3 py-1 rounded-sm uppercase font-black text-[10px]" style={{ color: accentColor, backgroundColor: `${accentColor}10` }}>
-                  {lang === 'en' ? `${mode} SPECS ACCENTUATED` : `تاکید روی حالت ${mode === 'MOBILE' ? 'موبایل' : 'سرور'}`}
-                </span>
+              <div className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-gray-500">
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: accentColor }} />
+                {t.projects.understand}
               </div>
+            </div>
+
+            {/* Modern filter pill bar */}
+            <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-sm self-start">
+              {(['ALL', 'FULLSTACK', 'MOBILE', 'BACKEND'] as const).map((f) => {
+                const active = roleFilter === f;
+                const label = f === 'ALL' ? t.projects.filterAll : t.projects.roles[f];
+                return (
+                  <button
+                    key={f}
+                    onClick={() => setRoleFilter(f)}
+                    className={`relative px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-colors duration-300 ${active ? 'text-black' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="projFilterPill"
+                        className="absolute inset-0 rounded-xl"
+                        style={{ backgroundColor: accentColor }}
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10">{label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Stacking Tall Cinematic Vertical Project Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10">
+          {/* Modern professional project card grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 xl:gap-8">
             <AnimatePresence mode="popLayout">
-              {sortedProjects.map((proj, idx) => {
+              {filteredProjects.map((proj, idx) => {
                 const projLocal = proj[languageKey] || proj.en;
                 return (
-                  <motion.div 
+                  <motion.div
                     layout
                     key={proj.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-100px' }}
-                    transition={{ duration: 0.6, delay: idx * 0.1, ease: 'easeOut' }}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ type: 'spring', stiffness: 90, damping: 18, delay: idx * 0.06 }}
                     onClick={() => openProjectPage(proj.id)}
-                    aria-pressed={selectedProjId === proj.id}
-                    className="group relative cursor-pointer flex flex-col justify-between bg-zinc-950/60 rounded-3xl overflow-hidden border border-white/5 hover:border-white/15 transition-all duration-500 min-h-[580px] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]"
+                    className="group relative cursor-pointer flex flex-col rounded-3xl overflow-hidden bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-white/20 transition-colors duration-500 min-h-[600px]"
                     style={{
                       boxShadow: selectedProjId === proj.id
-                        ? `inset 0 0 0 1px ${proj.color}55, 0 24px 70px -25px ${proj.color}30`
-                        : `inset 0 1px 1px rgba(255,255,255,0.05)`
+                        ? `0 30px 80px -30px ${proj.color}55`
+                        : '0 18px 50px -30px rgba(0,0,0,0.8)'
                     }}
                   >
-                    {/* Subtle lighting reflection sweep effect on card hover */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.012] to-transparent bg-[length:200%_200%] transition-all duration-700 opacity-0 group-hover:opacity-100 animate-pulse" />
-                    
-                    {/* Neon Glow Corner Elements matching individual project's design accent */}
-                    <div 
-                      className="absolute -top-12 -right-12 w-44 h-44 rounded-full blur-[65px] opacity-10 group-hover:opacity-25 transition-opacity duration-700 pointer-events-none animate-pulse"
-                      style={{ backgroundColor: proj.color }}
-                    />
-                    
-                    {/* Category, Banner & Title Grid */}
-                    <div className="p-6 pb-4 z-10 relative text-left rtl:text-right">
-                      <div className="flex justify-between items-center mb-2.5 gap-2 font-mono">
-                        <span className="text-[10px] uppercase tracking-widest font-extrabold text-gray-400">
-                          {projLocal.category}
+                    <div className="absolute top-0 left-0 w-full h-1.5" style={{ background: `linear-gradient(90deg, ${proj.color}, transparent)` }} />
+                    <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-[70px] opacity-15 group-hover:opacity-30 transition-opacity duration-700 pointer-events-none" style={{ backgroundColor: proj.color }} />
+
+                    <div className="p-6 pb-3 z-10 relative">
+                      <div className="flex justify-between items-center mb-3 gap-2">
+                        <span className="text-[10px] uppercase tracking-widest font-extrabold text-gray-400">{projLocal.category}</span>
+                        <span className="text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider border" style={{ color: proj.color, borderColor: `${proj.color}40`, backgroundColor: `${proj.color}12` }}>
+                          {proj.year} · {proj.status}
                         </span>
-                        
-                        {proj.scope === 'FULLSTACK' && (
-                          <span className="text-[8px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/10">
-                            {lang === 'en' ? 'FULLSTACK ARCHITECTURE' : 'معماری فول‌استک'}
-                          </span>
-                        )}
-                        {proj.scope === 'MOBILE' && (
-                          <span className="text-[8px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider bg-[#7B61FF]/10 text-[#7B61FF] border border-[#7B61FF]/10">
-                            {lang === 'en' ? 'MOBILE SUITE' : 'توسعه موبایل'}
-                          </span>
-                        )}
-                        {proj.scope === 'BACKEND' && (
-                          <span className="text-[8px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider bg-[#FF6B00]/10 text-[#FF6B00] border border-[#FF6B00]/10">
-                            {lang === 'en' ? 'BACKEND SWARM' : 'کدهای بک‌اند'}
-                          </span>
-                        )}
                       </div>
-                      
-                      <h3 className="text-3xl font-black uppercase text-white tracking-tight leading-none group-hover:text-white transition-colors duration-300 font-sans">
-                        {projLocal.title}
-                      </h3>
+                      <h3 className="text-2xl md:text-3xl font-black uppercase text-white tracking-tight leading-none">{projLocal.title}</h3>
+                      {projLocal.tagline && (
+                        <p className="text-xs font-bold mt-2" style={{ color: proj.color }}>{projLocal.tagline}</p>
+                      )}
                     </div>
 
-                    {/* Cinematic Large Image Showcase & Reflection Block */}
-                    <div className="flex-1 px-5 flex items-center justify-center relative my-4 overflow-hidden min-h-[220px]">
-                      <div className="relative w-full h-[220px] rounded-2xl overflow-hidden glass-card border border-white/5 flex items-center justify-center p-1.5 transition-all duration-500">
-                        
-                        {/* Background visual halo */}
-                        <div 
-                          className="absolute inset-6 rounded-full blur-[35px] opacity-25 group-hover:scale-110 group-hover:opacity-45 transition-all duration-700" 
-                          style={{ backgroundColor: proj.color }}
-                        />
-                        
-                        <img 
-                          src={proj.visual} 
-                          alt={lang === 'en' ? `${projLocal.title} Device Showcase` : `پیش‌نمایش دستگاه پروژه ${projLocal.title}`} 
+                    <div className="px-5 flex-1 flex items-center justify-center relative my-2 overflow-hidden min-h-[200px]">
+                      <div className="relative w-full h-[210px] rounded-2xl overflow-hidden border border-white/[0.08] flex items-center justify-center p-1.5 transition-all duration-500 group-hover:border-white/20" style={{ boxShadow: `0 20px 60px -30px ${proj.color}40` }}>
+                        <div className="absolute inset-6 rounded-full blur-[35px] opacity-20 group-hover:scale-110 group-hover:opacity-40 transition-all duration-700" style={{ backgroundColor: proj.color }} />
+                        <img
+                          src={proj.visual}
+                          alt={lang === 'en' ? `${projLocal.title} preview` : `پیش‌نمایش ${projLocal.title}`}
                           referrerPolicy="no-referrer"
                           loading="lazy"
                           decoding="async"
-                          className="w-full h-full object-cover rounded-xl transition-all duration-700 group-hover:scale-[1.05] grayscale brightness-90 group-hover:grayscale-0 group-hover:brightness-100"
+                          className="w-full h-full object-cover rounded-xl transition-transform duration-700 ease-out group-hover:scale-[1.06]"
                         />
-
-                        {/* Sliding HUD grid line */}
-                        <div className="absolute top-0 left-0 w-full h-0.5 bg-white/10 [box-shadow:0_0_10px_#fff] opacity-0 group-hover:opacity-100 group-hover:translate-y-[215px] transition-all duration-[3s] ease-linear repeat-infinite pointer-events-none" />
                       </div>
                     </div>
 
-                    {/* Descriptions, metrics tags & core features list */}
-                    <div className="p-6 pt-2 space-y-4 z-10 relative bg-black/40 border-t border-white/5 text-left rtl:text-right font-sans">
-                      
-                      <p className="text-gray-400 text-xs leading-relaxed font-light min-h-[48px]">
-                        {projLocal.desc}
-                      </p>
+                    <div className="p-6 pt-3 space-y-4 z-10 relative text-left rtl:text-right font-sans">
+                      <p className="text-gray-300/90 text-xs leading-relaxed font-light min-h-[44px]">{projLocal.problem}</p>
 
-                      {/* Customized highlights depending on engineers' role */}
-                      <div className="text-[9px] font-light text-gray-400 border-t border-white/5 pt-2.5 font-mono">
-                        {proj.scope === 'FULLSTACK' && (
-                          <div className="flex flex-col gap-1 text-[8px] uppercase tracking-wider text-[#9EFF00]">
-                            <span>✦ {lang === 'en' ? 'UI Preview & Server Logic Combined' : 'تلاقی کامل رابط کاربری موبایل و وب با منطق سرور'}</span>
-                            <span>✦ {lang === 'en' ? 'Dockerized Microservices & REST/WS APIs' : 'میکروسرویس‌های کانتینری و وب‌سوکت‌های پاسخگو'}</span>
-                          </div>
-                        )}
-                        {proj.scope === 'MOBILE' && (
-                          <div className="flex flex-col gap-1 text-[8px] uppercase tracking-wider text-[#00D1FF]">
-                            <span>✦ {lang === 'en' ? 'Ultra Smooth UI & Flow Animation' : 'انیمیشن‌های جریانی ۶۰ فریم تعاملی کلاینت'}</span>
-                            <span>✦ {lang === 'en' ? 'Cross-Platform Engine Render Pipeline' : 'مهندسی ویجت‌ها با ذخیره حافظه پنهان بومی'}</span>
-                          </div>
-                        )}
-                        {proj.scope === 'BACKEND' && (
-                          <div className="flex flex-col gap-1 text-[8px] uppercase tracking-wider text-[#FF6B00]">
-                            <span>✦ {lang === 'en' ? 'Database Pool Tuning & Memory Buffers' : 'بهینه‌سازی حداکثری پایگاه‌داده و بافرهای مقیاس‌پذیر'}</span>
-                            <span>✦ {lang === 'en' ? 'High Concurrent Stream Brokers' : 'بهره‌گیری از صف‌های پیام‌رسانی غیرهمزمان توزیع شده'}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3.5 py-3 border-y border-white/5 font-mono">
+                      <div className="grid grid-cols-2 gap-3 py-3 border-y border-white/[0.06]">
                         {proj.metrics.map((metric, mIdx) => {
                           const metLabel = metric.label[languageKey] || metric.label.en;
                           return (
                             <div key={mIdx} className="space-y-0.5">
                               <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold block">{metLabel}</span>
-                              <span className="text-sm font-black text-white" style={{ color: proj.color }}>{metric.value}</span>
+                              <span className="text-base font-black" style={{ color: proj.color }}>{metric.value}</span>
                             </div>
                           );
                         })}
                       </div>
 
-                      <div className="flex flex-wrap gap-1 pt-1 font-mono">
-                        {proj.tech.slice(0, 4).map((t, idx) => (
-                          <span key={idx} className="text-[9px] font-bold uppercase tracking-wider bg-white/5 border border-white/5 px-2.5 py-1 rounded text-gray-400 group-hover:border-white/15 transition-colors">
-                            {t}
-                          </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {proj.tech.slice(0, 4).map((tech, tIdx) => (
+                          <span key={tIdx} className="text-[9px] font-bold uppercase tracking-wider bg-white/5 border border-white/[0.08] px-2.5 py-1 rounded-md text-gray-400 group-hover:border-white/15 transition-colors">{tech}</span>
                         ))}
                         {proj.tech.length > 4 && (
-                          <span className="text-[9px] font-bold uppercase tracking-wider bg-white/5 border border-white/5 px-2 py-1 rounded text-gray-400 hover:border-white/15 transition-colors">
-                            +{proj.tech.length - 4} {lang === 'en' ? 'MORE' : 'ب�Rشتر'}
-                          </span>
+                          <span className="text-[9px] font-bold uppercase tracking-wider bg-white/5 border border-white/[0.08] px-2 py-1 rounded-md text-gray-400">+{proj.tech.length - 4}</span>
                         )}
                       </div>
 
-                      {/* Highly polished footer and CTA */}
-                      <div className="pt-3 flex items-center justify-between text-xs text-white">
-                        <span className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase font-black text-gray-500 transition-colors group-hover:text-white font-sans">
-                          <span>{lang === 'en' ? 'Open Case Study' : 'باز کردن مطالعهٔ پروژه'}</span>
+                      <div className="pt-2 flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase font-black text-gray-500 group-hover:text-white transition-colors">
+                          <span>{t.projects.openCaseStudy}</span>
                           <MousePointerClick className="w-3.5 h-3.5" style={{ color: proj.color }} />
                         </span>
-                        <span className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-white group-hover:bg-white/10 group-hover:scale-105 transition-all duration-300">
-                          <ArrowRight className="w-4 h-4" style={{ color: proj.color }} />
+                        <span className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" style={{ backgroundColor: `${proj.color}1f`, color: proj.color }}>
+                          <ArrowRight className="w-4 h-4" />
                         </span>
                       </div>
-
                     </div>
-
                   </motion.div>
                 );
               })}

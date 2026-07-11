@@ -1,15 +1,35 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 export type ProjectScope = 'FULLSTACK' | 'MOBILE' | 'BACKEND';
+
+export interface ScreenMockup {
+  id: string;
+  title: string;
+  description: string;
+  image?: string;
+}
+
+export interface FeatureCard {
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export interface TimelineStep {
+  phase: string;
+  description: string;
+}
+
+export interface ChallengePair {
+  problem: string;
+  solution: string;
+}
 
 export interface ProjectLocalizedData {
   title: string;
   category: string;
   desc: string;
   role: string;
+  problem: string;
+  outcome: string;
   highlights: string[];
   realtimeFeatures: string;
   aiFeatures: string;
@@ -17,6 +37,12 @@ export interface ProjectLocalizedData {
   performanceOptimizations: string;
   architectureHighlights: string[];
   scopeLabel: string;
+  tagline: string;
+  heroDescription: string;
+  screens: ScreenMockup[];
+  features: FeatureCard[];
+  timeline: TimelineStep[];
+  challenges: ChallengePair[];
 }
 
 export interface ProjectSchema {
@@ -26,6 +52,8 @@ export interface ProjectSchema {
   color: string;
   visual: string;
   scope: ProjectScope;
+  year: string;
+  status: string;
   en: ProjectLocalizedData;
   fa: ProjectLocalizedData;
   [languageCode: string]: any;
@@ -104,6 +132,15 @@ export interface TranslationDictionary {
     pillarsHeader: string;
     telemetryHeader: string;
     inquireBtn: string;
+    filterAll: string;
+    understand: string;
+    theChallenge: string;
+    theApproach: string;
+    results: string;
+    byTheNumbers: string;
+    problemLabel: string;
+    outcomeLabel: string;
+    openCaseStudy: string;
     roles: {
       FULLSTACK: string;
       MOBILE: string;

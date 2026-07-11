@@ -11,6 +11,8 @@ export default [
       { label: { en: 'Accuracy', fa: 'دقت تشخیص' }, value: '96.2%' },
       { label: { en: 'Inference', fa: 'زمان پاسخ‌دهی' }, value: '180ms' },
     ],
+    year: '2024',
+    status: 'Production',
   },
   {
     id: 'couchini',
@@ -22,6 +24,8 @@ export default [
       { label: { en: 'Audio Latency', fa: 'تأخیر استریم' }, value: '<50ms' },
       { label: { en: 'Frame Rate', fa: 'نرخ بازسازی فریم' }, value: '120fps' },
     ],
+    year: '2023',
+    status: 'Production',
   },
   {
     id: 'tipax',
@@ -33,6 +37,8 @@ export default [
       { label: { en: 'Active Drivers', fa: 'رانندگان فعال' }, value: '12k+' },
       { label: { en: 'Throughput', fa: 'ترانش لجستیک' }, value: '500k/day' },
     ],
+    year: '2024',
+    status: 'Production',
   },
   {
     id: 'hyperstar',
@@ -44,6 +50,8 @@ export default [
       { label: { en: 'Database Sync', fa: 'نرخ همگام‌سازی DB' }, value: '2M/hr' },
       { label: { en: 'Query Performance', fa: 'تاخیر کوئری‌ها' }, value: '12ms' },
     ],
+    year: '2023',
+    status: 'Production',
   },
   {
     id: 'faceauth',
@@ -55,5 +63,7 @@ export default [
       { label: { en: 'Match Latency', fa: 'سرعت تطبیق چهره' }, value: '0.08s' },
       { label: { en: 'Database Sync', fa: 'همگام‌سازی محلی' }, value: 'Active' },
     ],
+    year: '2022',
+    status: 'Production',
   },
 ] as const;
