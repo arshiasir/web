@@ -202,6 +202,8 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
   useEffect(() => { itemRefs.current[active]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); }, [active]);
 
+  useEffect(() => { window.scrollTo(0, 0); }, [project.id]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setLightbox(null); };
     addEventListener('keydown', onKey);
@@ -249,7 +251,6 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
             <a href="#tech" className="transition-colors hover:text-white">{L.navTechnical}</a>
             <a href="#architecture" className="transition-colors hover:text-white">{L.navArchitecture}</a>
             <a href="#challenges" className="transition-colors hover:text-white">{L.navChallenges}</a>
-            <a href="#results" className="transition-colors hover:text-white">{L.navResults}</a>
           </nav>
 
           <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={onContact} className="rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'white' }}>
@@ -301,7 +302,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, delay: 0.2, ease: EASE }} className="flex justify-center lg:justify-end">
             {project.visual && (
-              <div className="relative w-full max-w-md overflow-hidden rounded-2xl border" style={{ borderColor: 'rgba(255,255,255,0.12)', boxShadow: `0 40px 120px -40px ${accent}66` }}>
+              <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border lg:max-w-xl" style={{ borderColor: 'rgba(255,255,255,0.12)', boxShadow: `0 50px 140px -40px ${accent}77` }}>
                 <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(120% 80% at 50% -10%, ${accent}22, transparent 70%)` }} />
                 <img src={project.visual} alt={`${localized.title} cover`} className="relative h-full w-full object-cover" />
               </div>
@@ -489,41 +490,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
           </section>
         )}
 
-        {/* ===== Results ===== */}
-        <section id="results" className="scroll-mt-24 border-t py-20 md:py-28" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-          <Reveal>
-            <span className="cs-eyebrow-line" />
-            <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.resultsTitle}</h2>
-            <p className="mt-3 max-w-xl" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.resultsLead}</p>
-          </Reveal>
-
-          {project.metrics?.length > 0 && (
-            <div className="mt-10 grid grid-cols-2 gap-px lg:grid-cols-4" style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, overflow: 'hidden' }}>
-              {project.metrics.map((metric, i) => {
-                const label = metric.label[languageKey] || metric.label.en;
-                return (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.5, delay: i * 0.06, ease: EASE }}
-                    className="p-7" style={{ backgroundColor: '#08090C' }}
-                  >
-                    <div className="text-[11px] uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</div>
-                    <div className="mt-3 text-3xl font-bold tracking-tight md:text-4xl"><MetricValue value={metric.value} accent={accent} reduce={reduce} /></div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
-
-          {localized.outcome && (
-            <Reveal delay={0.1}>
-              <div className="mt-6 rounded-2xl border p-8" style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: accent }}>{L.outcomeLabel}</div>
-                <p className="mt-3 text-lg leading-relaxed" style={{ color: 'rgba(255,255,255,0.85)' }}>{localized.outcome}</p>
-              </div>
-            </Reveal>
-          )}
-        </section>
+        {/* ===== Results removed per request ===== */}
 
         {/* ===== Gallery ===== */}
         {screens.length > 0 && (
