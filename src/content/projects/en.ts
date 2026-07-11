@@ -51,7 +51,8 @@ export default {
     "scalabilityDetails": "Designed high-throughput inference nodes, enabling horizontal microservices scaling across GPU worker groups behind an API Gateway.",
     "performanceOptimizations": "Utilizes hardware-accelerated texture shaders in Flutter and locks frames at constant 120Hz during live camera scanner overlays.",
     "problem": "People had no instant, reliable way to know the true nutritional value of the meals they eat every day.",
-    "outcome": "Delivers 96.2% recognition accuracy in 180ms, powered by a custom YOLOv8 model trained on 50k+ images and shipped through a CI/CD pipeline."
+    "outcome": "Delivers 96.2% recognition accuracy in 180ms, powered by a custom YOLOv8 model trained on 50k+ images and shipped through a CI/CD pipeline.",
+    "reflection": "Shipping a custom computer-vision model to a phone taught me that accuracy is worthless if inference isn't fast enough to feel instant. If I rebuilt it, I'd add on-device quantization profiling from day one and a clearer failure story for low-light scenes."
   },
   "couchini": {
     "title": "Couchini Music",
@@ -62,12 +63,12 @@ export default {
     "tagline": "Your music. Your world.",
     "heroDescription": "An immersive audio experience with ultra-low latency streaming, offline playback, and AI-powered recommendations that learn your taste.",
     "screens": [
-      { "id": "player", "title": "Player", "description": "Smart AI recommendations based on your listening context." },
-      { "id": "search", "title": "Search", "description": "Offline-first search across your entire library." },
-      { "id": "lyrics", "title": "Lyrics", "description": "Live synchronized lyrics with karaoke-style highlighting." },
-      { "id": "playlist", "title": "Playlist", "description": "Dynamic playlists that adapt to your mood." },
-      { "id": "collections", "title": "Collections", "description": "Organize your music your way." },
-      { "id": "profile", "title": "Profile", "description": "Listening stats, achievements, and social features." }
+      { "id": "player", "title": "Player", "description": "Full-screen player with gesture control, gapless playback and live lyric sync." },
+      { "id": "explore", "title": "Explore", "description": "Personalized home feed with smart mixes, new releases and curated radio." },
+      { "id": "search", "title": "Search", "description": "Instant search across tracks, artists, albums and playlists with filters." },
+      { "id": "playlist", "title": "Playlist", "description": "Create and edit playlists with smart auto-ordering and collaborative editing." },
+      { "id": "lyrics", "title": "Lyrics", "description": "Time-coded synchronized lyrics with karaoke-style word highlighting." },
+      { "id": "library", "title": "Library", "description": "All your saved music, downloads and listening history in one organized place." }
     ],
     "features": [
       { "title": "Immersive Audio", "description": "Ultra-low latency streaming with hardware-accelerated decoding for pristine sound.", "icon": "Music" },
@@ -105,7 +106,27 @@ export default {
     "scalabilityDetails": "Designed cleanly separating presentation states from media service models, creating completely predictable memory bounds for continuous play.",
     "performanceOptimizations": "Custom audio buffer pipelines bypass standard framework channels, eliminating GC memory spikes during heavy high-fidelity chunk buffers.",
     "problem": "Music listeners wanted an immersive, low-latency player that still worked flawlessly offline and learned their taste.",
-    "outcome": "Sub-50ms audio latency with synchronized party listening across devices and an on-device recommendation engine that adapts in real time."
+    "outcome": "Sub-50ms audio latency with synchronized party listening across devices and an on-device recommendation engine that adapts in real time.",
+    "reflection": "Couchini proved that perceived quality lives in the buffer pipeline, not the codec. The hardest bug was GC pauses during playback — solving it with Dart isolates changed how I think about mobile threading. Next I'd add cross-device equalizer sync.",
+    "contribution": [
+      "Designed and built the entire Flutter mobile client from concept to release.",
+      "Implemented low-latency audio playback with custom buffer pipelines bypassing framework overhead.",
+      "Architected predictable, reactive state management using Riverpod across the whole app.",
+      "Integrated the Django + WebSocket backend for real-time sync, auth and streaming.",
+      "Built secure offline playback with local storage, downloads and background sync."
+    ],
+    "capabilities": [
+      { "title": "Music Discovery", "description": "Personalized home feed and smart mixes that learn listening habits over time." },
+      { "title": "Playback Experience", "description": "Gapless, low-latency audio with gesture control and live lyric sync." },
+      { "title": "Offline Listening", "description": "Download and play music securely without a connection, then sync when online." },
+      { "title": "Synchronized Lyrics", "description": "Live, time-coded lyrics with karaoke-style word highlighting." }
+    ],
+    "implementation": [
+      { "title": "Mobile", "description": "Flutter, Dart and Riverpod for a reactive cross-platform client." },
+      { "title": "Backend Integration", "description": "REST API and Django with real-time WebSocket updates." },
+      { "title": "Local Data", "description": "SQLite and secure storage for offline playback and caching." },
+      { "title": "Media", "description": "Audio playback engine with download and buffer management." }
+    ]
   },
   "tipax": {
     "title": "Tipax Logistics",
@@ -159,7 +180,8 @@ export default {
     "scalabilityDetails": "Distributed worker systems packaged inside high-availability environments. Supports parallel pooling on database coordinates.",
     "performanceOptimizations": "Engineered custom geographic packet telemetry encodings that slashed transmission payloads size by 78% for cellular cells.",
     "problem": "Logistics operators couldn't track thousands of drivers live or compute optimal delivery routes as conditions changed.",
-    "outcome": "Connects 12,000+ live drivers handling 500k deliveries/day, with 78% smaller telemetry payloads and dynamic route optimization."
+    "outcome": "Connects 12,000+ live drivers handling 500k deliveries/day, with 78% smaller telemetry payloads and dynamic route optimization.",
+    "reflection": "Tipax showed me that telemetry framing is a product decision: shaving 78% off the payload wasn't an optimization, it was what made cellular tracking viable. If I did it again I'd revisit the offline queue with CRDT-style merge."
   },
   "hyperstar": {
     "title": "Hyperstar Supply",
@@ -213,7 +235,8 @@ export default {
     "scalabilityDetails": "Designed split read-write databases and configured active-active Redis nodes, easily ensuring reliable scaling bounds under stress.",
     "performanceOptimizations": "Formulated precise PostgreSQL composite indexes and query loops that plunged system operations response down to just 12ms.",
     "problem": "Enterprises struggled with real-time inventory accuracy, role governance, and predicting when stock would run out.",
-    "outcome": "Syncs 2M+ records per hour at sub-12ms queries with neural demand forecasting that auto-adjusts replenishment thresholds."
+    "outcome": "Syncs 2M+ records per hour at sub-12ms queries with neural demand forecasting that auto-adjusts replenishment thresholds.",
+    "reflection": "Hyperstar reinforced that schema design — not framework choice — decides whether a system scales. The 12ms win came from composite indexes, not magic. Given another pass I'd add predictable read-replica lag budgets and automated index regression tests."
   },
   "faceauth": {
     "title": "FaceAuth Attendance",
@@ -267,6 +290,7 @@ export default {
     "scalabilityDetails": "Designed completely resilient edge loops allowing continuous biometrics validation even during complete connectivity offline states.",
     "performanceOptimizations": "Slashed OpenCV frame resolutions down to crucial regions of interest, mitigating CPU thermal throttling on passive cooled kiosks.",
     "problem": "Workplaces needed secure attendance that kept working offline and never leaked biometric data to the cloud.",
-    "outcome": "Matches faces in under 90ms fully on-device, with encrypted templates and tamper-proof audit logs that survive full connectivity loss."
+    "outcome": "Matches faces in under 90ms fully on-device, with encrypted templates and tamper-proof audit logs that survive full connectivity loss.",
+    "reflection": "FaceAuth made me respect edge-first thinking: the product only mattered because it worked with zero connectivity. The encrypted biometric template storage is the part I'm proudest of. I'd add on-device liveness anti-spoofing and a tamper-evident audit export."
   }
 } as const;

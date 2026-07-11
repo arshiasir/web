@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Atlas — Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #08080a;
+    --bg-1: #0d0d10;
+    --surface: #121216;
+    --surface-2: #17171c;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-strong: rgba(255, 255, 255, 0.13);
+    --text: #ededf0;
+    --text-2: #a3a3ad;
+    --text-3: #6c6c76;
+    --accent: #6e62e5;
+    --accent-2: #8b80ff;
+    --accent-soft: rgba(110, 98, 229, 0.12);
+    --accent-line: rgba(110, 98, 229, 0.35);
+    --radius: 14px;
+    --radius-lg: 20px;
+    --maxw: 1120px;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    font-feature-settings: "ss01", "cv01", "cv03";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection { background: var(--accent-soft); color: var(--text); }
+
+  a { color: inherit; text-decoration: none; }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- subtle background ---------- */
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(900px 600px at 78% -8%, rgba(110, 98, 229, 0.10), transparent 60%),
+      radial-gradient(700px 500px at 5% 10%, rgba(110, 98, 229, 0.05), transparent 55%);
+  }
+  .bg-grid::after {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%);
+  }
+
+  /* ---------- top nav ---------- */
+  header.nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: saturate(160%) blur(14px);
+    background: rgba(8, 8, 10, 0.6);
+    border-bottom: 1px solid transparent;
+    transition: border-color .3s var(--ease), background .3s var(--ease);
+  }
+  header.nav.scrolled { border-bottom-color: var(--border); background: rgba(8, 8, 10, 0.82); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.01em; }
+  .nav-logo {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: linear-gradient(140deg, var(--accent-2), var(--accent));
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 6px 18px -6px var(--accent);
+    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 13px;
+  }
+  .nav-links { display: flex; align-items: center; gap: 26px; }
+  .nav-links a { color: var(--text-2); font-size: 14px; font-weight: 500; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    font-size: 13.5px; font-weight: 600; padding: 8px 15px; border-radius: 9px;
+    border: 1px solid var(--border-strong); color: var(--text);
+    transition: border-color .2s, background .2s;
+  }
+  .nav-cta:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+  @media (max-width: 720px) { .nav-links a:not(.nav-cta) { display: none; } }
+
+  /* ---------- section scaffolding ---------- */
+  section { position: relative; z-index: 1; }
+  .section-pad { padding: 112px 0; border-top: 1px solid var(--border); }
+  @media (max-width: 720px) { .section-pad { padding: 76px 0; } }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent-2); margin-bottom: 22px;
+  }
+  .eyebrow::before { content: ""; width: 22px; height: 1px; background: var(--accent-line); }
+
+  h2.section-title {
+    font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 700; letter-spacing: -0.025em;
+    line-height: 1.08; margin-bottom: 20px;
+  }
+  .section-lead { color: var(--text-2); font-size: 1.075rem; max-width: 640px; }
+
+  /* ---------- HERO ---------- */
+  .hero { padding: 92px 0 84px; }
+  .hero .pill-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 30px; }
+  .pill {
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.02em;
+    padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border-strong);
+    color: var(--text-2); background: var(--surface);
+  }
+  .pill.accent { color: var(--accent-2); border-color: var(--accent-line); background: var(--accent-soft); }
+  .pill .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #4ade80; margin-right: 7px; box-shadow: 0 0 0 3px rgba(74,222,128,.16); vertical-align: middle; }
+
+  .hero h1 {
+    font-size: clamp(3rem, 9vw, 6.4rem); font-weight: 800; letter-spacing: -0.04em;
+    line-height: 0.98; margin-bottom: 26px;
+    background: linear-gradient(180deg, #fff 30%, #b9b9c6 130%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero .summary { font-size: clamp(1.15rem, 2.4vw, 1.5rem); font-weight: 500; color: var(--text); max-width: 720px; letter-spacing: -0.01em; margin-bottom: 26px; }
+  .hero .intro { color: var(--text-2); max-width: 680px; font-size: 1.08rem; }
+
+  .meta-grid {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px;
+    background: var(--border); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; margin: 52px 0 44px;
+  }
+  .meta-grid .cell { background: var(--bg-1); padding: 20px 22px; }
+  .meta-grid .k { font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 9px; }
+  .meta-grid .v { font-size: 14.5px; color: var(--text); font-weight: 500; line-height: 1.45; }
+  @media (max-width: 900px) { .meta-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 560px) { .meta-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .cta-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px; font-weight: 600; font-size: 15px;
+    padding: 13px 22px; border-radius: 11px; transition: transform .2s var(--ease), background .2s, border-color .2s, box-shadow .2s;
+  }
+  .btn svg { width: 17px; height: 17px; }
+  .btn-primary { background: linear-gradient(140deg, var(--accent-2), var(--accent)); color: #fff; box-shadow: 0 10px 30px -10px var(--accent); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -12px var(--accent); }
+  .btn-ghost { border: 1px solid var(--border-strong); color: var(--text); background: var(--surface); }
+  .btn-ghost:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+  .btn-link { color: var(--text-2); font-weight: 500; font-size: 14.5px; }
+  .btn-link:hover { color: var(--text); }
+
+  /* ---------- cover ---------- */
+  .cover {
+    position: relative; margin-top: 64px; border-radius: var(--radius-lg); overflow: hidden;
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 40px 120px -40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.02) inset;
+  }
+  .cover .glow { position: absolute; inset: 0; background: radial-gradient(700px 300px at 50% -10%, rgba(110,98,229,.18), transparent 70%); pointer-events: none; }
+
+  /* ---------- mock app frame ---------- */
+  .mock { background: var(--surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-strong); }
+  .mock-bar { height: 38px; display: flex; align-items: center; gap: 7px; padding: 0 14px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .mock-bar .d { width: 10px; height: 10px; border-radius: 50%; background: #2c2c33; }
+  .mock-bar .addr { margin-left: 12px; font-family: var(--mono); font-size: 11px; color: var(--text-3); background: var(--bg); padding: 3px 10px; border-radius: 6px; }
+  .mock-body { display: flex; min-height: 360px; }
+  .mock-side { width: 184px; background: var(--bg-1); border-right: 1px solid var(--border); padding: 16px 12px; flex-shrink: 0; }
+  .mock-side .s-item { height: 30px; border-radius: 7px; display: flex; align-items: center; gap: 9px; padding: 0 10px; margin-bottom: 4px; font-size: 12.5px; color: var(--text-2); }
+  .mock-side .s-item .ic { width: 14px; height: 14px; border-radius: 4px; background: #26262e; }
+  .mock-side .s-item.active { background: var(--accent-soft); color: var(--text); }
+  .mock-side .s-item.active .ic { background: var(--accent); }
+  .mock-side .s-label { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); margin: 16px 10px 8px; }
+  .mock-main { flex: 1; padding: 22px; background: linear-gradient(180deg, var(--surface), var(--bg-1)); }
+  .mock-h { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 4px; }
+  .mock-sub { font-size: 12.5px; color: var(--text-3); margin-bottom: 18px; }
+  .mock-row { display: flex; gap: 12px; margin-bottom: 12px; }
+  .mock-card { flex: 1; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .mock-card .mc-k { font-size: 11px; color: var(--text-3); margin-bottom: 7px; }
+  .mock-card .mc-v { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .mock-card .mc-v.accent { color: var(--accent-2); }
+  .mock-bars { display: flex; align-items: flex-end; gap: 6px; height: 90px; margin-top: 8px; }
+  .mock-bars span { flex: 1; background: linear-gradient(180deg, var(--accent), rgba(110,98,229,.25)); border-radius: 4px 4px 0 0; }
+  .mock-line { height: 90px; border-radius: 10px; border: 1px solid var(--border); background:
+      linear-gradient(180deg, rgba(110,98,229,.10), transparent),
+      repeating-linear-gradient(90deg, transparent, transparent 22px, rgba(255,255,255,.03) 22px, rgba(255,255,255,.03) 23px);
+    position: relative; overflow: hidden; }
+  .mock-line::after { content:""; position:absolute; left:0; right:0; bottom:0; height:2px;
+    background: linear-gradient(90deg, transparent, var(--accent-2), transparent); }
+  .mock-doc { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .mock-doc .ln { height: 9px; border-radius: 4px; background: #24242b; margin-bottom: 10px; }
+  .mock-doc .ln.w1 { width: 70%; } .mock-doc .ln.w2 { width: 92%; } .mock-doc .ln.w3 { width: 84%; } .mock-doc .ln.w4 { width: 60%; } .mock-doc .ln.head { height: 14px; width: 40%; background: #34343d; margin-bottom: 16px; }
+  .mock-cursor { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:#fff; background:var(--accent); padding:2px 8px; border-radius:0 8px 8px 8px; }
+  .mock-search { display:flex; align-items:center; gap:10px; background: var(--surface-2); border:1px solid var(--border-strong); border-radius:10px; padding:12px 14px; margin-bottom:16px; }
+  .mock-search .si { width:14px; height:14px; border-radius:4px; border:2px solid var(--text-3); }
+  .mock-search .st { color: var(--text-3); font-size:13px; }
+  .mock-result { display:flex; gap:12px; padding:13px; border:1px solid var(--border); border-radius:10px; background:var(--surface-2); margin-bottom:9px; }
+  .mock-result .ri { width:30px; height:30px; border-radius:8px; background:var(--accent-soft); border:1px solid var(--accent-line); flex-shrink:0; }
+  .mock-result .rt { font-size:13px; font-weight:600; } .mock-result .rd { font-size:11.5px; color:var(--text-3); }
+  @media (max-width: 640px) { .mock-side { display: none; } .mock-row { flex-direction: column; } }
+
+  /* ---------- overview ---------- */
+  .overview-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 64px; align-items: start; }
+  @media (max-width: 880px) { .overview-grid { grid-template-columns: 1fr; gap: 44px; } }
+  .qa { margin-bottom: 34px; }
+  .qa .q { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 9px; letter-spacing: -0.01em; }
+  .qa .a { color: var(--text-2); font-size: 1.02rem; }
+
+  .resp { border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-1); padding: 28px 30px; }
+  .resp h3 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); margin-bottom: 20px; }
+  .resp-item { padding: 15px 0; border-top: 1px solid var(--border); }
+  .resp-item:first-of-type { border-top: none; padding-top: 0; }
+  .resp-item .ri-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .resp-item .ri-title { font-weight: 600; font-size: 1rem; display:flex; align-items:center; gap:10px; }
+  .resp-item .ri-title .tag { font-family: var(--mono); font-size: 10.5px; color: var(--accent-2); border:1px solid var(--accent-line); padding:2px 7px; border-radius:6px; background:var(--accent-soft); }
+  .resp-item .ri-desc { color: var(--text-2); font-size: 0.95rem; margin-top: 7px; }
+
+  /* ---------- walkthrough ---------- */
+  .walk-head { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-bottom: 38px; }
+  .walk-info {
+    border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-1);
+    padding: 26px 30px; min-height: 168px; transition: border-color .3s;
+  }
+  .walk-info .wi-index { font-family: var(--mono); font-size: 12px; color: var(--accent-2); margin-bottom: 12px; }
+  .walk-info .wi-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .walk-info .wi-purpose { color: var(--text-2); font-size: 1rem; margin-bottom: 16px; }
+  .walk-info .wi-foot { display:flex; gap: 28px; flex-wrap:wrap; }
+  .walk-info .wi-foot .wf-k { font-size: 11px; letter-spacing:.1em; text-transform:uppercase; color: var(--text-3); margin-bottom:5px; }
+  .walk-info .wi-foot .wf-v { font-size: 14px; color: var(--text); font-weight: 500; }
+
+  .walk-viewport { position: relative; margin-top: 30px; }
+  .walk-track {
+    display: flex; gap: 26px; overflow-x: auto; scroll-snap-type: x mandatory;
+    padding: 14px calc(50% - 330px) 26px; scroll-padding: 0 calc(50% - 330px);
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  .walk-track::-webkit-scrollbar { display: none; }
+  .slide {
+    flex: 0 0 660px; max-width: 90vw; scroll-snap-align: center;
+    transition: transform .5s var(--ease), opacity .5s var(--ease), filter .5s var(--ease);
+    opacity: 0.35; transform: scale(0.94); filter: saturate(0.6);
+  }
+  .slide.active { opacity: 1; transform: scale(1); filter: none; }
+  @media (max-width: 720px) { .slide { flex-basis: 86vw; } .walk-track { padding: 14px 7vw 26px; scroll-padding: 0 7vw; } }
+
+  .walk-nav { display:flex; align-items:center; gap:14px; margin-top: 6px; }
+  .arrow {
+    width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--border-strong);
+    background: var(--surface); color: var(--text); display: grid; place-items: center; cursor: pointer;
+    transition: border-color .2s, background .2s, transform .2s;
+  }
+  .arrow:hover { border-color: var(--accent-line); background: var(--accent-soft); transform: translateY(-1px); }
+  .arrow:disabled { opacity: .35; cursor: not-allowed; }
+  .dots { display:flex; gap:8px; margin-left:auto; }
+  .dot-nav { width: 8px; height: 8px; border-radius: 50%; background: #2a2a31; cursor:pointer; transition: background .2s, width .3s var(--ease); }
+  .dot-nav.active { background: var(--accent); width: 22px; border-radius: 5px; }
+
+  /* ---------- dev highlights ---------- */
+  .hl { display: grid; grid-template-columns: 200px 1fr; gap: 0; border-top: 1px solid var(--border); }
+  .hl:last-child { border-bottom: 1px solid var(--border); }
+  .hl-head { padding: 34px 30px 34px 0; border-right: 1px solid var(--border); }
+  .hl-head .hl-no { font-family: var(--mono); font-size: 12px; color: var(--text-3); margin-bottom: 12px; }
+  .hl-head h3 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; }
+  .hl-head .hl-tag { display:inline-block; margin-top:12px; font-family:var(--mono); font-size:11px; color:var(--accent-2); border:1px solid var(--accent-line); background:var(--accent-soft); padding:3px 9px; border-radius:6px; }
+  .hl-body { padding: 34px 0 34px 34px; display: grid; grid-template-columns: 1fr 1fr; gap: 26px 40px; }
+  .hl-body .blk .bk-k { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 9px; }
+  .hl-body .blk p { color: var(--text-2); font-size: 0.98rem; }
+  @media (max-width: 820px) { .hl { grid-template-columns: 1fr; } .hl-head { border-right: none; border-bottom: 1px solid var(--border); padding: 28px 0; } .hl-body { padding: 28px 0; grid-template-columns: 1fr; gap: 22px; } }
+
+  /* ---------- architecture ---------- */
+  .arch { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: 44px; }
+  .arch-node {
+    width: min(560px, 100%); border: 1px solid var(--border-strong); background: var(--surface);
+    border-radius: 13px; padding: 18px 24px; display:flex; align-items:center; justify-content:space-between; gap: 16px;
+    transition: border-color .25s, transform .25s var(--ease);
+  }
+  .arch-node:hover { border-color: var(--accent-line); transform: translateY(-2px); }
+  .arch-node .an-left { display:flex; align-items:center; gap:14px; }
+  .arch-node .an-ic { width: 34px; height: 34px; border-radius: 9px; background: var(--accent-soft); border:1px solid var(--accent-line); display:grid; place-items:center; color: var(--accent-2); }
+  .arch-node .an-ic svg { width: 17px; height: 17px; }
+  .arch-node .an-title { font-weight: 600; font-size: 1.02rem; }
+  .arch-node .an-tech { font-family: var(--mono); font-size: 11.5px; color: var(--text-3); }
+  .arch-arrow { width: 1px; height: 38px; background: linear-gradient(var(--border-strong), var(--accent-line)); position: relative; }
+  .arch-arrow::after { content:""; position:absolute; bottom:-1px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-top:6px solid var(--accent-line); }
+  .arch-node.ext { border-style: dashed; background: transparent; }
+  .arch-note { color: var(--text-3); font-size: 13px; margin-top: 26px; text-align: center; max-width: 520px; }
+
+  /* ---------- challenges ---------- */
+  .chal { border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-1); padding: 36px 38px; margin-bottom: 22px; transition: border-color .3s; }
+  .chal:hover { border-color: var(--border-strong); }
+  .chal-top { display:flex; align-items:flex-start; gap:18px; margin-bottom: 24px; }
+  .chal-num { font-family: var(--mono); font-size: 13px; color: var(--accent-2); border:1px solid var(--accent-line); background:var(--accent-soft); padding:6px 11px; border-radius:9px; flex-shrink:0; }
+  .chal-title { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; }
+  .chal-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+  .chal-grid .cg-k { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); margin-bottom: 9px; }
+  .chal-grid .cg-v { color: var(--text-2); font-size: 0.95rem; }
+  .chal-grid .cg-v.outcome { color: var(--text); }
+  .chal-grid .cg-v .hi { color: var(--accent-2); font-weight: 600; }
+  @media (max-width: 820px) { .chal-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .chal-grid { grid-template-columns: 1fr; } .chal { padding: 28px 24px; } }
+
+  /* ---------- results ---------- */
+  .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 44px; }
+  .result-cell { background: var(--bg-1); padding: 32px 30px; }
+  .result-cell .rc-v { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; background: linear-gradient(180deg,#fff,#bdbdc8); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .result-cell .rc-v .u { font-size: 1.1rem; color: var(--accent-2); -webkit-text-fill-color: var(--accent-2); }
+  .result-cell .rc-k { color: var(--text-2); font-size: 0.95rem; margin-top: 12px; }
+  @media (max-width: 760px) { .results-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- gallery ---------- */
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 44px; }
+  .gallery .g-item { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; cursor: zoom-in; background: var(--surface); transition: border-color .3s, transform .3s var(--ease); }
+  .gallery .g-item:hover { border-color: var(--border-strong); transform: translateY(-3px); }
+  .gallery .g-item.wide { grid-column: 1 / -1; }
+  .gallery .g-item .g-cap { padding: 13px 16px; font-size: 13px; color: var(--text-2); border-top: 1px solid var(--border); display:flex; justify-content:space-between; }
+  .gallery .g-item .g-cap .gt { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+  @media (max-width: 620px) { .gallery { grid-template-columns: 1fr; } }
+
+  /* lightbox */
+  .lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(5,5,7,.92); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 40px; }
+  .lightbox.open { display: flex; }
+  .lightbox .lb-inner { width: min(1000px, 100%); max-height: 86vh; overflow: auto; border-radius: var(--radius-lg); border: 1px solid var(--border-strong); }
+  .lightbox .lb-close { position: absolute; top: 22px; right: 26px; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); cursor: pointer; display:grid; place-items:center; font-size: 18px; }
+  .lightbox .lb-cap { padding: 14px 20px; color: var(--text-2); font-size: 13px; border-top: 1px solid var(--border); }
+
+  /* ---------- reflection ---------- */
+  .reflect p { color: var(--text-2); font-size: 1.08rem; max-width: 760px; margin-bottom: 22px; }
+  .reflect .rf-q { color: var(--text); font-weight: 600; font-size: 1rem; margin-bottom: 7px; }
+  .reflect-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; margin-top: 30px; }
+  @media (max-width: 760px) { .reflect-grid { grid-template-columns: 1fr; gap: 28px; } }
+
+  /* ---------- next projects ---------- */
+  .next-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 44px; }
+  .next-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-1); overflow: hidden; transition: border-color .3s, transform .3s var(--ease); cursor: pointer; }
+  .next-card:hover { border-color: var(--border-strong); transform: translateY(-4px); }
+  .next-card .nc-thumb { height: 150px; background: linear-gradient(135deg, var(--surface-2), var(--bg)); border-bottom: 1px solid var(--border); position: relative; overflow:hidden; }
+  .next-card .nc-thumb .nc-orb { position:absolute; width:160px; height:160px; border-radius:50%; background: radial-gradient(circle, rgba(110,98,229,.4), transparent 70%); top:-40px; right:-30px; }
+  .next-card .nc-body { padding: 22px 24px; }
+  .next-card .nc-cat { font-size: 11.5px; letter-spacing:.1em; text-transform:uppercase; color: var(--accent-2); margin-bottom: 9px; }
+  .next-card .nc-title { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 7px; }
+  .next-card .nc-desc { color: var(--text-2); font-size: 0.93rem; }
+  @media (max-width: 760px) { .next-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- profile ---------- */
+  .profile { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
+  @media (max-width: 620px) { .profile { grid-template-columns: 1fr; text-align: left; } }
+  .avatar { width: 120px; height: 120px; border-radius: 26px; background: linear-gradient(140deg, var(--accent-2), var(--accent)); display:grid; place-items:center; font-size: 40px; font-weight: 800; color:#fff; box-shadow: 0 20px 50px -18px var(--accent); flex-shrink:0; }
+  .profile h3 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .profile .role { color: var(--accent-2); font-weight: 500; margin-bottom: 14px; font-size: 0.98rem; }
+  .profile .bio { color: var(--text-2); max-width: 620px; margin-bottom: 22px; }
+  .profile-links { display:flex; flex-wrap: wrap; gap: 10px; }
+  .pl { display:inline-flex; align-items:center; gap:8px; font-size: 13.5px; font-weight:500; color: var(--text-2); border:1px solid var(--border-strong); background: var(--surface); padding: 9px 14px; border-radius: 10px; transition: border-color .2s, color .2s; }
+  .pl:hover { border-color: var(--accent-line); color: var(--text); }
+  .pl.contact { background: var(--accent-soft); border-color: var(--accent-line); color: var(--text); }
+  .pl svg { width: 15px; height: 15px; }
+
+  /* ---------- footer ---------- */
+  footer { border-top: 1px solid var(--border); padding: 40px 0; color: var(--text-3); font-size: 13.5px; }
+  .foot-inner { display:flex; justify-content: space-between; align-items:center; flex-wrap: wrap; gap: 14px; }
+
+  /* reveal */
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } .reveal { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="nav-brand"><span class="nav-logo">A</span> Atlas</a>
+    <nav class="nav-links">
+      <a href="#overview">Overview</a>
+      <a href="#walkthrough">Product</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#challenges">Challenges</a>
+      <a href="#top" class="nav-cta">Back to Projects</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="pill-row reveal">
+      <span class="pill accent">Real-time Knowledge Platform</span>
+      <span class="pill"><span class="dot"></span>Live · v2.4</span>
+      <span class="pill">B2B SaaS</span>
+    </div>
+
+    <h1 class="reveal">Atlas</h1>
+    <p class="summary reveal">A collaborative workspace where engineering teams document, search, and sync institutional knowledge in real time — locally first, AI-aware, and built to survive flaky networks.</p>
+    <p class="intro reveal">Atlas is a real-time collaborative documentation platform for engineering organizations. It pairs a CRDT-based editor with semantic search and an AI layer that turns scattered notes into structured, queryable knowledge. I led the frontend architecture and the sync engine from zero to production.</p>
+
+    <div class="meta-grid reveal">
+      <div class="cell"><div class="k">Role</div><div class="v">Lead Frontend Engineer &amp; Architect</div></div>
+      <div class="cell"><div class="k">Timeline</div><div class="v">2023 – 2024 · 14 months</div></div>
+      <div class="cell"><div class="k">Platforms</div><div class="v">Web · macOS · Windows</div></div>
+      <div class="cell"><div class="k">Team Size</div><div class="v">6 (2 FE · 2 BE · 1 Design · 1 PM)</div></div>
+      <div class="cell"><div class="k">Industry</div><div class="v">Developer Tools / SaaS</div></div>
+      <div class="cell"><div class="k">Technologies</div><div class="v">TypeScript · Rust · Postgres · Redis</div></div>
+    </div>
+
+    <div class="cta-row reveal">
+      <a class="btn btn-primary" href="#" >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        View Live
+      </a>
+      <a class="btn btn-ghost" href="#">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.36-2.22-.26-4.55-1.14-4.55-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.04 10.04 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+        GitHub
+      </a>
+      <a class="btn-link" href="#top">← Back to Projects</a>
+    </div>
+  </div>
+
+  <!-- COVER -->
+  <div class="wrap">
+    <div class="cover reveal">
+      <div class="glow"></div>
+      <div class="mock">
+        <div class="mock-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">atlas.dev/workspace/engineering</span></div>
+        <div class="mock-body">
+          <div class="mock-side">
+            <div class="s-label">Workspace</div>
+            <div class="s-item active"><span class="ic"></span> Home</div>
+            <div class="s-item"><span class="ic"></span> Docs</div>
+            <div class="s-item"><span class="ic"></span> Search</div>
+            <div class="s-item"><span class="ic"></span> Insights</div>
+            <div class="s-label">Spaces</div>
+            <div class="s-item"><span class="ic"></span> Platform</div>
+            <div class="s-item"><span class="ic"></span> Mobile</div>
+            <div class="s-item"><span class="ic"></span> Infra</div>
+          </div>
+          <div class="mock-main">
+            <div class="mock-h">Engineering Workspace</div>
+            <div class="mock-sub">12 active docs · 4 collaborators online</div>
+            <div class="mock-row">
+              <div class="mock-card"><div class="mc-k">Docs synced</div><div class="mc-v accent">2,481</div></div>
+              <div class="mock-card"><div class="mc-k">AI queries / day</div><div class="mc-v">318</div></div>
+              <div class="mock-card"><div class="mc-k">p90 sync</div><div class="mc-v">80ms</div></div>
+            </div>
+            <div class="mock-line"></div>
+            <div style="margin-top:14px" class="mock-doc">
+              <div class="ln head"></div>
+              <div class="ln w2"></div><div class="ln w1"></div><div class="ln w3"></div>
+              <div class="ln w2"></div><div class="ln w4"></div>
+              <span class="mock-cursor">Arshia · editing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OVERVIEW -->
+<section class="section-pad" id="overview">
+  <div class="wrap overview-grid">
+    <div class="reveal">
+      <span class="eyebrow">Project Overview</span>
+      <h2 class="section-title">Why Atlas exists</h2>
+      <div class="qa">
+        <div class="q">What problem existed?</div>
+        <div class="a">Engineering knowledge lived in disconnected wikis, Slack threads, and people's heads. When someone left or a service changed hands, context evaporated. Search returned filenames, not meaning.</div>
+      </div>
+      <div class="qa">
+        <div class="q">Why was this project created?</div>
+        <div class="a">To give teams a single, live source of truth that is editable offline, merges without conflicts, and answers questions in natural language — not just keyword matches.</div>
+      </div>
+      <div class="qa">
+        <div class="q">Who are the users?</div>
+        <div class="a">Platform and product engineers at 40–400-person companies who maintain shared systems, runbooks, and architecture decisions that must stay current.</div>
+      </div>
+      <div class="qa">
+        <div class="q">What value does it provide?</div>
+        <div class="a">Faster onboarding, fewer repeated questions, and institutional memory that survives reorgs. Teams report cutting time-to-find documentation by roughly 40%.</div>
+      </div>
+    </div>
+
+    <div class="resp reveal">
+      <h3>My Responsibilities</h3>
+      <div class="resp-item">
+        <div class="ri-head"><div class="ri-title">Architecture <span class="tag">lead</span></div></div>
+        <div class="ri-desc">Designed the client-side data model and the offline-first sync protocol end to end.</div>
+      </div>
+      <div class="resp-item">
+        <div class="ri-head"><div class="ri-title">Frontend</div></div>
+        <div class="ri-desc">Built the collaborative editor, real-time presence, and the design system used across the app.</div>
+      </div>
+      <div class="resp-item">
+        <div class="ri-head"><div class="ri-title">Backend</div></div>
+        <div class="ri-desc">Contributed to the Rust API and the CRDT merge service that reconciles edits.</div>
+      </div>
+      <div class="resp-item">
+        <div class="ri-head"><div class="ri-title">AI</div></div>
+        <div class="ri-desc">Integrated embeddings, semantic retrieval, and LLM summarization into the search path.</div>
+      </div>
+      <div class="resp-item">
+        <div class="ri-head"><div class="ri-title">Infrastructure</div></div>
+        <div class="ri-desc">Set up CI/CD, edge caching, and observability (traces, metrics, error budgets).</div>
+      </div>
+      <div class="resp-item">
+        <div class="ri-head"><div class="ri-title">Deployment</div></div>
+        <div class="ri-desc">Containerized services on AWS ECS with blue-green deploys and zero-downtime migrations.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WALKTHROUGH -->
+<section class="section-pad" id="walkthrough">
+  <div class="wrap">
+    <span class="eyebrow">Product Walkthrough</span>
+    <div class="walk-head">
+      <div>
+        <h2 class="section-title">Inside the product</h2>
+        <p class="section-lead">Navigate the core screens. Each one exists to solve a specific moment in a team's workflow.</p>
+      </div>
+    </div>
+
+    <div class="walk-info reveal" id="walkInfo">
+      <div class="wi-index" id="wiIndex">01 / 04</div>
+      <div class="wi-title" id="wiTitle">Workspace Home</div>
+      <div class="wi-purpose" id="wiPurpose">The entry point — see what changed, who is active, and where to go next.</div>
+      <div class="wi-foot">
+        <div><div class="wf-k">Key interaction</div><div class="wf-v" id="wiKey">Command palette (⌘K)</div></div>
+        <div><div class="wf-k">Why it exists</div><div class="wf-v" id="wiWhy">Reduces navigation friction to near zero</div></div>
+      </div>
+    </div>
+
+    <div class="walk-viewport">
+      <div class="walk-track" id="walkTrack">
+
+        <!-- slide 1 -->
+        <div class="slide active">
+          <div class="mock">
+            <div class="mock-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">atlas.dev/home</span></div>
+            <div class="mock-body">
+              <div class="mock-side">
+                <div class="s-label">Workspace</div>
+                <div class="s-item active"><span class="ic"></span> Home</div>
+                <div class="s-item"><span class="ic"></span> Docs</div>
+                <div class="s-item"><span class="ic"></span> Search</div>
+                <div class="s-item"><span class="ic"></span> Insights</div>
+              </div>
+              <div class="mock-main">
+                <div class="mock-h">Home</div>
+                <div class="mock-sub">Recent activity across your spaces</div>
+                <div class="mock-row">
+                  <div class="mock-card"><div class="mc-k">Active docs</div><div class="mc-v accent">12</div></div>
+                  <div class="mock-card"><div class="mc-k">Online</div><div class="mc-v">4</div></div>
+                </div>
+                <div class="mock-doc"><div class="ln head"></div><div class="ln w2"></div><div class="ln w1"></div><div class="ln w3"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- slide 2 -->
+        <div class="slide">
+          <div class="mock">
+            <div class="mock-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">atlas.dev/doc/runbook</span></div>
+            <div class="mock-body">
+              <div class="mock-side">
+                <div class="s-label">Doc</div>
+                <div class="s-item active"><span class="ic"></span> Editing</div>
+                <div class="s-item"><span class="ic"></span> History</div>
+                <div class="s-item"><span class="ic"></span> Comments</div>
+              </div>
+              <div class="mock-main">
+                <div class="mock-h">Incident Runbook</div>
+                <div class="mock-sub">3 people editing · synced</div>
+                <div class="mock-doc">
+                  <div class="ln head"></div>
+                  <div class="ln w2"></div><div class="ln w1"></div>
+                  <span class="mock-cursor">Maya · typing</span>
+                  <div class="ln w3" style="margin-top:14px"></div><div class="ln w2"></div><div class="ln w4"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- slide 3 -->
+        <div class="slide">
+          <div class="mock">
+            <div class="mock-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">atlas.dev/search</span></div>
+            <div class="mock-body">
+              <div class="mock-side">
+                <div class="s-label">Search</div>
+                <div class="s-item active"><span class="ic"></span> Semantic</div>
+                <div class="s-item"><span class="ic"></span> Filters</div>
+              </div>
+              <div class="mock-main">
+                <div class="mock-h">Ask Atlas</div>
+                <div class="mock-sub">Natural language, answered from your docs</div>
+                <div class="mock-search"><span class="si"></span><span class="st">“How do we rotate the API keys?”</span></div>
+                <div class="mock-result"><span class="ri"></span><div><div class="rt">Key rotation runbook</div><div class="rd">Infra · updated 2d ago · 94% match</div></div></div>
+                <div class="mock-result"><span class="ri"></span><div><div class="rt">Secrets service design</div><div class="rd">Platform · 3w ago · 81% match</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- slide 4 -->
+        <div class="slide">
+          <div class="mock">
+            <div class="mock-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">atlas.dev/insights</span></div>
+            <div class="mock-body">
+              <div class="mock-side">
+                <div class="s-label">Insights</div>
+                <div class="s-item active"><span class="ic"></span> Usage</div>
+                <div class="s-item"><span class="ic"></span> Health</div>
+              </div>
+              <div class="mock-main">
+                <div class="mock-h">Workspace Insights</div>
+                <div class="mock-sub">Last 30 days</div>
+                <div class="mock-row">
+                  <div class="mock-card"><div class="mc-k">Docs created</div><div class="mc-v accent">+184</div></div>
+                  <div class="mock-card"><div class="mc-k">AI answers</div><div class="mc-v">9.5k</div></div>
+                </div>
+                <div class="mock-bars"><span style="height:40%"></span><span style="height:62%"></span><span style="height:48%"></span><span style="height:80%"></span><span style="height:70%"></span><span style="height:95%"></span><span style="height:60%"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="walk-nav">
+      <button class="arrow" id="prevBtn" aria-label="Previous screen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="arrow" id="nextBtn" aria-label="Next screen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <div class="dots" id="dots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- DEV HIGHLIGHTS -->
+<section class="section-pad" id="highlights">
+  <div class="wrap">
+    <span class="eyebrow">Development Highlights</span>
+    <h2 class="section-title">Engineering work that mattered</h2>
+    <p class="section-lead">Not feature checkboxes — the hard parts, and how they were actually solved.</p>
+
+    <div style="margin-top:48px">
+      <div class="hl reveal">
+        <div class="hl-head"><div class="hl-no">01</div><h3>Authentication</h3><span class="hl-tag">SSO · Sessions</span></div>
+        <div class="hl-body">
+          <div class="blk"><div class="bk-k">Problem</div><p>Enterprise teams required SAML/SCIM but still expected instant, passwordless sign-in on the web app.</p></div>
+          <div class="blk"><div class="bk-k">Solution</div><p>Hybrid auth: OIDC for interactive login, short-lived JWTs with rotating refresh tokens, SAML brokered through a dedicated IdP proxy.</p></div>
+          <div class="blk"><div class="bk-k">Implementation</div><p>Built a token store that survived reloads and tab switches, with silent refresh 60s before expiry to avoid UI flicker.</p></div>
+          <div class="blk"><div class="bk-k">Result</div><p>Zero login-related support tickets after launch; passkey enrollment adopted by 62% of users in month one.</p></div>
+        </div>
+      </div>
+
+      <div class="hl reveal">
+        <div class="hl-head"><div class="hl-no">02</div><h3>Offline Support</h3><span class="hl-tag">Local-first</span></div>
+        <div class="hl-body">
+          <div class="blk"><div class="bk-k">Problem</div><p>Field and travel-heavy engineers lost edits whenever the train tunnel or café Wi-Fi dropped.</p></div>
+          <div class="blk"><div class="bk-k">Solution</div><p>A local-first store (IndexedDB) holding a CRDT replica; writes apply optimistically and reconcile on reconnect.</p></div>
+          <div class="blk"><div class="bk-k">Implementation</div><p>Serialized the document as a sequence of operations, persisted the op-log locally, and replayed it against the server's timeline with causal ordering.</p></div>
+          <div class="blk"><div class="bk-k">Result</div><p>Edits never lost; merge conflicts resolved automatically in 99.4% of reconnects without user intervention.</p></div>
+        </div>
+      </div>
+
+      <div class="hl reveal">
+        <div class="hl-head"><div class="hl-no">03</div><h3>Real-time Communication</h3><span class="hl-tag">CRDT · WebSocket</span></div>
+        <div class="hl-body">
+          <div class="blk"><div class="bk-k">Problem</div><p>Multi-cursor editing and live presence had to feel instantaneous across continents, not just one office.</p></div>
+          <div class="blk"><div class="bk-k">Solution</div><p>Rust WebSocket gateway broadcasting CRDT ops, with presence diffs batched at 30fps and interpolated on the client.</p></div>
+          <div class="blk"><div class="bk-k">Implementation</div><p>Used a hybrid of authoritative server ordering and local echo; cursor positions sent over a separate lightweight channel to keep doc ops clean.</p></div>
+          <div class="blk"><div class="bk-k">Result</div><p>p90 presence latency of 80ms globally; smooth co-editing sessions with up to 14 concurrent users.</p></div>
+        </div>
+      </div>
+
+      <div class="hl reveal">
+        <div class="hl-head"><div class="hl-no">04</div><h3>AI Integration</h3><span class="hl-tag">Embeddings · LLM</span></div>
+        <div class="hl-body">
+          <div class="blk"><div class="bk-k">Problem</div><p>Keyword search missed intent; teams asked questions, not queries, and expected sourced answers.</p></div>
+          <div class="blk"><div class="bk-k">Solution</div><p>Chunked docs into embeddings stored in Postgres pgvector, retrieved top-k, then grounded an LLM answer with citations.</p></div>
+          <div class="blk"><div class="bk-k">Implementation</div><p>Re-embedded only changed blocks via a CDC pipeline; cached retrieval results at the edge with a 10-minute TTL keyed by doc version.</p></div>
+          <div class="blk"><div class="bk-k">Result</div><p>Semantic answers in ~700ms p50; every answer links back to the source block for trust and verification.</p></div>
+        </div>
+      </div>
+
+      <div class="hl reveal">
+        <div class="hl-head"><div class="hl-no">05</div><h3>Caching &amp; Performance</h3><span class="hl-tag">Edge · Virtualization</span></div>
+        <div class="hl-body">
+          <div class="blk"><div class="bk-k">Problem</div><p>Feature growth pushed the initial bundle past 1.4MB and made large docs janky to scroll.</p></div>
+          <div class="blk"><div class="bk-k">Solution</div><p>Route-level code-splitting, an edge cache for public workspace shells, and windowed virtualization for long documents.</p></div>
+          <div class="blk"><div class="bk-k">Implementation</div><p>Adopted React Server Components for static shells, lazy-loaded the editor, and virtualized the block list with fixed-size measurement.</p></div>
+          <div class="blk"><div class="bk-k">Result</div><p>Initial JS cut by 61% to 540KB; time-to-interactive dropped from 3.1s to 1.2s on mid-tier devices.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section-pad" id="architecture">
+  <div class="wrap">
+    <span class="eyebrow">Technical Architecture</span>
+    <h2 class="section-title">How the pieces fit</h2>
+    <p class="section-lead">A deliberately simple flow. Each layer has one job, which kept the system debuggable as it scaled.</p>
+
+    <div class="arch reveal">
+      <div class="arch-node">
+        <div class="an-left"><span class="an-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8"/></svg></span><div><div class="an-title">Application</div><div class="an-tech">React · Tauri · TypeScript</div></div></div>
+        <div class="an-tech">Web + Desktop</div>
+      </div>
+      <div class="arch-arrow"></div>
+      <div class="arch-node">
+        <div class="an-left"><span class="an-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span><div><div class="an-title">API Gateway</div><div class="an-tech">Rust · Axum · WebSocket</div></div></div>
+        <div class="an-tech">Auth · Routing</div>
+      </div>
+      <div class="arch-arrow"></div>
+      <div class="arch-node">
+        <div class="an-left"><span class="an-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></span><div><div class="an-title">Services</div><div class="an-tech">Sync · Search · AI · Notify</div></div></div>
+        <div class="an-tech">Stateless workers</div>
+      </div>
+      <div class="arch-arrow"></div>
+      <div class="arch-node">
+        <div class="an-left"><span class="an-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/></svg></span><div><div class="an-title">Database</div><div class="an-tech">PostgreSQL · pgvector · Redis</div></div></div>
+        <div class="an-tech">Primary store</div>
+      </div>
+      <div class="arch-arrow"></div>
+      <div class="arch-node">
+        <div class="an-left"><span class="an-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg></span><div><div class="an-title">Storage</div><div class="an-tech">S3 · CDN edge cache</div></div></div>
+        <div class="an-tech">Assets · Snapshots</div>
+      </div>
+      <div class="arch-arrow"></div>
+      <div class="arch-node ext">
+        <div class="an-left"><span class="an-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></span><div><div class="an-title">External Integrations</div><div class="an-tech">OpenAI · Auth0 · GitHub</div></div></div>
+        <div class="an-tech">Brokered</div>
+      </div>
+    </div>
+    <p class="arch-note">Sync, search, and AI run as independent workers behind the gateway, so a slow embedding job can never block a document save.</p>
+  </div>
+</section>
+
+<!-- CHALLENGES -->
+<section class="section-pad" id="challenges">
+  <div class="wrap">
+    <span class="eyebrow">Challenges &amp; Solutions</span>
+    <h2 class="section-title">The decisions that defined the build</h2>
+    <p class="section-lead">The interesting part of any real product is what broke and why the fix looks obvious in hindsight.</p>
+
+    <div style="margin-top:48px">
+      <div class="chal reveal">
+        <div class="chal-top"><span class="chal-num">C1</span><div class="chal-title">Conflict-free editing when nobody is online together</div></div>
+        <div class="chal-grid">
+          <div><div class="cg-k">Problem</div><div class="cg-v">Two engineers editing the same doc offline for a day produced divergent states that naive last-write-wins destroyed.</div></div>
+          <div><div class="cg-k">Approach</div><div class="cg-v">Evaluated OT vs CRDT; chose CRDT (RGA + map) for commutative merges without a central arbiter.</div></div>
+          <div><div class="cg-k">Final Solution</div><div class="cg-v">Per-block CRDT with operation logs persisted locally and replayed with causal ordering on reconnect.</div></div>
+          <div><div class="cg-k">Outcome</div><div class="cg-v outcome">Automatic merge in <span class="hi">99.4%</span> of cases; manual resolve only for true semantic conflicts.</div></div>
+        </div>
+      </div>
+
+      <div class="chal reveal">
+        <div class="chal-top"><span class="chal-num">C2</span><div class="chal-title">Presence that feels alive across the planet</div></div>
+        <div class="chal-grid">
+          <div><div class="cg-k">Problem</div><div class="cg-v">Raw WebSocket broadcasts saturated bandwidth and jittered on high-latency links between regions.</div></div>
+          <div><div class="cg-k">Approach</div><div class="cg-v">Separated cursor/presence traffic from document ops; batched and interpolated rather than streaming raw.</div></div>
+          <div><div class="cg-k">Final Solution</div><div class="cg-v">Edge-terminated sockets with a regional fan-out mesh; client-side easing smoothed 30fps diffs.</div></div>
+          <div><div class="cg-k">Outcome</div><div class="cg-v outcome"><span class="hi">80ms</span> p90 presence latency globally; bandwidth down <span class="hi">7×</span>.</div></div>
+        </div>
+      </div>
+
+      <div class="chal reveal">
+        <div class="chal-top"><span class="chal-num">C3</span><div class="chal-title">Semantic search that was fast and cheap</div></div>
+        <div class="chal-grid">
+          <div><div class="cg-k">Problem</div><div class="cg-v">Re-embedding whole docs on every keystroke was slow and expensive; stale answers eroded trust.</div></div>
+          <div><div class="cg-k">Approach</div><div class="cg-v">Block-level embeddings via a CDC pipeline, plus retrieval caching keyed by doc version.</div></div>
+          <div><div class="cg-k">Final Solution</div><div class="cg-v">Only changed blocks re-embed; edge cache served repeat queries; LLM grounded with citations.</div></div>
+          <div><div class="cg-k">Outcome</div><div class="cg-v outcome"><span class="hi">~700ms</span> p50 answers; embedding cost per doc edit cut <span class="hi">90%</span>.</div></div>
+        </div>
+      </div>
+
+      <div class="chal reveal">
+        <div class="chal-top"><span class="chal-num">C4</span><div class="chal-title">Shipping features without bloating the bundle</div></div>
+        <div class="chal-grid">
+          <div><div class="cg-k">Problem</div><div class="cg-v">Editor, AI, and insights in one bundle pushed load time past 3s on mid-tier phones.</div></div>
+          <div><div class="cg-k">Approach</div><div class="cg-v">Treat the shell as static, lazy-load everything interactive, virtualize long content.</div></div>
+          <div><div class="cg-k">Final Solution</div><div class="cg-v">RSC static shells, route-split chunks, windowed block rendering, strict bundle budgets in CI.</div></div>
+          <div><div class="cg-k">Outcome</div><div class="cg-v outcome">Initial JS <span class="hi">−61%</span>; TTI <span class="hi">3.1s → 1.2s</span>.</div></div>
+        </div>
+      </div>
+
+      <div class="chal reveal">
+        <div class="chal-top"><span class="chal-num">C5</span><div class="chal-title">Zero-downtime schema changes on live data</div></div>
+        <div class="chal-grid">
+          <div><div class="cg-k">Problem</div><div class="cg-v">CRDT schema evolved; migrations had to run without locking tables or dropping a single op.</div></div>
+          <div><div class="cg-k">Approach</div><div class="cg-v">Expand-contract pattern with dual-write and a backward-compatible op decoder.</div></div>
+          <div><div class="cg-k">Final Solution</div><div class="cg-v">Versioned op format; migrations ran online with shadow reads before cutover.</div></div>
+          <div><div class="cg-k">Outcome</div><div class="cg-v outcome"><span class="hi">0</span> downtime incidents across 11 schema migrations in production.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="section-pad" id="results">
+  <div class="wrap">
+    <span class="eyebrow">Results</span>
+    <h2 class="section-title">Measurable impact</h2>
+    <p class="section-lead">Numbers from production telemetry and post-launch review — not projections.</p>
+
+    <div class="results-grid reveal">
+      <div class="result-cell"><div class="rc-v">80<span class="u">ms</span></div><div class="rc-k">p90 real-time presence latency, global</div></div>
+      <div class="result-cell"><div class="rc-v">−61<span class="u">%</span></div><div class="rc-k">Initial JavaScript bundle size</div></div>
+      <div class="result-cell"><div class="rc-v">1.2<span class="u">s</span></div><div class="rc-k">Time to interactive on mid-tier devices</div></div>
+      <div class="result-cell"><div class="rc-v">99.98<span class="u">%</span></div><div class="rc-k">Uptime across 12 months in production</div></div>
+      <div class="result-cell"><div class="rc-v">12k<span class="u"></span></div><div class="rc-k">Monthly active users at last measurement</div></div>
+      <div class="result-cell"><div class="rc-v">99.4<span class="u">%</span></div><div class="rc-k">Offline edits auto-merged without conflict</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="section-pad" id="gallery">
+  <div class="wrap">
+    <span class="eyebrow">Gallery</span>
+    <h2 class="section-title">Product in pictures</h2>
+    <p class="section-lead">Click any frame to view it fullscreen.</p>
+
+    <div class="gallery">
+      <div class="g-item wide" data-title="Collaborative editor — multi-cursor session" data-tag="Desktop">
+        <div class="mock"><div class="mock-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">atlas.dev/doc/runbook</span></div>
+          <div class="mock-body"><div class="mock-side"><div class="s-label">Doc</div><div class="s-item active"><span class="ic"></span> Editing</div><div class="s-item"><span class="ic"></span> History</div><div class="s-item"><span class="ic"></span> Comments</div></div>
+            <div class="mock-main"><div class="mock-h">Incident Runbook</div><div class="mock-sub">3 people editing · synced</div>
+              <div class="mock-doc"><div class="ln head"></div><div class="ln w2"></div><span class="mock-cursor">Maya</span><div class="ln w1" style="margin-top:12px"></div><div class="ln w3"></div><div class="ln w2"></div><div class="ln w4"></div></div>
+            </div></div></div>
+        <div class="g-cap"><span>Collaborative editor</span><span class="gt">Desktop</span></div>
+      </div>
+
+      <div class="g-item" data-title="Semantic search results" data-tag="Web">
+        <div class="mock"><div class="mock-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">atlas.dev/search</span></div>
+          <div class="mock-body"><div class="mock-side"><div class="s-label">Search</div><div class="s-item active"><span class="ic"></span> Semantic</div><div class="s-item"><span class="ic"></span> Filters</div></div>
+            <div class="mock-main"><div class="mock-h">Ask Atlas</div><div class="mock-search"><span class="si"></span><span class="st">“rotate API keys?”</span></div>
+              <div class="mock-result"><span class="ri"></span><div><div class="rt">Key rotation runbook</div><div class="rd">94% match</div></div></div>
+              <div class="mock-result"><span class="ri"></span><div><div class="rt">Secrets service</div><div class="rd">81% match</div></div></div>
+            </div></div></div>
+        <div class="g-cap"><span>Semantic search</span><span class="gt">Web</span></div>
+      </div>
+
+      <div class="g-item" data-title="Insights dashboard" data-tag="Web">
+        <div class="mock"><div class="mock-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">atlas.dev/insights</span></div>
+          <div class="mock-body"><div class="mock-side"><div class="s-label">Insights</div><div class="s-item active"><span class="ic"></span> Usage</div><div class="s-item"><span class="ic"></span> Health</div></div>
+            <div class="mock-main"><div class="mock-h">Insights</div>
+              <div class="mock-row"><div class="mock-card"><div class="mc-k">Docs</div><div class="mc-v accent">+184</div></div><div class="mock-card"><div class="mc-k">Answers</div><div class="mc-v">9.5k</div></div></div>
+              <div class="mock-bars"><span style="height:40%"></span><span style="height:62%"></span><span style="height:48%"></span><span style="height:80%"></span><span style="height:70%"></span><span style="height:95%"></span><span style="height:60%"></span></div>
+            </div></div></div>
+        <div class="g-cap"><span>Insights dashboard</span><span class="gt">Web</span></div>
+      </div>
+
+      <div class="g-item wide" data-title="Desktop app — Tauri shell" data-tag="Desktop">
+        <div class="mock"><div class="mock-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">Atlas · macOS</span></div>
+          <div class="mock-body"><div class="mock-side"><div class="s-label">Workspace</div><div class="s-item active"><span class="ic"></span> Home</div><div class="s-item"><span class="ic"></span> Docs</div><div class="s-item"><span class="ic"></span> Search</div><div class="s-item"><span class="ic"></span> Insights</div></div>
+            <div class="mock-main"><div class="mock-h">Native Desktop</div><div class="mock-sub">Same engine, native window, offline by default</div>
+              <div class="mock-row"><div class="mock-card"><div class="mc-k">Local cache</div><div class="mc-v accent">100%</div></div><div class="mock-card"><div class="mc-k">Cold start</div><div class="mc-v">0.4s</div></div></div>
+              <div class="mock-line"></div>
+            </div></div></div>
+        <div class="g-cap"><span>Desktop application</span><span class="gt">macOS · Windows</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REFLECTION -->
+<section class="section-pad reflect" id="reflection">
+  <div class="wrap">
+    <span class="eyebrow">Developer Reflection</span>
+    <h2 class="section-title">What I'd tell my past self</h2>
+
+    <p>Atlas taught me that the hardest part of real-time software isn't the algorithms — it's making failure invisible. The CRDT math was the easy quarter; the hard part was the reconnect path, the stale-cache path, and the "two people typed the same word" path nobody plans for in a demo.</p>
+
+    <div class="reflect-grid">
+      <div class="reveal">
+        <div class="rf-q">What I learned</div>
+        <p class="a" style="color:var(--text-2)">Local-first is a product decision, not just an architecture one. Once edits never disappear, users stop saving defensively and start collaborating naturally.</p>
+      </div>
+      <div class="reveal">
+        <div class="rf-q">What I'd improve</div>
+        <p class="a" style="color:var(--text-2)">I'd invest in end-to-end type safety across the WebSocket boundary from day one. We lost more time to op-shape drift than to any algorithm bug.</p>
+      </div>
+      <div class="reveal">
+        <div class="rf-q">Interesting decisions</div>
+        <p class="a" style="color:var(--text-2)">Keeping AI retrieval on a separate channel from document ops was the call that kept search fast without ever risking a lost edit.</p>
+      </div>
+      <div class="reveal">
+        <div class="rf-q">Future roadmap</div>
+        <p class="a" style="color:var(--text-2)">Conflict-free mobile sync with CRDT compaction, and an agent mode that proposes doc updates from merged PRs automatically.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT PROJECTS -->
+<section class="section-pad" id="next">
+  <div class="wrap">
+    <span class="eyebrow">Next Projects</span>
+    <h2 class="section-title">Keep exploring</h2>
+
+    <div class="next-grid">
+      <div class="next-card reveal">
+        <div class="nc-thumb"><div class="nc-orb"></div></div>
+        <div class="nc-body">
+          <div class="nc-cat">Developer Tools</div>
+          <div class="nc-title">Beacon</div>
+          <div class="nc-desc">A status page engine that turns uptime telemetry into branded incidents in seconds.</div>
+        </div>
+      </div>
+      <div class="next-card reveal">
+        <div class="nc-thumb"><div class="nc-orb" style="background:radial-gradient(circle, rgba(74,222,128,.4), transparent 70%); left:-30px; right:auto"></div></div>
+        <div class="nc-body">
+          <div class="nc-cat">CI / DX</div>
+          <div class="nc-title">Forge</div>
+          <div class="nc-desc">A pipeline dashboard that explains failed builds in plain language instead of raw logs.</div>
+        </div>
+      </div>
+      <div class="next-card reveal">
+        <div class="nc-thumb"><div class="nc-orb" style="background:radial-gradient(circle, rgba(56,189,248,.4), transparent 70%); left:50%; right:auto; margin-left:-80px"></div></div>
+        <div class="nc-body">
+          <div class="nc-cat">Reliability</div>
+          <div class="nc-title">Pulse</div>
+          <div class="nc-desc">An incident timeline that reconstructs exactly what changed, when, and who was paged.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROFILE -->
+<section class="section-pad" id="profile">
+  <div class="wrap profile">
+    <div class="avatar reveal">A</div>
+    <div class="reveal">
+      <h3>Arshia P.</h3>
+      <div class="role">Senior Software Engineer · Frontend &amp; Systems</div>
+      <p class="bio">I build local-first, real-time products for engineering teams. I care about latency you can feel, migrations with zero downtime, and interfaces that get out of the way. Currently focused on collaborative and AI-assisted developer tooling.</p>
+      <div class="profile-links">
+        <a class="pl" href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.36-2.22-.26-4.55-1.14-4.55-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.04 10.04 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg> GitHub</a>
+        <a class="pl" href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14zM8.34 18.34V9.99H6.5v8.35h1.84zM7.42 9.05a1.07 1.07 0 1 0 0-2.14 1.07 1.07 0 0 0 0 2.14zm11.23 9.29v-4.58c0-2.45-1.31-3.59-3.06-3.59-1.41 0-2.04.78-2.39 1.32v-1.13h-1.84v8.35h1.84v-4.41c0-1.16.22-2.29 1.66-2.29 1.42 0 1.44 1.33 1.44 2.36v4.34h1.35z"/></svg> LinkedIn</a>
+        <a class="pl" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> Resume</a>
+        <a class="pl" href="mailto:hello@arshia.dev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg> Email</a>
+        <a class="pl contact" href="mailto:hello@arshia.dev">Contact me →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div>© 2024 Arshia P. — Built as a case study.</div>
+    <div>Atlas · Real-time Knowledge Platform</div>
+  </div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lbClose" aria-label="Close">×</button>
+  <div class="lb-inner" id="lbInner"></div>
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<script>
+  // nav scrolled state
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 12), { passive: true });
+
+  // reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ---------- product walkthrough ----------
+  const track = document.getElementById('walkTrack');
+  const slides = [...track.querySelectorAll('.slide')];
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const dotsWrap = document.getElementById('dots');
+  const data = [
+    { t: 'Workspace Home', p: 'The entry point — see what changed, who is active, and where to go next.', k: 'Command palette (⌘K)', w: 'Reduces navigation friction to near zero' },
+    { t: 'Collaborative Editor', p: 'Conflict-free multi-cursor editing with live presence and version history.', k: 'Live multi-cursor editing', w: 'Makes co-authoring feel native, not awkward' },
+    { t: 'Semantic Search', p: 'Ask in plain language; answers are retrieved and grounded in your own docs.', k: 'Natural-language query', w: 'Find meaning, not just filenames' },
+    { t: 'Insights Dashboard', p: 'Usage, health, and adoption across the workspace over time.', k: 'Time-range filtering', w: 'Proves the product is actually used' },
+  ];
+  const wiIndex = document.getElementById('wiIndex');
+  const wiTitle = document.getElementById('wiTitle');
+  const wiPurpose = document.getElementById('wiPurpose');
+  const wiKey = document.getElementById('wiKey');
+  const wiWhy = document.getElementById('wiWhy');
+  const infoBox = document.getElementById('walkInfo');
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot-nav' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', 'Go to screen ' + (i + 1));
+    d.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(d);
+  });
+  const dots = [...dotsWrap.children];
+
+  function setActive(i) {
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+    dots.forEach((d, idx) => d.classList.toggle('active', idx === i));
+    const d = data[i];
+    wiIndex.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+    infoBox.style.borderColor = 'var(--accent-line)';
+    setTimeout(() => infoBox.style.borderColor = '', 350);
+    wiTitle.textContent = d.t; wiPurpose.textContent = d.p; wiKey.textContent = d.k; wiWhy.textContent = d.w;
+    prevBtn.disabled = i === 0; nextBtn.disabled = i === slides.length - 1;
+  }
+
+  function currentIndex() {
+    const center = track.scrollLeft + track.clientWidth / 2;
+    let best = 0, bestDist = Infinity;
+    slides.forEach((s, i) => {
+      const c = s.offsetLeft + s.offsetWidth / 2;
+      const dist = Math.abs(c - center);
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    });
+    return best;
+  }
+
+  function goTo(i) {
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    const s = slides[i];
+    track.scrollTo({ left: s.offsetLeft - (track.clientWidth - s.offsetWidth) / 2, behavior: 'smooth' });
+    setActive(i);
+  }
+
+  let ticking = false;
+  track.addEventListener('scroll', () => {
+    if (!ticking) { requestAnimationFrame(() => { setActive(currentIndex()); ticking = false; }); ticking = true; }
+  }, { passive: true });
+
+  prevBtn.addEventListener('click', () => goTo(currentIndex() - 1));
+  nextBtn.addEventListener('click', () => goTo(currentIndex() + 1));
+  setActive(0);
+
+  // ---------- gallery lightbox ----------
+  const lb = document.getElementById('lightbox');
+  const lbInner = document.getElementById('lbInner');
+  const lbCap = document.getElementById('lbCap');
+  document.querySelectorAll('.g-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const clone = item.querySelector('.mock').cloneNode(true);
+      clone.style.borderRadius = '0';
+      lbInner.innerHTML = '';
+      lbInner.appendChild(clone);
+      lbCap.textContent = item.dataset.title + '  ·  ' + item.dataset.tag;
+      lb.classList.add('open');
+    });
+  });
+  function closeLb() { lb.classList.remove('open'); lbInner.innerHTML = ''; }
+  document.getElementById('lbClose').addEventListener('click', closeLb);
+  lb.addEventListener('click', (e) => { if (e.target === lb) closeLb(); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLb(); });
+</script>
+</body>
+</html>

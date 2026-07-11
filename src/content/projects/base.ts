@@ -16,8 +16,8 @@ export default [
   },
   {
     id: 'couchini',
-    tech: ['Flutter', 'Django', 'WebSocket', 'Redis', 'Riverpod'],
-    color: '#7B61FF',
+    tech: ['Flutter', 'Dart', 'Riverpod', 'Django', 'WebSocket'],
+    color: '#2563EB',
     visual: imageLinks.couchiniMockup,
     scope: 'MOBILE',
     metrics: [
@@ -25,7 +25,7 @@ export default [
       { label: { en: 'Frame Rate', fa: 'نرخ بازسازی فریم' }, value: '120fps' },
     ],
     year: '2023',
-    status: 'Production',
+    status: 'In Development',
   },
   {
     id: 'tipax',

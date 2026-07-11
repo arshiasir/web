@@ -23,6 +23,16 @@ export interface ChallengePair {
   solution: string;
 }
 
+export interface CapabilityRow {
+  title: string;
+  description: string;
+}
+
+export interface TechRow {
+  title: string;
+  description: string;
+}
+
 export interface ProjectLocalizedData {
   title: string;
   category: string;
@@ -43,6 +53,10 @@ export interface ProjectLocalizedData {
   features: FeatureCard[];
   timeline: TimelineStep[];
   challenges: ChallengePair[];
+  contribution?: string[];
+  capabilities?: CapabilityRow[];
+  implementation?: TechRow[];
+  reflection?: string;
 }
 
 export interface ProjectSchema {

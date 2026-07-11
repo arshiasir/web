@@ -42,6 +42,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 import { translations, languageMeta, supportedLanguages } from './data/translations';
 import { projectsData } from './data/projectsData';
+import ProjectDetail from './pages/ProjectDetail';
 import { walkthroughData } from './data/walkthroughData';
 import { imageLinks } from './data/imageLinks';
 
@@ -597,168 +598,28 @@ export default function App() {
       );
     }
 
-    const projectLocal = project[languageKey] || project.en;
-    const highlights = lang === 'en' ? project.en.highlights : project.fa.highlights;
-
     return (
-      <div dir={lang === 'fa' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#070707] text-[#D7E2EA] overflow-x-hidden relative">
-        <div className="absolute top-0 left-0 w-full h-[120vh] pointer-events-none overflow-hidden z-0">
-          <div className="absolute -top-[20%] left-[10%] w-[500px] h-[500px] rounded-full blur-[140px] opacity-25" style={{ backgroundColor: project.color }} />
-          <div className="absolute top-[40%] -right-[10%] w-[600px] h-[600px] rounded-full blur-[180px] opacity-[0.12]" style={{ backgroundColor: secondaryAccent }} />
-        </div>
-
-        <main className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-10">
-          <div className="flex items-center justify-between gap-4 mb-8">
-            <button
-              onClick={() => {
-                window.history.pushState({}, '', '/');
-                setCurrentPath(window.location.pathname);
-                setSelectedProjId(null);
-              }}
-              className="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs uppercase tracking-wider font-black text-white transition-colors"
-            >
-              {lang === 'en' ? 'Back to Projects' : 'بازگشت به پروژه‌ها'}
-            </button>
-
-            <button
-              onClick={() => {
-                window.history.pushState({}, '', '/');
-                setCurrentPath(window.location.pathname);
-                setSelectedProjId(null);
-                window.setTimeout(() => {
-                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 50);
-              }}
-              className="px-4 py-2 rounded-full bg-white text-black text-xs uppercase tracking-wider font-black hover:bg-white/90 transition-colors"
-            >
-              {lang === 'en' ? 'Contact Me' : 'تماس'}
-            </button>
-          </div>
-
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-5 space-y-6">
-              <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/60">
-                <img src={project.visual} alt={projectLocal.title} referrerPolicy="no-referrer" className="w-full h-[360px] object-cover" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {project.metrics.map((metric, metricIdx) => {
-                  const metricLabel = metric.label[languageKey] || metric.label.en;
-                  return (
-                    <div key={metricIdx} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                      <span className="text-[10px] uppercase tracking-widest text-gray-500 font-mono block mb-2">{metricLabel}</span>
-                      <span className="text-2xl font-black" style={{ color: project.color }}>{metric.value}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="lg:col-span-7 space-y-6">
-              <div className="rounded-3xl border border-white/10 bg-black/50 p-6 md:p-8">
-                <div className="flex flex-col gap-3 mb-5">
-                  <span className="text-[10px] uppercase tracking-widest font-black text-gray-500 font-mono">{project.scope}</span>
-                  <h1 className="text-4xl md:text-5xl font-black uppercase text-white tracking-tight">{projectLocal.title}</h1>
-                  <p className="text-gray-400 text-sm leading-relaxed max-w-3xl">
-                    {lang === 'en'
-                      ? 'This case study is structured to answer the questions recruiters scan for first: what the project solves, what you owned, what stack was used, and what proof exists.'
-                      : 'این case study طوری چیده شده که سؤال‌های اصلی خواننده را سریع جواب دهد: پروژه چه مشکلی را حل می‌کند، شما چه بخشی را مالک بودید، چه استکی استفاده شده، و چه مدرکی برای اثرش وجود دارد.'}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                    <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">
-                      {lang === 'en' ? 'Problem / Context' : 'مسئله / زمینه'}
-                    </div>
-                    <p className="text-sm leading-relaxed text-gray-300">{projectLocal.desc}</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                    <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">
-                      {lang === 'en' ? 'My Role' : 'نقش من'}
-                    </div>
-                    <p className="text-sm leading-relaxed text-gray-300">{projectLocal.role}</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                    <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">
-                      {lang === 'en' ? 'Proof / Outcome' : 'مدرک / نتیجه'}
-                    </div>
-                    <div className="space-y-2">
-                      {project.metrics.map((metric, metricIdx) => {
-                  const metricLabel = metric.label[languageKey] || metric.label.en;
-                        return (
-                          <div key={metricIdx} className="flex items-center justify-between gap-3">
-                            <span className="text-[10px] uppercase tracking-wider text-gray-500">{metricLabel}</span>
-                            <span className="text-sm font-black" style={{ color: project.color }}>{metric.value}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {project.tech.map((tech, techIdx) => (
-                    <span key={techIdx} className="text-[9px] font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-2.5 py-1 rounded-full text-gray-300">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { label: lang === 'en' ? 'Process / Architecture' : 'فرآیند / معماری', value: projectLocal.architectureHighlights.join(' • ') },
-                    { label: lang === 'en' ? 'Real-time signals' : 'سیگنال‌های بلادرنگ', value: projectLocal.realtimeFeatures },
-                    { label: lang === 'en' ? 'AI / automation' : 'هوش مصنوعی / اتوماسیون', value: projectLocal.aiFeatures },
-                    { label: lang === 'en' ? 'Scale / performance' : 'مقیاس / کارایی', value: `${projectLocal.scalabilityDetails} ${projectLocal.performanceOptimizations}` },
-                  ].map((item) => (
-                    <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                      <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">{item.label}</div>
-                      <p className="text-sm leading-relaxed text-gray-300">{item.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-                  <h2 className="text-xs uppercase tracking-widest font-black text-white mb-3">
-                    {lang === 'en' ? 'What I Built' : 'آنچه ساختم'}
-                  </h2>
-                  <div className="space-y-2">
-                    {highlights.map((item, itemIdx) => (
-                      <div key={itemIdx} className="flex gap-2 text-sm text-gray-300 leading-relaxed">
-                        <span className="text-[10px] mt-1" style={{ color: project.color }}>●</span>
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-                  <h2 className="text-xs uppercase tracking-widest font-black text-white mb-3">
-                    {lang === 'en' ? 'Why It Works for a Portfolio' : 'چرا برای پورتفولیو جواب می‌دهد'}
-                  </h2>
-                  <div className="space-y-3 text-sm text-gray-300 leading-relaxed">
-                    <p>
-                      {lang === 'en'
-                        ? 'It gives a recruiter a 30-second scan path: problem, role, stack, proof, then deeper engineering detail.'
-                        : 'برای خواننده یک مسیر ۳۰ ثانیه‌ای می‌سازد: مسئله، نقش، استک، مدرک، و بعد جزئیات فنی عمیق‌تر.'}
-                    </p>
-                    <p>
-                      {lang === 'en'
-                        ? 'That is the right balance between attractive presentation and practical signal.'
-                        : 'این همان تعادل درست بین ارائهٔ جذاب و سیگنال کاربردی است.'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </main>
-      </div>
+      <ProjectDetail
+        project={project}
+        languageKey={languageKey}
+        onBack={() => {
+          window.history.pushState({}, '', '/');
+          setCurrentPath(window.location.pathname);
+          setSelectedProjId(null);
+        }}
+        onContact={() => {
+          window.history.pushState({}, '', '/');
+          setCurrentPath(window.location.pathname);
+          setSelectedProjId(null);
+          window.setTimeout(() => {
+            document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 50);
+        }}
+        onOpenProject={(id) => {
+          window.history.pushState({}, '', `/projects/${id}`);
+          setCurrentPath(window.location.pathname);
+        }}
+      />
     );
   }
 
