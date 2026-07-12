@@ -1,7 +1,7 @@
-import type { ProjectSchema, TranslationDictionary } from '../types/schema';
+import type { TranslationDictionary } from '../types/schema';
 
-import projectBase from './projects/base';
 import walkthroughBase from './walkthrough/base';
+import { projectsData } from '../data/projects';
 
 type LocaleFile = {
   code: string;
@@ -46,28 +46,14 @@ const localeModules = import.meta.glob('./locales/*.ts', { eager: true, import: 
   LocaleFile
 >;
 
-const projectLocaleModules = import.meta.glob('./projects/*.ts', { eager: true, import: 'default' }) as Record<
-  string,
-  Record<string, Record<string, unknown>>
->;
-
 const walkthroughLocaleModules = import.meta.glob('./walkthrough/*.ts', { eager: true, import: 'default' }) as Record<
   string,
-  Record<string, WalkthroughLocale>
+  WalkthroughLocale
 >;
 
 const locales = Object.fromEntries(
   Object.entries(localeModules).map(([, locale]) => [locale.code, locale]),
 ) as Record<string, LocaleFile>;
-
-const projectLocales = Object.fromEntries(
-  Object.entries(projectLocaleModules)
-    .filter(([path]) => !path.endsWith('/base.ts'))
-    .map(([path, locale]) => {
-      const code = path.split('/').pop()?.replace('.ts', '') ?? '';
-      return [code, locale];
-    }),
-) as Record<string, Record<string, Record<string, unknown>>>;
 
 const walkthroughLocales = Object.fromEntries(
   Object.entries(walkthroughLocaleModules)
@@ -76,7 +62,7 @@ const walkthroughLocales = Object.fromEntries(
       const code = path.split('/').pop()?.replace('.ts', '') ?? '';
       return [code, locale];
     }),
-) as Record<string, Record<string, WalkthroughLocale>>;
+  ) as unknown as Record<string, Record<string, WalkthroughLocale>>;
 
 export const languageMeta = Object.fromEntries(
   Object.values(locales).map((locale) => [
@@ -91,12 +77,7 @@ export const translations = Object.fromEntries(
   Object.entries(locales).map(([code, locale]) => [code, locale.dictionary]),
 ) as Record<string, TranslationDictionary>;
 
-export const projectsData = projectBase.map((project) => ({
-  ...project,
-  ...Object.fromEntries(
-    Object.entries(projectLocales).map(([code, locale]) => [code, locale[project.id]]),
-  ),
-})) as unknown as ProjectSchema[];
+export { projectsData };
 
 export const walkthroughData = Object.fromEntries(
   Object.entries(walkthroughBase).map(([projectId, blueprint]) => {

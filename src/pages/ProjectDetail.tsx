@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { Github, ChevronLeft, ChevronRight, ArrowLeft, ArrowUpRight, Linkedin, GitBranch, Boxes, Cpu, Radio, Smartphone, Webhook, Database, Cloud, Share2, Server } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowLeft, ArrowUpRight, Linkedin, GitBranch, Boxes, Cpu, Radio, Smartphone, Webhook, Database, Cloud, Share2, Server } from 'lucide-react';
 import type { ProjectSchema } from '../types/schema';
 import { projectsData } from '../data/projectsData';
+import { resolveAsset } from '../data/imageLinks';
 import ArchitectureMap from '../components/ArchitectureMap';
 import './caseStudy.css';
 
@@ -33,7 +34,7 @@ const ui = {
     architectureNote: 'Layers stay decoupled so a slow subsystem never blocks a core write path.',
     challengesTitle: 'Challenges & Solutions', challengesLead: 'The interesting part of any real product is what broke, and why the fix looks obvious in hindsight.',
     resultsTitle: 'Results', resultsLead: 'Numbers from production telemetry and post-launch review — not projections.',
-    outcomeLabel: 'Outcome', gallery: 'Gallery', galleryLead: 'Click any screen to view it fullscreen.',
+    outcomeLabel: 'Outcome',
     reflection: 'Developer Reflection', reflectionLead: 'What I would tell my past self.',
     nextProjects: 'Next Projects', nextProjectsLead: 'Keep exploring related work.',
     openProject: 'Open case study',
@@ -61,7 +62,7 @@ const ui = {
     architectureNote: 'لایه‌ها از هم جدا می‌مانند تا یک زیرسیستم کند هرگز مسیر نوشتن اصلی را مسدود نکند.',
     challengesTitle: 'چالش‌ها و راه‌حل‌ها', challengesLead: 'بخش جالب هر محصول واقعی این است که چه چیزی خراب شد و چرا راه‌حل در نگاه به عقب بدیهی به نظر می‌رسد.',
     resultsTitle: 'نتایج', resultsLead: 'اعدادی از تل‌متری تولید و بررسی پس از انتشار — نه حدس و گمان.',
-    outcomeLabel: 'نتیجه', gallery: 'گالری', galleryLead: 'هر صفحه را کلیک کنید تا تمام‌صفحه ببینید.',
+    outcomeLabel: 'نتیجه',
     reflection: 'بازاندیشی توسعه‌دهنده', reflectionLead: 'آنچه به گذشته خودم می‌گفتم.',
     nextProjects: 'پروژه‌های بعدی', nextProjectsLead: 'کاوش در آثار مرتبط را ادامه دهید.',
     openProject: 'باز کردن مطالعه موردی',
@@ -139,29 +140,36 @@ function MetricValue({ value, accent, reduce }: { value: string; accent: string;
   return <span ref={ref} style={{ color: accent }}>{display}</span>;
 }
 
-function PhoneMock({ title, active, accent, large }: { title: string; active: boolean; accent: string; large?: boolean }) {
+function PhoneMock({ title, active, accent, large, image }: { title: string; active: boolean; accent: string; large?: boolean; image?: string }) {
+  const src = resolveAsset(image);
   return (
     <div
       className="relative aspect-[9/19] w-full rounded-[30px] border bg-[#0e0f14] p-3 transition-shadow duration-300"
       style={{ borderColor: active ? `${accent}66` : 'rgba(255,255,255,0.1)', boxShadow: active ? `0 24px 60px ${accent}22` : '0 12px 30px rgba(0,0,0,0.4)' }}
     >
       <div className="flex h-full w-full flex-col overflow-hidden rounded-[22px] border border-white/[0.06] bg-[#0a0b0f]">
-        <div className="relative flex h-10 items-center gap-2 border-b border-white/[0.06] px-4">
+        <div className="relative flex h-10 shrink-0 items-center gap-2 border-b border-white/[0.06] px-4">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: accent }} />
           <span className="truncate text-[10px] font-medium text-white/70">{title}</span>
           {active && <span className="cs-scan" />}
         </div>
-        <div className="flex flex-1 flex-col gap-3 p-4">
-          <div className="h-20 rounded-xl" style={{ background: `linear-gradient(135deg, ${accent}26, transparent)` }} />
-          <div className="h-2.5 w-3/4 rounded-full bg-white/10" />
-          <div className="h-2.5 w-1/2 rounded-full bg-white/10" />
-          <div className="h-2.5 w-2/3 rounded-full bg-white/10" />
-          <div className="mt-auto space-y-2">
-            <div className="h-2 w-full rounded-full bg-white/10" />
-            <div className="h-2 w-5/6 rounded-full bg-white/10" />
-          </div>
+        <div className="relative flex-1 overflow-hidden">
+          {src ? (
+            <img src={src} alt={title} className="h-full w-full object-cover" loading="lazy" />
+          ) : (
+            <div className="flex flex-1 flex-col gap-3 p-4">
+              <div className="h-20 rounded-xl" style={{ background: `linear-gradient(135deg, ${accent}26, transparent)` }} />
+              <div className="h-2.5 w-3/4 rounded-full bg-white/10" />
+              <div className="h-2.5 w-1/2 rounded-full bg-white/10" />
+              <div className="h-2.5 w-2/3 rounded-full bg-white/10" />
+              <div className="mt-auto space-y-2">
+                <div className="h-2 w-full rounded-full bg-white/10" />
+                <div className="h-2 w-5/6 rounded-full bg-white/10" />
+              </div>
+            </div>
+          )}
         </div>
-        <div className="flex h-12 items-center justify-center border-t border-white/[0.06]">
+        <div className="flex h-12 shrink-0 items-center justify-center border-t border-white/[0.06]">
           <div className="h-1 w-10 rounded-full bg-white/20" />
         </div>
       </div>
@@ -200,6 +208,26 @@ function buildArchitecture(techs: string[], scope: string) {
   return layers;
 }
 
+const LAYER_LABELS: Record<string, { en: string; fa: string }> = {
+  client: { en: 'Application', fa: 'اپلیکیشن' },
+  api: { en: 'API & Gateway', fa: 'API و دروازه' },
+  services: { en: 'Services & Intelligence', fa: 'سرویس و هوش' },
+  data: { en: 'Data & Cache', fa: 'داده و کش' },
+  infra: { en: 'Infrastructure & Storage', fa: 'زیرساخت و ذخیره‌سازی' },
+  external: { en: 'External Integrations', fa: 'یکپارچه‌سازی خارجی' },
+};
+const layerLabel = (id: string, isFa: boolean) => LAYER_LABELS[id]?.[isFa ? 'fa' : 'en'] || id;
+
+const LAYER_BLURBS: Record<string, { en: string; fa: string }> = {
+  client: { en: 'What the user touches — the app surface and every interaction.', fa: 'آنچه کاربر لمس می‌کند — سطح اپلیکیشن و تعاملات.' },
+  api: { en: 'The gateway that routes, validates, and secures each request.', fa: 'دروازه‌ای که هر درخواست را مسیریابی، اعتبارسنجی و ایمن می‌کند.' },
+  services: { en: 'Business logic, models, and intelligent processing.', fa: 'منطق کسب‌وکار، مدل‌ها و پردازش هوشمند.' },
+  data: { en: 'Persistence, caching, and fast lookups.', fa: 'ذخیره‌سازی، کش و جستجوهای سریع.' },
+  infra: { en: 'Where it runs, scales, and rests at storage.', fa: 'محیط اجرا، مقیاس‌پذیری و ذخیره‌سازی.' },
+  external: { en: 'Third-party systems wired into the flow.', fa: 'سیستم‌های ثالث متصل به جریان.' },
+};
+const layerBlurb = (id: string, isFa: boolean) => LAYER_BLURBS[id]?.[isFa ? 'fa' : 'en'] || '';
+
 export default function ProjectDetail({ project, languageKey, onBack, onContact, onOpenProject }: ProjectDetailProps) {
   const localized = project[languageKey] || project.en;
   const L = ui[languageKey] || ui.en;
@@ -226,6 +254,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
   const status = L.statusMap[project.status as keyof typeof L.statusMap] || project.status;
 
   const [active, setActive] = useState(0);
+  const [activeLayer, setActiveLayer] = useState<string | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -256,7 +285,10 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
   const related = projectsData.filter((p) => p.id !== project.id).slice(0, 3);
   const arch = buildArchitecture(project.tech, project.scope);
   const ownedTechs = new Set<string>();
-  arch.forEach((l) => { if (l.owned) l.items.forEach((t) => ownedTechs.add(t)); });
+  const techToLayer: Record<string, string> = {};
+  arch.forEach((l) => { if (l.owned) l.items.forEach((t) => ownedTechs.add(t)); l.items.forEach((t) => { techToLayer[t] = l.id; }); });
+  const sA = '#00D4FF';
+  const sA2 = '#3B82F6';
 
   return (
     <div dir={isFa ? 'rtl' : 'ltr'} className="relative min-h-screen text-white" style={{ backgroundColor: '#08090C', ['--cs-accent' as any]: accent }}>
@@ -329,16 +361,15 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5, ease: EASE }} className="mt-9 flex flex-wrap gap-3">
               <motion.a href="#screens" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="rounded-lg px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90" style={{ backgroundColor: accent }}>{L.explore}</motion.a>
-              <motion.a href="https://github.com/arshia-khani" target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 rounded-lg border px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.12)' }}><Github className="h-4 w-4" /> {L.github}</motion.a>
               <motion.button onClick={onBack} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 rounded-lg border px-5 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.12)' }}><ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {L.back}</motion.button>
             </motion.div>
           </div>
 
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, delay: 0.2, ease: EASE }} className="flex justify-center lg:justify-end">
-            {project.visual && (
+            {project.images.mockup && (
               <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border lg:max-w-xl" style={{ borderColor: 'rgba(255,255,255,0.12)', boxShadow: `0 50px 140px -40px ${accent}77` }}>
                 <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(120% 80% at 50% -10%, ${accent}22, transparent 70%)` }} />
-                <img src={project.visual} alt={`${localized.title} cover`} className="relative h-full w-full object-cover" />
+                <img src={project.images.mockup} alt={`${localized.title} cover`} className="relative h-full w-full object-cover" />
               </div>
             )}
           </motion.div>
@@ -390,7 +421,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
                     ref={(el) => { itemRefs.current[i] = el; }}
                     className={`w-[230px] shrink-0 snap-center transition-all duration-300 ${i === active ? 'scale-100 opacity-100' : 'scale-90 opacity-50'}`}
                   >
-                    <PhoneMock title={screen.title} active={i === active} accent={accent} />
+                    <PhoneMock title={screen.title} active={i === active} accent={accent} image={screen.image} />
                   </motion.div>
                 ))}
               </div>
@@ -472,24 +503,95 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
         {/* ===== Architecture map ===== */}
         {arch.length > 0 && (
-          <section id="architecture" className="scroll-mt-24 border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-            <Reveal>
-              <span className="cs-eyebrow-line" />
-              <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.architecture}</h2>
-              <p className="mt-3 max-w-xl" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.architectureLead}</p>
-            </Reveal>
+          <section id="architecture" className="scroll-mt-24 border-t py-16 md:py-24" style={{ borderColor: 'rgba(255,255,255,0.08)', backgroundColor: '#05070A' }}>
+            <div className="relative">
+              {/* ambient glow */}
+              <div className="pointer-events-none absolute left-1/2 top-2 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl" style={{ background: `radial-gradient(circle, ${sA}14, transparent 70%)` }} />
 
-            <div className="mt-10">
-              <ArchitectureMap tech={project.tech} name={localized.title} accent={accent} ownedTechs={ownedTechs} isFa={isFa} />
-            </div>
+              <div className="relative">
+                <Reveal>
+                  <span className="cs-eyebrow-line" />
+                  <h2 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">{L.architecture}</h2>
+                  <p className="mt-4 max-w-xl text-[15px] leading-relaxed md:text-base" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.architectureLead}</p>
+                </Reveal>
 
-            <Reveal>
-              <div className="mx-auto mt-10 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full" style={{ background: `${accent}59`, border: `1px solid ${accent}` }} /> {isFa ? 'تکنولوژی‌های بخش من' : 'My-scope technologies'}</span>
-                <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)' }} /> {isFa ? 'سایر تکنولوژی‌ها' : 'Other technologies'}</span>
+                <div className="mt-12 grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+                  {/* diagram */}
+                  <div className="flex justify-center">
+                    <ArchitectureMap
+                      tech={project.tech}
+                      name={localized.title}
+                      accent={sA}
+                      accent2={sA2}
+                      ownedTechs={ownedTechs}
+                      isFa={isFa}
+                      activeLayer={activeLayer}
+                      techToLayer={techToLayer}
+                      onHoverTech={(t) => setActiveLayer(t ? techToLayer[t] : null)}
+                    />
+                  </div>
+
+                  {/* cards */}
+                  <div className="flex flex-col gap-4">
+                    {arch.map((layer) => {
+                      const Icon = layer.icon;
+                      const active = activeLayer === layer.id;
+                      const dimmed = activeLayer != null && !active;
+                      return (
+                        <motion.div
+                          key={layer.id}
+                          onMouseEnter={() => setActiveLayer(layer.id)}
+                          onMouseLeave={() => setActiveLayer(null)}
+                          initial={{ opacity: 0, y: 18 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, margin: '-40px' }}
+                          transition={{ duration: 0.5, ease: EASE }}
+                          whileHover={{ y: -4, scale: 1.02 }}
+                          className="group relative overflow-hidden rounded-2xl border p-5 md:p-6"
+                          style={{
+                            borderColor: active ? `${sA}66` : 'rgba(255,255,255,0.09)',
+                            background: active
+                              ? `linear-gradient(180deg, ${sA}10, rgba(255,255,255,0.02))`
+                              : 'linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))',
+                            boxShadow: active ? `0 12px 40px -12px ${sA}55` : '0 8px 30px -16px rgba(0,0,0,0.6)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
+                            opacity: dimmed ? 0.5 : 1,
+                            transition: 'background 500ms cubic-bezier(0.22,1,0.36,1), border-color 500ms cubic-bezier(0.22,1,0.36,1), box-shadow 500ms cubic-bezier(0.22,1,0.36,1), opacity 500ms cubic-bezier(0.22,1,0.36,1)',
+                          }}
+                        >
+                          {/* left gradient accent */}
+                          <span className="absolute inset-y-3 left-0 w-[3px] rounded-full" style={{ background: `linear-gradient(180deg, ${sA}, ${sA2})`, opacity: active ? 1 : 0.45 }} />
+
+                          <div className="flex items-start gap-4">
+                            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: `${sA}14`, color: sA, border: `1px solid ${sA}33` }}>
+                              <Icon className="h-6 w-6" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="text-[15px] font-semibold text-white">{layerLabel(layer.id, isFa)}</h3>
+                                {layer.owned && (<span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: `${sA}1f`, color: sA }}>{isFa ? 'بخش من' : 'My scope'}</span>)}
+                                {layer.external && (<span className="rounded-full border px-2 py-0.5 text-[10px] font-medium" style={{ borderColor: 'rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.5)' }}>{isFa ? 'خارجی' : 'external'}</span>)}
+                              </div>
+                              <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{layerBlurb(layer.id, isFa)}</p>
+                              <div className="mt-3 flex flex-wrap gap-1.5">
+                                {layer.items.map((t, ti) => {
+                                  const mine = ownedTechs.has(t);
+                                  return (
+                                    <span key={ti} className="rounded-md border px-2 py-1 text-[11px] font-medium" style={{ borderColor: mine ? `${sA}55` : 'rgba(255,255,255,0.12)', color: mine ? sA : 'rgba(255,255,255,0.65)', background: mine ? `${sA}12` : 'transparent' }}>{t}</span>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+
               </div>
-              <p className="mx-auto mt-4 max-w-2xl text-center text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.architectureNote}</p>
-            </Reveal>
+            </div>
           </section>
         )}
 
@@ -519,28 +621,6 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
         )}
 
         {/* ===== Results removed per request ===== */}
-
-        {/* ===== Gallery ===== */}
-        {screens.length > 0 && (
-          <section className="scroll-mt-24 border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-            <Reveal>
-              <span className="cs-eyebrow-line" />
-              <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.gallery}</h2>
-              <p className="mt-3 max-w-xl" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.galleryLead}</p>
-            </Reveal>
-
-            <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-6">
-              {screens.map((screen, i) => (
-                <Reveal key={screen.id} delay={i * 0.05}>
-                  <motion.button whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }} onClick={() => setLightbox(i)} className="group flex w-full flex-col items-center gap-3 text-center" aria-label={`Open ${screen.title}`}>
-                    <div className="w-full max-w-[150px] transition-transform duration-300 group-hover:-translate-y-1"><PhoneMock title={screen.title} active={false} accent={accent} /></div>
-                    <span className="text-xs font-medium text-white/70 group-hover:text-white">{screen.title}</span>
-                  </motion.button>
-                </Reveal>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* ===== Reflection ===== */}
         {reflection && (
@@ -593,7 +673,6 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
                 <p className="mt-1 max-w-md text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.builtByDesc}</p>
               </div>
               <div className="flex flex-wrap gap-3">
-                <motion.a href="https://github.com/arshia-khani" target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="rounded-lg border px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.12)' }}><span className="flex items-center gap-2"><Github className="h-4 w-4" /> {L.viewProfile}</span></motion.a>
                 <motion.a href="https://linkedin.com/in/arshia-khani" target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="rounded-lg border px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.12)' }}><span className="flex items-center gap-2"><Linkedin className="h-4 w-4" /> LinkedIn</span></motion.a>
                 <motion.button onClick={onContact} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90" style={{ backgroundColor: accent }}>{L.contact}</motion.button>
               </div>
@@ -605,7 +684,6 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p>© 2026 {localized.title}. {isFa ? 'تمام حقوق محفوظ است.' : 'All rights reserved.'}</p>
             <div className="flex gap-4">
-              <a href="https://github.com/arshia-khani" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">GitHub</a>
               <a href="https://linkedin.com/in/arshia-khani" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">LinkedIn</a>
               <button onClick={onContact} className="transition-colors hover:text-white">{L.contact}</button>
             </div>
@@ -619,7 +697,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
           <motion.div key="lb" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/92 p-6 backdrop-blur" onClick={() => setLightbox(null)}>
             <button className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border text-white transition-colors hover:bg-white/10" style={{ borderColor: 'rgba(255,255,255,0.12)' }} aria-label="Close">×</button>
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.3, ease: EASE }} className="w-[300px]" onClick={(e) => e.stopPropagation()}>
-              <PhoneMock title={screens[lightbox].title} active accent={accent} large />
+              <PhoneMock title={screens[lightbox].title} active accent={accent} large image={screens[lightbox].image} />
               <p className="mt-4 text-center text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{screens[lightbox].description}</p>
             </motion.div>
           </motion.div>

@@ -1208,7 +1208,7 @@ export default function App() {
                       <div className="relative w-full h-[210px] rounded-2xl overflow-hidden border border-white/[0.08] flex items-center justify-center p-1.5 transition-all duration-500 group-hover:border-white/20" style={{ boxShadow: `0 20px 60px -30px ${proj.color}40` }}>
                         <div className="absolute inset-6 rounded-full blur-[35px] opacity-20 group-hover:scale-110 group-hover:opacity-40 transition-all duration-700" style={{ backgroundColor: proj.color }} />
                         <img
-                          src={proj.visual}
+                          src={proj.images.mockup}
                           alt={lang === 'en' ? `${projLocal.title} preview` : `پیش‌نمایش ${projLocal.title}`}
                           referrerPolicy="no-referrer"
                           loading="lazy"
@@ -1318,7 +1318,7 @@ export default function App() {
                 <div className="lg:col-span-5 space-y-6">
                   <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/60">
                     <img
-                      src={project.visual}
+                      src={project.images.mockup}
                       alt={projectLocal.title}
                       referrerPolicy="no-referrer"
                       className="w-full h-[320px] object-cover"
@@ -3062,7 +3062,7 @@ LIMIT 5;`
                           {/* Reflective shine sweep image overlay */}
                           <div className="absolute top-0 right-[-100%] w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-[30deg] animate-[shine_5s_ease-in-out_infinite]" />
                           <img 
-                            src={project.visual} 
+                            src={project.images.mockup} 
                             alt={`${projectLocal.title} Full visual`} 
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-cover rounded-lg"

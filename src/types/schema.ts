@@ -59,12 +59,24 @@ export interface ProjectLocalizedData {
   reflection?: string;
 }
 
+export interface ProjectLinks {
+  github?: string;
+  live?: string;
+  store?: { label: string; url: string }[];
+}
+
+export interface ProjectImages {
+  mockup: string;
+  gallery?: string[];
+}
+
 export interface ProjectSchema {
   id: string;
   tech: string[];
   metrics: { label: { en: string; fa: string }; value: string }[];
   color: string;
-  visual: string;
+  images: ProjectImages;
+  links: ProjectLinks;
   scope: ProjectScope;
   year: string;
   status: string;

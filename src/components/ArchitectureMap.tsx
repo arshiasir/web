@@ -41,16 +41,13 @@ function TechIcon({ name, accent }: { name: string; accent: string }) {
         alt={name}
         loading="lazy"
         onError={() => setErr(true)}
-        className="h-[58%] w-[58%] object-contain"
-        style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.55))' }}
+        className="h-[56%] w-[56%] object-contain"
+        style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' }}
       />
     );
   }
   return (
-    <span
-      className="select-none font-mono text-[13px] font-bold tracking-tight"
-      style={{ color: fb }}
-    >
+    <span className="select-none font-mono text-[12px] font-bold tracking-tight" style={{ color: fb }}>
       {initials(name)}
     </span>
   );
@@ -62,131 +59,131 @@ type Props = {
   tech: string[];
   name: string;
   accent: string;
+  accent2: string;
   ownedTechs: Set<string>;
   isFa: boolean;
+  activeLayer: string | null;
+  techToLayer: Record<string, string>;
+  onHoverTech: (tech: string | null) => void;
 };
 
-export default function ArchitectureMap({ tech, name, accent, ownedTechs, isFa }: Props) {
+export default function ArchitectureMap({
+  tech,
+  name,
+  accent,
+  accent2,
+  ownedTechs,
+  isFa,
+  activeLayer,
+  techToLayer,
+  onHoverTech,
+}: Props) {
   const reduce = useReducedMotion();
   const n = tech.length;
-  const radius = 43; // % from center to node
+  const R = 41; // orbit radius (%)
   const positions = useMemo(
     () =>
       tech.map((_, i) => {
         const angle = -90 + (360 / n) * i;
         const rad = (angle * Math.PI) / 180;
-        return {
-          x: 50 + radius * Math.cos(rad),
-          y: 50 + radius * Math.sin(rad),
-          angle,
-        };
+        return { x: 50 + R * Math.cos(rad), y: 50 + R * Math.sin(rad), angle };
       }),
     [tech, n],
   );
 
-  const embers = useMemo(
+  const particles = useMemo(
     () =>
-      Array.from({ length: 18 }, (_, i) => ({
-        id: i,
-        left: (i * 53.3) % 100,
-        top: (i * 27.7) % 100,
-        size: 2 + ((i * 7) % 4),
-        delay: (i % 9) * 0.7,
-        dur: 4 + (i % 5),
-      })),
+      Array.from({ length: 9 }, (_, i) => {
+        const a = (i / 9) * Math.PI * 2;
+        const rad = 16 + ((i * 13) % 18);
+        return {
+          id: i,
+          x: 50 + rad * Math.cos(a),
+          y: 50 + rad * Math.sin(a),
+          size: 1.5 + ((i * 3) % 2),
+          delay: (i % 5) * 0.8,
+          dur: 4 + (i % 4),
+        };
+      }),
     [],
   );
 
   return (
     <div
-      className="relative mx-auto aspect-square w-full max-w-[580px]"
+      className="relative mx-auto aspect-square w-full max-w-[460px]"
       style={{ ['--cs-accent' as string]: accent }}
     >
-      {/* volumetric core light */}
+      {/* ambient core glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/2 h-[78%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
-        style={{ background: `radial-gradient(circle, ${accent}33 0%, transparent 68%)` }}
+        style={{ background: `radial-gradient(circle, ${accent}1f 0%, transparent 66%)` }}
       />
 
-      {/* rotating dashed rings */}
-      <motion.div
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[88%] w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{ border: `1px dashed ${accent}55` }}
-        animate={reduce ? undefined : { rotate: 360 }}
-        transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-      />
-      <motion.div
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[66%] w-[66%] -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{ border: `1px solid rgba(255,255,255,0.08)` }}
-        animate={reduce ? undefined : { rotate: -360 }}
-        transition={{ duration: 42, repeat: Infinity, ease: 'linear' }}
-      />
+      {/* orbit rings (no hard connectors) */}
+      <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <circle cx="50" cy="50" r={R} fill="none" stroke={accent} strokeOpacity="0.12" strokeWidth="0.35" />
+        <circle cx="50" cy="50" r="28" fill="none" stroke={accent2} strokeOpacity="0.1" strokeWidth="0.3" />
+        <circle cx="50" cy="50" r={R} fill="none" stroke={accent} strokeOpacity="0.4" strokeWidth="0.5" strokeDasharray="1.5 7" style={{ transformOrigin: '50px 50px' }}>
+          <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="80s" repeatCount="indefinite" />
+        </circle>
+      </svg>
 
-      {/* radar scan sweep */}
-      {!reduce && (
-        <div
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[88%] w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, ${accent}22 18deg, transparent 40deg, transparent 360deg)`,
-            maskImage: 'radial-gradient(circle, transparent 30%, #000 31%, #000 70%, transparent 72%)',
-            WebkitMaskImage: 'radial-gradient(circle, transparent 30%, #000 31%, #000 70%, transparent 72%)',
-          }}
-        >
-          <motion.div
-            className="h-full w-full rounded-full"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 7, repeat: Infinity, ease: 'linear' }}
-          />
-        </div>
-      )}
-
-      {/* drifting embers */}
+      {/* particles around core */}
       {!reduce &&
-        embers.map((e) => (
+        particles.map((p) => (
           <motion.span
-            key={e.id}
+            key={p.id}
             className="pointer-events-none absolute rounded-full"
             style={{
-              left: `${e.left}%`,
-              top: `${e.top}%`,
-              width: e.size,
-              height: e.size,
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              width: p.size,
+              height: p.size,
               background: accent,
-              boxShadow: `0 0 ${e.size * 3}px ${accent}`,
+              boxShadow: `0 0 ${p.size * 3}px ${accent}`,
             }}
-            animate={{ opacity: [0, 0.8, 0], y: [0, -18, -34], scale: [0.6, 1, 0.4] }}
-            transition={{ duration: e.dur, repeat: Infinity, delay: e.delay, ease: 'easeInOut' }}
+            animate={{ opacity: [0, 0.6, 0], scale: [0.5, 1, 0.5] }}
+            transition={{ duration: p.dur, repeat: Infinity, delay: p.delay, ease: 'easeInOut' }}
           />
         ))}
 
-      {/* spokes */}
-      {positions.map((p, i) => {
-        const owned = ownedTechs.has(tech[i]);
-        return (
+      {/* core node */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <motion.div
+          className="relative grid place-items-center rounded-full border text-center"
+          style={{
+            width: 150,
+            height: 150,
+            borderColor: `${accent}aa`,
+            background: `radial-gradient(circle at 50% 35%, ${accent}22, #05070A 72%)`,
+          }}
+          initial={{ scale: 0.6, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: EASE }}
+        >
           <motion.div
-            key={`spoke-${i}`}
-            className="pointer-events-none absolute left-1/2 top-1/2 h-px"
-            style={{
-              width: `${radius}%`,
-              transformOrigin: '0 50%',
-              transform: `translateY(-50%) rotate(${p.angle}deg)`,
-              background: owned
-                ? `linear-gradient(90deg, ${accent}, ${accent}10)`
-                : 'linear-gradient(90deg, rgba(255,255,255,0.35), rgba(255,255,255,0.04))',
-            }}
-            initial={{ scaleX: 0, opacity: 0 }}
-            whileInView={{ scaleX: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.15 + i * 0.08, ease: EASE }}
+            className="absolute inset-0 rounded-full"
+            animate={reduce ? undefined : { boxShadow: [`0 0 40px ${accent}33, inset 0 0 24px ${accent}14`, `0 0 72px ${accent}55, inset 0 0 34px ${accent}22`, `0 0 40px ${accent}33, inset 0 0 24px ${accent}14`] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           />
-        );
-      })}
+          <div className="px-4">
+            <div className="text-[9px] font-semibold uppercase tracking-[0.25em]" style={{ color: accent }}>
+              {isFa ? 'هسته سیستم' : 'System Core'}
+            </div>
+            <div className="mt-1 text-base font-bold leading-tight text-white">{name}</div>
+          </div>
+        </motion.div>
+      </div>
 
-      {/* orbiting tech nodes */}
+      {/* orbiting technology nodes */}
       {tech.map((t, i) => {
+        const layer = techToLayer[t];
+        const active = activeLayer === layer;
+        const dimmed = activeLayer != null && !active;
         const owned = ownedTechs.has(t);
         const p = positions[i];
-        const ring = owned ? accent : 'rgba(255,255,255,0.22)';
+        const glow = active || owned ? accent : accent2;
         return (
           <motion.div
             key={t}
@@ -195,31 +192,41 @@ export default function ArchitectureMap({ tech, name, accent, ownedTechs, isFa }
             initial={{ scale: 0, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.55, delay: 0.25 + i * 0.08, ease: EASE }}
+            transition={{ duration: 0.5, delay: 0.2 + i * 0.07, ease: EASE }}
           >
             <motion.div
               className="flex flex-col items-center"
-              animate={reduce ? undefined : { y: [0, -7, 0] }}
-              transition={{ duration: 3.4 + (i % 4) * 0.4, repeat: Infinity, ease: 'easeInOut', delay: i * 0.3 }}
+              animate={reduce ? undefined : { y: [0, -6, 0] }}
+              transition={{ duration: 3.2 + (i % 4) * 0.4, repeat: Infinity, ease: 'easeInOut', delay: i * 0.3 }}
             >
               <motion.div
-                whileHover={{ scale: 1.18 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-                className="grid place-items-center rounded-full border bg-[#0b0b0e]"
+                onMouseEnter={() => onHoverTech(t)}
+                onMouseLeave={() => onHoverTech(null)}
+                animate={{ scale: active ? 1.14 : 1 }}
+                whileHover={{ scale: 1.16 }}
+                transition={{ duration: 0.5, ease: EASE }}
+                className="relative grid cursor-pointer place-items-center rounded-full border bg-[#0a0c11]"
                 style={{
-                  width: 66,
-                  height: 66,
-                  borderColor: ring,
-                  boxShadow: owned
-                    ? `0 0 22px ${accent}66, inset 0 0 14px ${accent}22`
-                    : '0 0 14px rgba(255,255,255,0.08)',
+                  width: 62,
+                  height: 62,
+                  borderColor: active ? accent : owned ? `${accent}88` : 'rgba(255,255,255,0.16)',
+                  boxShadow: active || owned ? `0 0 24px ${glow}55, inset 0 0 12px ${glow}1f` : '0 0 0 rgba(0,0,0,0)',
+                  opacity: dimmed ? 0.35 : 1,
                 }}
               >
+                {active && !reduce && (
+                  <motion.span
+                    className="pointer-events-none absolute inset-0 rounded-full"
+                    style={{ border: `1px solid ${accent}` }}
+                    animate={{ scale: [1, 1.32, 1], opacity: [0.6, 0, 0.6] }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                )}
                 <TechIcon name={t} accent={accent} />
               </motion.div>
               <span
                 className="mt-2 whitespace-nowrap text-[11px] font-medium tracking-wide"
-                style={{ color: owned ? accent : 'rgba(255,255,255,0.62)' }}
+                style={{ color: active || owned ? accent : 'rgba(255,255,255,0.6)', opacity: dimmed ? 0.4 : 1 }}
               >
                 {t}
               </span>
@@ -227,39 +234,6 @@ export default function ArchitectureMap({ tech, name, accent, ownedTechs, isFa }
           </motion.div>
         );
       })}
-
-      {/* core node */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <motion.div
-          className="grid place-items-center rounded-full border text-center"
-          style={{
-            width: 168,
-            height: 168,
-            borderColor: `${accent}aa`,
-            background: `radial-gradient(circle at 50% 35%, ${accent}22, #070708 70%)`,
-            boxShadow: `0 0 50px ${accent}55, inset 0 0 30px ${accent}22`,
-          }}
-          initial={{ scale: 0.6, opacity: 0 }}
-          whileInView={{ scale: 1, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: EASE }}
-        >
-          {!reduce && (
-            <motion.span
-              className="pointer-events-none absolute inset-0 rounded-full"
-              style={{ border: `1px solid ${accent}66` }}
-              animate={{ scale: [1, 1.18, 1], opacity: [0.7, 0, 0.7] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            />
-          )}
-          <div className="px-4">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.25em]" style={{ color: accent }}>
-              {isFa ? 'هسته سیستم' : 'System Core'}
-            </div>
-            <div className="mt-1 text-lg font-bold leading-tight text-white">{name}</div>
-          </div>
-        </motion.div>
-      </div>
     </div>
   );
 }

@@ -6,6 +6,17 @@ import faceauthMockup from '../assets/images/faceauth_mockup_1779713858799.png';
 import hyperstarMockup from '../assets/images/hyperstar_mockup_1779713838569.png';
 import tipaxMockup from '../assets/images/tipax_mockup_1779713822171.png';
 
+// Resolve an asset by filename from src/assets/images/.
+// In JSON just put the file name, e.g. screens: [{ image: 'calkilo_scan.png' }]
+export function resolveAsset(name?: string): string | undefined {
+  if (!name) return undefined;
+  try {
+    return new URL(`../assets/images/${name}`, import.meta.url).href;
+  } catch {
+    return undefined;
+  }
+}
+
 export const imageLinks = {
   arshiaPortrait,
   aboutGeometric,
