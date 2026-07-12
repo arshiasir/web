@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { ChevronLeft, ChevronRight, ArrowLeft, ArrowUpRight, Linkedin, Expand, GitBranch, Boxes, Cpu, Radio, Smartphone, Webhook, Database, Cloud, Share2, Server } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowLeft, ArrowUpRight, Expand, GitBranch, Boxes, Cpu, Radio, Smartphone, Webhook, Database, Cloud, Share2, Server, Languages } from 'lucide-react';
 import type { ProjectSchema } from '../types/schema';
 import { projectsData } from '../data/projectsData';
 import { resolveAsset } from '../data/imageLinks';
@@ -12,6 +12,7 @@ interface ProjectDetailProps {
   languageKey: 'en' | 'fa';
   onBack: () => void;
   onContact: () => void;
+  onLanguageToggle: () => void;
   onOpenProject?: (id: string) => void;
 }
 
@@ -140,11 +141,11 @@ function MetricValue({ value, accent, reduce }: { value: string; accent: string;
   return <span ref={ref} style={{ color: accent }}>{display}</span>;
 }
 
-function PhoneMock({ active, accent, image }: { active: boolean; accent: string; image?: string; title?: string; large?: boolean }) {
+function PhoneMock({ active, accent, image, large = false }: { active: boolean; accent: string; image?: string; title?: string; large?: boolean }) {
   const src = resolveAsset(image);
   return (
     <div
-      className="relative aspect-[9/16] w-full overflow-hidden rounded-[34px] border bg-[#0a0b0f] transition-shadow duration-500"
+      className={`relative overflow-hidden rounded-[34px] border bg-[#0a0b0f] transition-shadow duration-500 ${large && src ? 'mx-auto w-fit max-w-full' : 'w-full'} ${src ? '' : 'aspect-[9/16]'}`}
       style={{
         borderColor: active ? `${accent}99` : 'rgba(255,255,255,0.14)',
         boxShadow: active
@@ -153,7 +154,7 @@ function PhoneMock({ active, accent, image }: { active: boolean; accent: string;
       }}
     >
       {src ? (
-        <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
+        <img src={src} alt="" className={large ? 'mx-auto block max-h-[72vh] w-auto max-w-full object-contain' : 'block h-auto w-full object-contain'} loading="lazy" />
       ) : (
         <div className="h-full w-full" style={{ background: `radial-gradient(130% 90% at 50% 0%, ${accent}26, #0a0b0f 70%)` }} />
       )}
@@ -215,7 +216,7 @@ const LAYER_BLURBS: Record<string, { en: string; fa: string }> = {
 };
 const layerBlurb = (id: string, isFa: boolean) => LAYER_BLURBS[id]?.[isFa ? 'fa' : 'en'] || '';
 
-export default function ProjectDetail({ project, languageKey, onBack, onContact, onOpenProject }: ProjectDetailProps) {
+export default function ProjectDetail({ project, languageKey, onBack, onContact, onLanguageToggle, onOpenProject }: ProjectDetailProps) {
   const localized = project[languageKey] || project.en;
   const L = ui[languageKey] || ui.en;
   const isFa = languageKey === 'fa';
@@ -307,9 +308,22 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
             <a href="#challenges" className="transition-colors hover:text-white">{L.navChallenges}</a>
           </nav>
 
-          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={onContact} className="shrink-0 rounded-full border px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-bold transition-colors hover:bg-white/10" style={{ borderColor: `${accent}55`, color: 'white', background: `${accent}12` }}>
-            {L.contact}
-          </motion.button>
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={onLanguageToggle}
+              className="flex h-8 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 text-[10px] font-bold text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white sm:h-9 sm:px-3 sm:text-xs"
+              aria-label={isFa ? 'Switch to English' : 'تغییر زبان به فارسی'}
+              title={isFa ? 'English' : 'فارسی'}
+            >
+              <Languages className="h-3.5 w-3.5" />
+              <span>{isFa ? 'EN' : 'FA'}</span>
+            </motion.button>
+            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={onContact} className="flex h-8 shrink-0 items-center rounded-full border px-3 text-[10px] font-bold transition-colors hover:bg-white/10 sm:h-9 sm:px-4 sm:text-xs" style={{ borderColor: `${accent}55`, color: 'white', background: `${accent}12` }}>
+              {L.contact}
+            </motion.button>
+          </div>
         </div>
       </header>
 
@@ -414,8 +428,8 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
                     className={`group flex w-[220px] shrink-0 items-center gap-3 rounded-xl border p-2.5 text-start transition-all duration-300 lg:w-full ${i === active ? 'border-white/15 bg-white/[0.07]' : 'border-transparent hover:bg-white/[0.035]'}`}
                     aria-label={`Select ${screen.title}`}
                   >
-                    <div className="h-16 w-11 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-black">
-                      {resolveAsset(screen.image) && <img src={resolveAsset(screen.image)} alt="" className="h-full w-full object-cover" loading="lazy" />}
+                    <div className="h-16 w-11 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-black p-0.5">
+                      {resolveAsset(screen.image) && <img src={resolveAsset(screen.image)} alt="" className="h-full w-full object-contain" loading="lazy" />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
@@ -750,7 +764,6 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
                 <p className="mt-1 max-w-md text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.builtByDesc}</p>
               </div>
               <div className="flex flex-wrap gap-3">
-                <motion.a href="https://linkedin.com/in/arshia-khani" target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="rounded-lg border px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.12)' }}><span className="flex items-center gap-2"><Linkedin className="h-4 w-4" /> LinkedIn</span></motion.a>
                 <motion.button onClick={onContact} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90" style={{ backgroundColor: accent }}>{L.contact}</motion.button>
               </div>
             </div>
@@ -761,7 +774,6 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p>© 2026 {localized.title}. {isFa ? 'تمام حقوق محفوظ است.' : 'All rights reserved.'}</p>
             <div className="flex gap-4">
-              <a href="https://linkedin.com/in/arshia-khani" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">LinkedIn</a>
               <button onClick={onContact} className="transition-colors hover:text-white">{L.contact}</button>
             </div>
           </div>

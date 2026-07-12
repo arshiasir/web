@@ -58,9 +58,9 @@ const faceauthMockup = imageLinks.faceauthMockup;
 
 export default function App() {
   // Global Bilingual State ('en' for English LTR, 'fa' for Persian / Farsi RTL)
-  const initialLang = supportedLanguages.includes(navigator.language.slice(0, 2))
-    ? navigator.language.slice(0, 2)
-    : 'en';
+  const urlLanguage = window.location.pathname.match(/^\/(en|fa)(?:\/|$)/)?.[1];
+  const browserLanguage = navigator.language.slice(0, 2);
+  const initialLang = urlLanguage || (supportedLanguages.includes(browserLanguage) ? browserLanguage : 'en');
   const [lang, setLang] = useState<string>(initialLang);
   const languageKey = supportedLanguages.includes(lang) ? (lang as 'en' | 'fa') : 'en';
   const t = translations[languageKey] || translations.en;
@@ -84,6 +84,18 @@ export default function App() {
   // Project detail page state
   const [selectedProjId, setSelectedProjId] = useState<string | null>(null);
   const [currentPath, setCurrentPath] = useState<string>(() => window.location.pathname);
+
+  const pathForLanguage = (nextLanguage: string, path = window.location.pathname) => {
+    const pathWithoutLanguage = path.replace(/^\/(en|fa)(?=\/|$)/, '') || '/';
+    return `/${nextLanguage}${pathWithoutLanguage === '/' ? '' : pathWithoutLanguage}`;
+  };
+
+  const changeLanguage = (nextLanguage: string) => {
+    const nextPath = pathForLanguage(nextLanguage);
+    window.history.pushState({}, '', nextPath);
+    setLang(nextLanguage);
+    setCurrentPath(nextPath);
+  };
 
   // Floating Developer HUD console states
   const [devMode, setDevMode] = useState<boolean>(false);
@@ -178,7 +190,19 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const projectMatch = currentPath.match(/^\/projects\/([^/]+)\/?$/);
+    const languageFromPath = currentPath.match(/^\/(en|fa)(?:\/|$)/)?.[1];
+    if (languageFromPath && languageFromPath !== lang) setLang(languageFromPath);
+  }, [currentPath, lang]);
+
+  useEffect(() => {
+    if (/^\/(en|fa)(?:\/|$)/.test(window.location.pathname)) return;
+    const localizedPath = pathForLanguage(languageKey);
+    window.history.replaceState({}, '', localizedPath);
+    setCurrentPath(localizedPath);
+  }, []);
+
+  useEffect(() => {
+    const projectMatch = currentPath.match(/^\/(?:(?:en|fa)\/)?projects\/([^/]+)\/?$/);
     setSelectedProjId(projectMatch ? projectMatch[1] : null);
   }, [currentPath]);
 
@@ -196,7 +220,7 @@ export default function App() {
 
   const openProjectPage = (projectId: string) => {
     setSelectedProjId(projectId);
-    window.history.pushState({}, '', `/projects/${projectId}`);
+    window.history.pushState({}, '', `/${languageKey}/projects/${projectId}`);
     setCurrentPath(window.location.pathname);
   };
 
@@ -557,7 +581,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const projectRouteMatch = currentPath.match(/^\/projects\/([^/]+)\/?$/);
+  const projectRouteMatch = currentPath.match(/^\/(?:(?:en|fa)\/)?projects\/([^/]+)\/?$/);
 
   if (projectRouteMatch) {
     const projectId = projectRouteMatch[1];
@@ -573,7 +597,7 @@ export default function App() {
             </p>
             <button
               onClick={() => {
-                window.history.pushState({}, '', '/');
+                window.history.pushState({}, '', `/${languageKey}`);
                 setCurrentPath(window.location.pathname);
               }}
               className="px-5 py-3 rounded-full bg-white text-black font-black uppercase tracking-wider text-xs"
@@ -589,13 +613,14 @@ export default function App() {
       <ProjectDetail
         project={project}
         languageKey={languageKey}
+        onLanguageToggle={() => changeLanguage(languageKey === 'fa' ? 'en' : 'fa')}
         onBack={() => {
-          window.history.pushState({}, '', '/');
+          window.history.pushState({}, '', `/${languageKey}`);
           setCurrentPath(window.location.pathname);
           setSelectedProjId(null);
         }}
         onContact={() => {
-          window.history.pushState({}, '', '/');
+          window.history.pushState({}, '', `/${languageKey}`);
           setCurrentPath(window.location.pathname);
           setSelectedProjId(null);
           window.setTimeout(() => {
@@ -603,7 +628,7 @@ export default function App() {
           }, 50);
         }}
         onOpenProject={(id) => {
-          window.history.pushState({}, '', `/projects/${id}`);
+          window.history.pushState({}, '', `/${languageKey}/projects/${id}`);
           setCurrentPath(window.location.pathname);
         }}
       />
@@ -682,13 +707,45 @@ export default function App() {
 
           {/* Global Bilingual Switcher Toggle Button */}
           <button 
-            onClick={() => setLang(nextLang)}
+            onClick={() => changeLanguage(nextLang)}
             className="flex h-9 w-9 items-center justify-center gap-1.5 rounded-full bg-white/5 border border-white/5 hover:border-white/15 hover:bg-white/10 text-[10px] font-black tracking-widest uppercase transition-all duration-300 text-gray-300 cursor-pointer sm:h-auto sm:w-auto sm:px-3 sm:py-1.5"
             title={isFa ? 'تغییر زبان' : 'Toggle language'}
           >
             <Globe className="w-3.5 h-3.5 text-gray-400 rotate-0 hover:rotate-45 transition-transform" />
             <span className="hidden sm:inline">{localeMeta.label}</span>
           </button>
+
+          {/* Compact mobile mode switcher */}
+          <div className="flex items-center gap-0.5 rounded-full border border-white/[0.07] bg-white/[0.04] p-1 shadow-inner md:hidden" dir="ltr">
+            <button
+              type="button"
+              onClick={() => setMode('MOBILE')}
+              aria-label={isFa ? 'حالت موبایل' : 'Mobile mode'}
+              aria-pressed={mode === 'MOBILE'}
+              title={isFa ? 'حالت موبایل' : 'Mobile mode'}
+              className={`flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${
+                mode === 'MOBILE'
+                  ? 'bg-[#7B61FF] text-white shadow-[0_0_12px_rgba(123,97,255,0.45)]'
+                  : 'text-gray-500 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Smartphone className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('BACKEND')}
+              aria-label={isFa ? 'حالت بک‌اند' : 'Backend mode'}
+              aria-pressed={mode === 'BACKEND'}
+              title={isFa ? 'حالت بک‌اند' : 'Backend mode'}
+              className={`flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${
+                mode === 'BACKEND'
+                  ? 'bg-[#9EFF00] text-black shadow-[0_0_12px_rgba(158,255,0,0.4)]'
+                  : 'text-gray-500 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Server className="h-3.5 w-3.5" />
+            </button>
+          </div>
 
           {/* Dynamic Mode Switcher on Navigation Bar */}
           <div className="hidden md:flex items-center gap-1 bg-white/5 border border-white/5 py-1 px-1 rounded-full shadow-inner">
