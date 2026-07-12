@@ -36,7 +36,9 @@ import {
   GitBranch,
   Sliders,
   Eye,
-  Copy
+  Copy,
+  Phone,
+  Youtube
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -436,9 +438,16 @@ export default function App() {
     return () => clearInterval(logInterval);
   }, [activeBlueprintId, deploying]);
 
-  // Form submission handling
-  const [formState, setFormState] = useState({ name: '', email: '', message: '' });
-  const [formSent, setFormSent] = useState(false);
+  const [copiedContact, setCopiedContact] = useState<string | null>(null);
+  const copyContact = async (key: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedContact(key);
+      window.setTimeout(() => setCopiedContact((current) => current === key ? null : current), 1800);
+    } catch (error) {
+      console.error('Unable to copy contact information:', error);
+    }
+  };
 
   // Rotating subtitle ticks
   useEffect(() => {
@@ -547,28 +556,6 @@ export default function App() {
     }, 2000);
     return () => clearInterval(interval);
   }, []);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const subject = isFa ? 'پیام از وبسایت' : 'Message from website';
-    const body = [
-      `${isFa ? 'نام' : 'Name'}: ${formState.name}`,
-      `${isFa ? 'ایمیل' : 'Email'}: ${formState.email}`,
-      '',
-      `${isFa ? 'پیام' : 'Message'}:`,
-      formState.message,
-    ].join('\n');
-
-    const mailto = `mailto:khaniarshia7@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailto;
-
-    setFormSent(true);
-    setTimeout(() => {
-      setFormSent(false);
-      setFormState({ name: '', email: '', message: '' });
-    }, 4000);
-  };
 
   const projectRouteMatch = currentPath.match(/^\/projects\/([^/]+)\/?$/);
 
@@ -3255,10 +3242,10 @@ LIMIT 5;`
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[300px] bg-[radial-gradient(circle,rgba(158,255,0,0.05)_0%,transparent_70%)] pointer-events-none z-0" />
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             
             {/* CTA Massive Left description */}
-            <div className="lg:col-span-6 flex flex-col justify-center space-y-6">
+            <div className="lg:col-span-5 flex flex-col justify-center space-y-6">
               <div className="flex items-center gap-2">
                 <span className="w-6 h-0.5 animate-pulse" style={{ backgroundColor: accentColor }} />
                 <span className={`text-xs font-black ${isFa ? '' : 'tracking-widest uppercase'}`} style={{ color: accentColor }}>
@@ -3266,11 +3253,11 @@ LIMIT 5;`
                 </span>
               </div>
                
-              <h2 className="text-5xl md:text-6xl xl:text-7xl font-black uppercase text-white tracking-tighter leading-none">
+              <h2 className={`text-5xl md:text-6xl xl:text-7xl font-black text-white tracking-tighter leading-[0.95] ${isFa ? '' : 'uppercase'}`}>
                 {isFa ? (
                   <>
-                    بیایید <br />
-                    چیزی <br />
+                    بیایید یک <br />
+                    گفت‌وگو را <br />
                   </>
                 ) : (
                   <>
@@ -3279,159 +3266,137 @@ LIMIT 5;`
                   </>
                 )}
                 <span className="bg-gradient-to-r bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(90deg, #D7E2EA 0%, ${accentColor} 100%)` }}>
-                  {isFa ? 'قدرتمند' : 'POWERFUL'}
+                  {isFa ? 'شروع کنیم' : 'POWERFUL'}
                 </span>
               </h2>
 
               <p className="text-gray-400 text-sm max-w-sm leading-relaxed">
                 {isFa
-                  ? 'چه یک اپ Flutter سطح‌بالا برای انتشار در اپ‌استور بخواهید، چه یک معماری FastAPI فوق‌سریع و بلادرنگ برای ترافیک بالا—آماده‌ام آن را مهندسی کنم.'
-                  : 'Whether you need a high-end Flutter application deployed to the App Store or an ultra-fast FastAPI real-time architecture capable of millions of hits, I am ready to engineer it.'}
+                  ? 'برای همکاری، مشاوره یا صحبت درباره یک ایده تازه، از یکی از راه‌های روبه‌رو مستقیم با من در ارتباط باشید.'
+                  : 'Have a project, an idea, or just want to talk? Choose the channel that works best for you and reach me directly.'}
               </p>
-
-              {/* Dynamic contact lists metrics widgets */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md pt-4">
-                
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">system_email</span>
-                  <a href="mailto:khaniarshia7@gmail.com" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1 truncate">
-                    khaniarshia7@gmail.com
-                  </a>
-                </div>
-
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">system_phone</span>
-                  <a href="tel:+989038510475" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1 truncate">
-                    09038510475
-                  </a>
-                </div>
-
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">social_github</span>
-                  <a href="https://github.com/arshiasir" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
-                    github.com/arshiasir
-                  </a>
-                </div>
-
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">social_x</span>
-                  <a href="https://x.com/arshia_sir" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
-                    x.com/arshia_sir
-                  </a>
-                </div>
-
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">telegram_broker</span>
-                  <a href="https://t.me/arshia_sir" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
-                    t.me/arshia_sir
-                  </a>
-                </div>
-
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">social_youtube</span>
-                  <a href="https://m.youtube.com/@arshia_sir/playlists" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1 truncate">
-                    youtube.com/@arshia_sir
-                  </a>
-                </div>
-
+              <div className="flex items-center gap-3 pt-2 text-[11px] text-gray-500">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                </span>
+                <span>{isFa ? 'در دسترس برای پروژه‌های جدید' : 'Available for new projects'}</span>
               </div>
             </div>
 
-            {/* Email Contact Form Container */}
-            <div className="lg:col-span-6">
-              <div className="glass-card rounded-2xl p-6 md:p-8 border border-white/5 relative">
-                
-                <div className="flex items-center gap-2 mb-6 text-gray-400">
-                  <MessageSquare className="w-4 h-4" />
-                  <span className={`text-[10px] font-black text-gray-400 ${isFa ? '' : 'tracking-widest uppercase'} ${isFa ? 'text-right w-full' : ''}`}>
-                    {isFa ? 'کانال ارتباط امن' : 'secured_communication_tunnel'}
-                  </span>
+            {/* Direct contact channels */}
+            <div className="lg:col-span-7">
+              <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#090a0c] shadow-[0_35px_100px_-45px_rgba(0,209,255,0.25)]">
+                <div className="pointer-events-none absolute inset-0 opacity-[0.035] bg-[linear-gradient(rgba(255,255,255,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.8)_1px,transparent_1px)] bg-[size:32px_32px]" />
+                <div className="pointer-events-none absolute -right-24 -top-32 h-72 w-72 rounded-full bg-[#00D1FF]/10 blur-[90px]" />
+
+                <div className="relative flex items-center justify-between border-b border-white/[0.07] px-5 py-4 md:px-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex gap-1.5" dir="ltr">
+                      <span className="h-2 w-2 rounded-full bg-[#FF5F57]" />
+                      <span className="h-2 w-2 rounded-full bg-[#FEBC2E]" />
+                      <span className="h-2 w-2 rounded-full bg-[#28C840]" />
+                    </div>
+                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600">contact.directory</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => copyContact('all', ['Telegram: @arshia_sir', 'Email: khaniarshia7@gmail.com', 'Phone: +989038510475', 'Website: https://arshiasir.ir'].join('\n'))}
+                      className="flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.025] px-2.5 font-mono text-[9px] text-gray-500 transition-all hover:border-white/20 hover:text-white"
+                    >
+                      {copiedContact === 'all' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                      <span>{copiedContact === 'all' ? (isFa ? 'همه کپی شد' : 'ALL COPIED') : (isFa ? 'کپی همه' : 'COPY ALL')}</span>
+                    </button>
+                    <span className="hidden font-mono text-[9px] text-emerald-400/70 sm:block">● ONLINE</span>
+                  </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  
-                  <div>
-                    <label className={`text-[10px] text-gray-400 block mb-2 ${isFa ? '' : 'font-mono uppercase tracking-wider'}`}>
-                      {isFa ? 'نام' : 'Sender Name'}
-                    </label>
-                    <input 
-                      type="text" 
-                      required
-                      placeholder={isFa ? 'مثلاً: علی رضایی' : 'e.g. Satoshi Nakamoto'} 
-                      value={formState.name}
-                      onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                      className="w-full bg-[#0b0b0d] border border-white/5 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-white/20 transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className={`text-[10px] text-gray-400 block mb-2 ${isFa ? '' : 'font-mono uppercase tracking-wider'}`}>
-                      {isFa ? 'ایمیل' : 'Sender Email Address'}
-                    </label>
-                    <input 
-                      type="email" 
-                      required
-                      placeholder={isFa ? 'مثلاً: name@example.com' : 'e.g. satoshi@bitcoin.org'} 
-                      value={formState.email}
-                      onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-                      className="w-full bg-[#0b0b0d] border border-white/5 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-white/20 transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className={`text-[10px] text-gray-400 block mb-2 ${isFa ? '' : 'font-mono uppercase tracking-wider'}`}>
-                      {isFa ? 'پیام' : 'Transmission Message payload'}
-                    </label>
-                    <textarea 
-                      rows={4}
-                      required
-                      placeholder={isFa ? 'جزئیات پروژه یا نیازمندی‌ها را بنویسید…' : 'Type details about your project architecture request...'} 
-                      value={formState.message}
-                      onChange={(e) => setFormState({ ...formState, message: e.target.value })}
-                      className="w-full bg-[#0b0b0d] border border-white/5 rounded-lg p-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-white/20 transition-all resize-none"
-                    />
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    className="w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300 relative overflow-hidden group/btn text-black flex items-center justify-center gap-2"
-                    style={{ 
-                      backgroundColor: accentColor,
-                      boxShadow: `0 8px 32px -8px ${accentColor}`
-                    }}
-                  >
-                    <span>{isFa ? 'ارسال پیام' : 'Transmit Message Payload'}</span>
-                    <Send className="w-3.5 h-3.5 shrink-0 text-black group-hover/btn:translate-x-1 transition-transform" />
-                  </button>
-
-                </form>
-
-                {/* Secure successful banner message transmission feedback */}
-                <AnimatePresence>
-                  {formSent && (
-                    <motion.div 
-                      key="form-success-banner"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute inset-0 bg-[#070707]/95 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-6 text-center border border-[#9EFF00]/30"
-                    >
-                      <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
-                        <CheckCircle className="w-6 h-6 text-emerald-400" />
+                <div className="relative grid grid-cols-1 gap-px bg-white/[0.07] sm:grid-cols-2">
+                  <div className="group relative min-h-48 overflow-hidden bg-[#0a0b0e] p-6 transition-colors hover:bg-[#0d151b] md:p-7">
+                    <div className="absolute -bottom-16 -right-12 h-40 w-40 rounded-full bg-[#2AABEE]/0 blur-3xl transition-colors group-hover:bg-[#2AABEE]/15" />
+                    <div className="relative flex h-full flex-col justify-between gap-8">
+                      <div className="flex items-start justify-between">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#2AABEE]/25 bg-[#2AABEE]/10 text-[#4bc2ff]">
+                          <Send className="h-5 w-5 -translate-x-px" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={() => copyContact('telegram', '@arshia_sir')} className="relative z-10 flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/20 px-2.5 font-mono text-[9px] text-gray-500 transition-all hover:border-[#2AABEE]/30 hover:text-[#4bc2ff]" title={isFa ? 'کپی آیدی تلگرام' : 'Copy Telegram ID'}>
+                            {copiedContact === 'telegram' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                            <span>{copiedContact === 'telegram' ? (isFa ? 'کپی شد' : 'COPIED') : (isFa ? 'کپی' : 'COPY')}</span>
+                          </button>
+                          <a href="https://t.me/arshia_sir" target="_blank" rel="noreferrer" aria-label="Open Telegram" className="p-2"><ExternalLink className="h-4 w-4 text-gray-700 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#4bc2ff]" /></a>
+                        </div>
                       </div>
-                      <h4 className={`text-lg font-bold text-white tracking-tight ${isFa ? '' : 'uppercase'}`}>
-                        {isFa ? 'ارسال انجام شد' : 'Transmission complete!'}
-                      </h4>
-                      <p className="text-gray-400 text-xs max-w-xs mt-2 leading-relaxed">
-                        {isFa
-                          ? 'پیام شما با موفقیت ثبت شد. در اسرع وقت پاسخ می‌دهم.'
-                          : "Message packet has been successfully published to Arshia's personal inbox. I will reply to you in under 12 hours."}
-                      </p>
-                      <span className="text-[9px] text-[#9EFF00] font-mono uppercase tracking-widest mt-4">SYS_PACKET_STDOUT: 202_ACCEPTED</span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      <div>
+                        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-[#4bc2ff]/70">01 / QUICK CHAT</span>
+                        <a href="https://t.me/arshia_sir" target="_blank" rel="noreferrer"><h3 className="mt-2 text-xl font-black text-white transition-colors group-hover:text-[#4bc2ff]">Telegram</h3></a>
+                        <p className="mt-1 text-xs text-gray-500">@arshia_sir</p>
+                      </div>
+                    </div>
+                  </div>
 
+                  <div className="group relative min-h-48 overflow-hidden bg-[#0a0b0e] p-6 transition-colors hover:bg-[#101010] md:p-7">
+                    <div className="relative flex h-full flex-col justify-between gap-8">
+                      <div className="flex items-start justify-between">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white shadow-[0_8px_25px_-12px_rgba(255,255,255,.8)]">
+                          <img src="https://img.icons8.com/color/96/000000/gmail.png" alt="Gmail" className="h-7 w-7 object-contain" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={() => copyContact('email', 'khaniarshia7@gmail.com')} className="flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/20 px-2.5 font-mono text-[9px] text-gray-500 transition-all hover:border-white/20 hover:text-white" title={isFa ? 'کپی ایمیل' : 'Copy email'}>
+                            {copiedContact === 'email' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                            <span>{copiedContact === 'email' ? (isFa ? 'کپی شد' : 'COPIED') : (isFa ? 'کپی' : 'COPY')}</span>
+                          </button>
+                          <a href="mailto:khaniarshia7@gmail.com" aria-label="Send email" className="p-2"><ArrowRight className={`h-4 w-4 text-gray-700 transition-all group-hover:text-white ${isFa ? 'rotate-180 group-hover:-translate-x-0.5' : 'group-hover:translate-x-0.5'}`} /></a>
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-gray-600">02 / EMAIL</span>
+                        <a href="mailto:khaniarshia7@gmail.com"><h3 className="mt-2 text-xl font-black text-white transition-colors group-hover:text-gray-200">Gmail</h3></a>
+                        <p className="mt-1 truncate text-xs text-gray-500">khaniarshia7@gmail.com</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group relative flex items-center gap-4 border-t border-white/[0.07] bg-white/[0.018] px-5 py-5 transition-colors hover:bg-white/[0.045] md:px-6">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-gray-300 transition-colors group-hover:border-emerald-400/30 group-hover:text-emerald-400">
+                    <Phone className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="block font-mono text-[9px] uppercase tracking-[0.18em] text-gray-600">03 / {isFa ? 'تماس مستقیم' : 'DIRECT LINE'}</span>
+                    <a href="tel:+989038510475" className="mt-1 block text-sm font-bold tracking-wide text-white" dir="ltr">+98 903 851 0475</a>
+                  </div>
+                  <button type="button" onClick={() => copyContact('phone', '+989038510475')} className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/20 px-2.5 font-mono text-[9px] text-gray-500 transition-all hover:border-emerald-400/30 hover:text-emerald-400">
+                    {copiedContact === 'phone' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                    <span className="hidden sm:inline">{copiedContact === 'phone' ? (isFa ? 'کپی شد' : 'COPIED') : (isFa ? 'کپی' : 'COPY')}</span>
+                  </button>
+                  <a href="tel:+989038510475" aria-label="Call"><ChevronRight className={`h-4 w-4 text-gray-700 transition-transform group-hover:text-white ${isFa ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} /></a>
+                </div>
+
+                <div className="group relative flex items-center gap-4 border-t border-white/[0.07] bg-white/[0.018] px-5 py-5 transition-colors hover:bg-white/[0.045] md:px-6">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-gray-300 transition-colors group-hover:border-[#00D1FF]/30 group-hover:text-[#00D1FF]">
+                    <Globe className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="block font-mono text-[9px] uppercase tracking-[0.18em] text-gray-600">04 / {isFa ? 'وب‌سایت' : 'WEBSITE'}</span>
+                    <a href="https://arshiasir.ir" target="_blank" rel="noreferrer" className="mt-1 block text-sm font-bold tracking-wide text-white" dir="ltr">arshiasir.ir</a>
+                  </div>
+                  <button type="button" onClick={() => copyContact('website', 'https://arshiasir.ir')} className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/20 px-2.5 font-mono text-[9px] text-gray-500 transition-all hover:border-[#00D1FF]/30 hover:text-[#00D1FF]">
+                    {copiedContact === 'website' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                    <span className="hidden sm:inline">{copiedContact === 'website' ? (isFa ? 'کپی شد' : 'COPIED') : (isFa ? 'کپی' : 'COPY')}</span>
+                  </button>
+                  <a href="https://arshiasir.ir" target="_blank" rel="noreferrer" aria-label="Open website"><ExternalLink className="h-4 w-4 text-gray-700 transition-all group-hover:text-white" /></a>
+                </div>
+
+                <div className="relative flex flex-col gap-4 border-t border-white/[0.07] px-5 py-4 sm:flex-row sm:items-center sm:justify-between md:px-6">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-gray-600">{isFa ? 'در شبکه‌های دیگر' : 'ELSEWHERE ON THE WEB'}</span>
+                  <div className="flex flex-wrap items-center gap-2" dir="ltr">
+                    <a href="https://github.com/arshiasir" target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-[10px] font-bold text-gray-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-white"><Github className="h-3.5 w-3.5" /> GitHub</a>
+                    <a href="https://x.com/arshia_sir" target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-[10px] font-bold text-gray-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-white"><span className="text-xs text-white">𝕏</span> X</a>
+                    <a href="https://m.youtube.com/@arshia_sir/playlists" target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-[10px] font-bold text-gray-400 transition-all hover:border-red-500/30 hover:bg-red-500/[0.05] hover:text-white"><Youtube className="h-3.5 w-3.5" /> YouTube</a>
+                  </div>
+                </div>
               </div>
             </div>
 
