@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { ChevronLeft, ChevronRight, ArrowLeft, ArrowUpRight, Linkedin, GitBranch, Boxes, Cpu, Radio, Smartphone, Webhook, Database, Cloud, Share2, Server } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowLeft, ArrowUpRight, Linkedin, Expand, GitBranch, Boxes, Cpu, Radio, Smartphone, Webhook, Database, Cloud, Share2, Server } from 'lucide-react';
 import type { ProjectSchema } from '../types/schema';
 import { projectsData } from '../data/projectsData';
 import { resolveAsset } from '../data/imageLinks';
@@ -34,7 +34,7 @@ const ui = {
     architectureNote: 'Layers stay decoupled so a slow subsystem never blocks a core write path.',
     challengesTitle: 'Challenges & Solutions', challengesLead: 'The interesting part of any real product is what broke, and why the fix looks obvious in hindsight.',
     resultsTitle: 'Results', resultsLead: 'Numbers from production telemetry and post-launch review — not projections.',
-    outcomeLabel: 'Outcome',
+    outcomeLabel: 'Outcome', viewScreen: 'View',
     reflection: 'Developer Reflection', reflectionLead: 'What I would tell my past self.',
     nextProjects: 'Next Projects', nextProjectsLead: 'Keep exploring related work.',
     openProject: 'Open case study',
@@ -62,7 +62,7 @@ const ui = {
     architectureNote: 'لایه‌ها از هم جدا می‌مانند تا یک زیرسیستم کند هرگز مسیر نوشتن اصلی را مسدود نکند.',
     challengesTitle: 'چالش‌ها و راه‌حل‌ها', challengesLead: 'بخش جالب هر محصول واقعی این است که چه چیزی خراب شد و چرا راه‌حل در نگاه به عقب بدیهی به نظر می‌رسد.',
     resultsTitle: 'نتایج', resultsLead: 'اعدادی از تل‌متری تولید و بررسی پس از انتشار — نه حدس و گمان.',
-    outcomeLabel: 'نتیجه',
+    outcomeLabel: 'نتیجه', viewScreen: 'مشاهده',
     reflection: 'بازاندیشی توسعه‌دهنده', reflectionLead: 'آنچه به گذشته خودم می‌گفتم.',
     nextProjects: 'پروژه‌های بعدی', nextProjectsLead: 'کاوش در آثار مرتبط را ادامه دهید.',
     openProject: 'باز کردن مطالعه موردی',
@@ -140,39 +140,26 @@ function MetricValue({ value, accent, reduce }: { value: string; accent: string;
   return <span ref={ref} style={{ color: accent }}>{display}</span>;
 }
 
-function PhoneMock({ title, active, accent, large, image }: { title: string; active: boolean; accent: string; large?: boolean; image?: string }) {
+function PhoneMock({ active, accent, image }: { active: boolean; accent: string; image?: string; title?: string; large?: boolean }) {
   const src = resolveAsset(image);
   return (
     <div
-      className="relative aspect-[9/19] w-full rounded-[30px] border bg-[#0e0f14] p-3 transition-shadow duration-300"
-      style={{ borderColor: active ? `${accent}66` : 'rgba(255,255,255,0.1)', boxShadow: active ? `0 24px 60px ${accent}22` : '0 12px 30px rgba(0,0,0,0.4)' }}
+      className="relative aspect-[9/16] w-full overflow-hidden rounded-[34px] border bg-[#0a0b0f] transition-shadow duration-500"
+      style={{
+        borderColor: active ? `${accent}99` : 'rgba(255,255,255,0.14)',
+        boxShadow: active
+          ? `0 50px 110px -40px ${accent}88, 0 0 0 1px ${accent}55`
+          : '0 30px 70px -30px rgba(0,0,0,0.7)',
+      }}
     >
-      <div className="flex h-full w-full flex-col overflow-hidden rounded-[22px] border border-white/[0.06] bg-[#0a0b0f]">
-        <div className="relative flex h-10 shrink-0 items-center gap-2 border-b border-white/[0.06] px-4">
-          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: accent }} />
-          <span className="truncate text-[10px] font-medium text-white/70">{title}</span>
-          {active && <span className="cs-scan" />}
-        </div>
-        <div className="relative flex-1 overflow-hidden">
-          {src ? (
-            <img src={src} alt={title} className="h-full w-full object-cover" loading="lazy" />
-          ) : (
-            <div className="flex flex-1 flex-col gap-3 p-4">
-              <div className="h-20 rounded-xl" style={{ background: `linear-gradient(135deg, ${accent}26, transparent)` }} />
-              <div className="h-2.5 w-3/4 rounded-full bg-white/10" />
-              <div className="h-2.5 w-1/2 rounded-full bg-white/10" />
-              <div className="h-2.5 w-2/3 rounded-full bg-white/10" />
-              <div className="mt-auto space-y-2">
-                <div className="h-2 w-full rounded-full bg-white/10" />
-                <div className="h-2 w-5/6 rounded-full bg-white/10" />
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="flex h-12 shrink-0 items-center justify-center border-t border-white/[0.06]">
-          <div className="h-1 w-10 rounded-full bg-white/20" />
-        </div>
-      </div>
+      {src ? (
+        <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
+      ) : (
+        <div className="h-full w-full" style={{ background: `radial-gradient(130% 90% at 50% 0%, ${accent}26, #0a0b0f 70%)` }} />
+      )}
+      {/* device top — notch only, no text */}
+      <div className="pointer-events-none absolute left-1/2 top-2.5 z-10 h-5 w-20 -translate-x-1/2 rounded-full bg-black/70" />
+      <div className="pointer-events-none absolute inset-0 rounded-[34px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
     </div>
   );
 }
@@ -256,7 +243,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
   const [active, setActive] = useState(0);
   const [activeLayer, setActiveLayer] = useState<string | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
 
@@ -407,45 +394,58 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
         {/* ===== Walkthrough ===== */}
         {screens.length > 0 && (
           <section id="screens" className="scroll-mt-24 border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-            <Reveal>
-              <span className="cs-eyebrow-line" />
-              <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.walkthrough}</h2>
-              <p className="mt-3 max-w-xl" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.walkthroughLead}</p>
-            </Reveal>
-
-            <div className="mt-8 grid items-center gap-10 lg:grid-cols-[1fr_280px]">
-              <div ref={trackRef} className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 no-scrollbar" style={{ paddingLeft: 'calc(50% - 115px)', paddingRight: 'calc(50% - 115px)' }}>
-                {screens.map((screen, i) => (
-                  <motion.div
-                    key={screen.id}
-                    ref={(el) => { itemRefs.current[i] = el; }}
-                    className={`w-[230px] shrink-0 snap-center transition-all duration-300 ${i === active ? 'scale-100 opacity-100' : 'scale-90 opacity-50'}`}
-                  >
-                    <PhoneMock title={screen.title} active={i === active} accent={accent} image={screen.image} />
-                  </motion.div>
-                ))}
-              </div>
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+              <Reveal>
+                <span className="cs-eyebrow-line" />
+                <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.walkthrough}</h2>
+                <p className="mt-3 max-w-md text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.walkthroughLead}</p>
+              </Reveal>
 
               <Reveal delay={0.1}>
-                <div className="font-mono text-sm" style={{ color: accent }}>{String(active + 1).padStart(2, '0')} / {String(screens.length).padStart(2, '0')}</div>
-                <AnimatePresence mode="wait">
-                  <motion.h3 key={active} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.35, ease: EASE }} className="mt-1 text-2xl font-semibold text-white">{screens[active].title}</motion.h3>
-                </AnimatePresence>
-                <AnimatePresence mode="wait">
-                  <motion.p key={`d${active}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }} className="mt-2 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{screens[active].description}</motion.p>
-                </AnimatePresence>
-
-                <div className="mt-7 flex items-center gap-3">
-                  <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }} onClick={() => go(-1)} aria-label="Previous screen" className="flex h-10 w-10 items-center justify-center rounded-lg border transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.12)' }}><ChevronLeft className="h-4 w-4 rtl:rotate-180" /></motion.button>
-                  <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }} onClick={() => go(1)} aria-label="Next screen" className="flex h-10 w-10 items-center justify-center rounded-lg border transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.12)' }}><ChevronRight className="h-4 w-4 rtl:rotate-180" /></motion.button>
-                </div>
-                <div className="mt-2 h-[2px] w-full overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
-                  <motion.div className="h-full rounded-full" style={{ background: accent, width: `${((active + 1) / screens.length) * 100}%` }} layout transition={{ duration: 0.4, ease: EASE }} />
-                </div>
-                <div className="mt-5 flex gap-1.5">
-                  {screens.map((_, i) => (<button key={i} onClick={() => setActive(i)} aria-label={`Go to screen ${i + 1}`} className="h-1.5 rounded-full transition-all" style={{ width: i === active ? 24 : 6, backgroundColor: i === active ? accent : 'rgba(255,255,255,0.2)' }} />))}
+                <div className="w-full max-w-sm rounded-2xl border p-4 lg:w-[300px]" style={{ borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="flex items-center justify-between">
+                    <div className="font-mono text-sm" style={{ color: accent }}>{String(active + 1).padStart(2, '0')} / {String(screens.length).padStart(2, '0')}</div>
+                    <button onClick={() => setLightbox(active)} className="flex items-center gap-1.5 text-xs text-white/50 transition-colors hover:text-white"><Expand className="h-3.5 w-3.5" /> {L.viewScreen}</button>
+                  </div>
+                  <AnimatePresence mode="wait">
+                    <motion.h3 key={active} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.3, ease: EASE }} className="mt-2 text-lg font-semibold text-white">{screens[active].title}</motion.h3>
+                  </AnimatePresence>
+                  <AnimatePresence mode="wait">
+                    <motion.p key={`d${active}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="mt-1 text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{screens[active].description}</motion.p>
+                  </AnimatePresence>
+                  <div className="mt-4 flex items-center gap-3">
+                    <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }} onClick={() => go(-1)} aria-label="Previous screen" className="flex h-9 w-9 items-center justify-center rounded-lg border transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.12)' }}><ChevronLeft className="h-4 w-4 rtl:rotate-180" /></motion.button>
+                    <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }} onClick={() => go(1)} aria-label="Next screen" className="flex h-9 w-9 items-center justify-center rounded-lg border transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.12)' }}><ChevronRight className="h-4 w-4 rtl:rotate-180" /></motion.button>
+                  </div>
+                  <div className="mt-3 h-[2px] w-full overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                    <motion.div className="h-full rounded-full" style={{ background: accent, width: `${((active + 1) / screens.length) * 100}%` }} layout transition={{ duration: 0.4, ease: EASE }} />
+                  </div>
                 </div>
               </Reveal>
+            </div>
+
+            <div className="relative mt-12">
+              <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#08090d] to-transparent" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#08090d] to-transparent" />
+              <div ref={trackRef} className="flex snap-x snap-mandatory gap-6 overflow-x-auto py-12 no-scrollbar" style={{ paddingLeft: 'calc(50% - 150px)', paddingRight: 'calc(50% - 150px)' }}>
+                {screens.map((screen, i) => (
+                  <motion.button
+                    key={screen.id}
+                    ref={(el) => { itemRefs.current[i] = el; }}
+                    onClick={() => { setActive(i); setLightbox(i); }}
+                    className={`group relative w-[300px] shrink-0 snap-center transition-all duration-300 ${i === active ? 'z-10 scale-105 opacity-100' : 'scale-90 opacity-45 hover:opacity-75'}`}
+                    aria-label={`Open ${screen.title}`}
+                  >
+                    <div className="relative rounded-[34px] p-1" style={i === active ? { boxShadow: `0 40px 90px -30px ${accent}66` } : undefined}>
+                      <PhoneMock active={i === active} accent={accent} image={screen.image} />
+                    </div>
+                    <div className="pointer-events-none absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/80 opacity-0 backdrop-blur transition-opacity duration-300 group-hover:opacity-100">
+                      <Expand className="h-3.5 w-3.5" />
+                    </div>
+                    <span className={`mt-3 block text-center text-xs font-medium transition-colors ${i === active ? 'text-white' : 'text-white/50'}`}>{screen.title}</span>
+                  </motion.button>
+                ))}
+              </div>
             </div>
           </section>
         )}
@@ -470,7 +470,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
                   </Reveal>
                 )}
                 {implementation.length > 0 && (
-                  <Reveal delay={0.1}>
+              <Reveal delay={0.1} className="order-1 md:order-2">
                     <h3 className="text-xl font-semibold text-white">{L.technicalImplementation}</h3>
                     <div className="mt-4 divide-y" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
                       {implementation.map((row, i) => (<div key={i} className="py-4"><div className="flex items-center gap-2 text-base font-medium text-white"><span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: accent }} />{row.title}</div><div className="mt-1 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{row.description}</div></div>))}
@@ -695,10 +695,14 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
       <AnimatePresence>
         {lightbox !== null && screens[lightbox] && (
           <motion.div key="lb" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/92 p-6 backdrop-blur" onClick={() => setLightbox(null)}>
-            <button className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border text-white transition-colors hover:bg-white/10" style={{ borderColor: 'rgba(255,255,255,0.12)' }} aria-label="Close">×</button>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.3, ease: EASE }} className="w-[300px]" onClick={(e) => e.stopPropagation()}>
+            <button className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border text-white transition-colors hover:bg-white/10" style={{ borderColor: 'rgba(255,255,255,0.12)' }} aria-label="Close" onClick={(e) => { e.stopPropagation(); setLightbox(null); }}>×</button>
+            <button onClick={(e) => { e.stopPropagation(); setLightbox((lightbox + screens.length - 1) % screens.length); }} className="absolute left-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 transition-colors hover:bg-white/10 rtl:right-4 rtl:left-auto" aria-label="Previous screen"><ChevronLeft className="h-5 w-5 rtl:rotate-180" /></button>
+            <button onClick={(e) => { e.stopPropagation(); setLightbox((lightbox + 1) % screens.length); }} className="absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 transition-colors hover:bg-white/10 rtl:left-4 rtl:right-auto" aria-label="Next screen"><ChevronRight className="h-5 w-5 rtl:rotate-180" /></button>
+            <motion.div key={lightbox} initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.3, ease: EASE }} className="flex w-[360px] max-w-[85vw] flex-col items-center" onClick={(e) => e.stopPropagation()}>
               <PhoneMock title={screens[lightbox].title} active accent={accent} large image={screens[lightbox].image} />
-              <p className="mt-4 text-center text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{screens[lightbox].description}</p>
+              <p className="mt-4 text-center text-sm font-medium text-white">{screens[lightbox].title}</p>
+              <p className="mt-1 max-w-xs text-center text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{screens[lightbox].description}</p>
+              <div className="mt-3 font-mono text-xs" style={{ color: accent }}>{String(lightbox + 1).padStart(2, '0')} / {String(screens.length).padStart(2, '0')}</div>
             </motion.div>
           </motion.div>
         )}
