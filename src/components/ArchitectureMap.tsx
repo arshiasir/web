@@ -80,7 +80,7 @@ export default function ArchitectureMap({
 }: Props) {
   const reduce = useReducedMotion();
   const n = tech.length;
-  const R = 41; // orbit radius (%)
+  const R = 37; // keeps orbit nodes and labels inside narrow screens
   const positions = useMemo(
     () =>
       tech.map((_, i) => {
@@ -110,7 +110,7 @@ export default function ArchitectureMap({
 
   return (
     <div
-      className="relative mx-auto aspect-square w-full max-w-[460px]"
+      className="architecture-orbit relative mx-auto aspect-square w-full max-w-[460px]"
       style={{ ['--cs-accent' as string]: accent }}
     >
       {/* ambient core glow */}
@@ -150,7 +150,7 @@ export default function ArchitectureMap({
       {/* core node */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <motion.div
-          className="relative grid place-items-center rounded-full border text-center"
+          className="architecture-core relative grid place-items-center rounded-full border text-center"
           style={{
             width: 150,
             height: 150,
@@ -205,7 +205,7 @@ export default function ArchitectureMap({
                 animate={{ scale: active ? 1.14 : 1 }}
                 whileHover={{ scale: 1.16 }}
                 transition={{ duration: 0.5, ease: EASE }}
-                className="relative grid cursor-pointer place-items-center rounded-full border bg-[#0a0c11]"
+                className="architecture-tech-node relative grid cursor-pointer place-items-center rounded-full border bg-[#0a0c11]"
                 style={{
                   width: 62,
                   height: 62,
@@ -225,7 +225,7 @@ export default function ArchitectureMap({
                 <TechIcon name={t} accent={accent} />
               </motion.div>
               <span
-                className="mt-2 whitespace-nowrap text-[11px] font-medium tracking-wide"
+                className="architecture-tech-label mt-2 whitespace-nowrap text-[11px] font-medium tracking-wide"
                 style={{ color: active || owned ? accent : 'rgba(255,255,255,0.6)', opacity: dimmed ? 0.4 : 1 }}
               >
                 {t}
