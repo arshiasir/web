@@ -292,11 +292,11 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
       <motion.div className="cs-progress" style={{ scaleX: progress }} />
 
       {/* ===== Navigation ===== */}
-      <header className="cs-nav sticky top-4 z-50 mx-auto w-[calc(100%-2rem)] max-w-7xl rounded-full border backdrop-blur-xl" style={{ backgroundColor: 'rgba(7,7,7,0.72)', borderColor: 'rgba(255,255,255,0.1)' }}>
-        <div className="mx-auto flex h-16 items-center justify-between px-4 md:px-7">
-          <button onClick={onBack} className="flex items-center gap-3">
+      <header className="cs-nav sticky top-2 sm:top-4 z-50 mx-auto w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] max-w-7xl rounded-full border backdrop-blur-xl" style={{ backgroundColor: 'rgba(7,7,7,0.82)', borderColor: 'rgba(255,255,255,0.1)' }}>
+        <div className="mx-auto flex h-14 sm:h-16 items-center justify-between gap-2 px-3 sm:px-4 md:px-7">
+          <button onClick={onBack} className="flex min-w-0 items-center gap-2 sm:gap-3">
             <ProjectLogo title={localized.title} accent={accent} size={36} />
-            <span className="text-sm font-semibold tracking-tight">{localized.title}</span>
+            <span className="hidden truncate text-sm font-semibold tracking-tight min-[360px]:block">{localized.title}</span>
           </button>
 
           <nav className="cs-nav-links hidden items-center gap-1 text-xs font-semibold md:flex" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -307,7 +307,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
             <a href="#challenges" className="transition-colors hover:text-white">{L.navChallenges}</a>
           </nav>
 
-          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={onContact} className="rounded-full border px-4 py-2 text-xs font-bold transition-colors hover:bg-white/10" style={{ borderColor: `${accent}55`, color: 'white', background: `${accent}12` }}>
+          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={onContact} className="shrink-0 rounded-full border px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-bold transition-colors hover:bg-white/10" style={{ borderColor: `${accent}55`, color: 'white', background: `${accent}12` }}>
             {L.contact}
           </motion.button>
         </div>
@@ -315,7 +315,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
       <main className="cs-main relative z-10 mx-auto max-w-7xl px-4 md:px-8">
         {/* ===== Hero ===== */}
-        <section id="overview" className="cs-hero grid scroll-mt-28 grid-cols-1 items-center gap-10 overflow-hidden rounded-[2rem] border p-6 md:p-10 lg:grid-cols-[1.05fr_.95fr] lg:p-14">
+        <section id="overview" className="cs-hero grid scroll-mt-28 grid-cols-1 items-center gap-8 sm:gap-10 overflow-hidden rounded-3xl sm:rounded-[2rem] border p-4 sm:p-6 md:p-10 lg:grid-cols-[1.05fr_.95fr] lg:p-14">
           <div className="relative z-10">
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EASE }} className="flex flex-wrap items-center gap-3">
               <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: accent }}>{localized.category}</span>
@@ -325,7 +325,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
               </span>
             </motion.div>
 
-            <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.05, ease: EASE }} className="mt-5 bg-gradient-to-b from-white to-white/55 bg-clip-text text-5xl font-bold leading-[1.02] tracking-tight text-transparent md:text-6xl lg:text-7xl">
+            <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.05, ease: EASE }} className="mt-5 break-words bg-gradient-to-b from-white to-white/55 bg-clip-text text-4xl sm:text-5xl font-bold leading-[1.02] tracking-tight text-transparent md:text-6xl lg:text-7xl">
               {localized.title}
             </motion.h1>
 

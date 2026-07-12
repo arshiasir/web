@@ -630,10 +630,10 @@ export default function App() {
       </div>
 
       {/* FLOATING NAVBAR */}
-      <header className="fixed top-5 left-1/2 -translate-x-1/2 w-[94%] max-w-7xl h-16 bg-black/50 backdrop-blur-xl border border-white/10 rounded-full z-50 px-4 md:px-8 flex items-center justify-between transition-all duration-300 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.8)]">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-full transition-all duration-500 animate-pulse" style={{ backgroundColor: accentColor }} />
-          <span className="font-black text-lg tracking-wider bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent uppercase">
+      <header className="fixed top-3 sm:top-5 left-1/2 -translate-x-1/2 w-[calc(100%-1rem)] sm:w-[94%] max-w-7xl h-14 sm:h-16 bg-black/70 sm:bg-black/50 backdrop-blur-xl border border-white/10 rounded-full z-50 px-3 sm:px-4 md:px-8 flex items-center justify-between transition-all duration-300 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.8)]">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <div className="h-2 w-2 shrink-0 rounded-full transition-all duration-500 animate-pulse sm:h-2.5 sm:w-2.5" style={{ backgroundColor: accentColor }} />
+          <span className="truncate font-black text-sm sm:text-lg tracking-wider bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent uppercase">
             {lang === 'en' ? 'ARSHIA.' : 'عرشیا.'}
           </span>
         </div>
@@ -648,7 +648,7 @@ export default function App() {
         </nav>
 
         {/* Action Widgets Zone */}
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
           
           {/* Dev Mode Layout Inspector Toggle */}
           <button
@@ -683,15 +683,15 @@ export default function App() {
           {/* Global Bilingual Switcher Toggle Button */}
           <button 
             onClick={() => setLang(nextLang)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 hover:border-white/15 hover:bg-white/10 text-[10px] font-black tracking-widest uppercase transition-all duration-300 text-gray-300 cursor-pointer"
+            className="flex h-9 w-9 items-center justify-center gap-1.5 rounded-full bg-white/5 border border-white/5 hover:border-white/15 hover:bg-white/10 text-[10px] font-black tracking-widest uppercase transition-all duration-300 text-gray-300 cursor-pointer sm:h-auto sm:w-auto sm:px-3 sm:py-1.5"
             title={isFa ? 'تغییر زبان' : 'Toggle language'}
           >
             <Globe className="w-3.5 h-3.5 text-gray-400 rotate-0 hover:rotate-45 transition-transform" />
-            <span>{localeMeta.label}</span>
+            <span className="hidden sm:inline">{localeMeta.label}</span>
           </button>
 
           {/* Dynamic Mode Switcher on Navigation Bar */}
-          <div className="flex items-center gap-1 bg-white/5 border border-white/5 py-1 px-1 rounded-full shadow-inner scale-90 md:scale-100">
+          <div className="hidden md:flex items-center gap-1 bg-white/5 border border-white/5 py-1 px-1 rounded-full shadow-inner">
             <button 
               onClick={() => setMode('MOBILE')}
               className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all duration-300 ${isFa ? '' : 'tracking-wider uppercase'} ${
@@ -726,7 +726,7 @@ export default function App() {
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`relative min-h-screen pt-28 pb-16 flex items-center justify-center z-10 px-4 md:px-8 max-w-7xl mx-auto transition-all duration-500 ${
+        className={`relative min-h-screen pt-24 sm:pt-28 pb-14 sm:pb-16 flex items-center justify-center z-10 px-4 md:px-8 max-w-7xl mx-auto transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#00D1FF]/40 bg-[#00D1FF]/[0.01] rounded-3xl mt-2 relative' : ''
         }`}
       >
@@ -740,14 +740,14 @@ export default function App() {
           
           {/* Hero Left Side: Intro and main headline */}
           <div className="lg:col-span-4 flex flex-col justify-center items-start space-y-6">
-            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase text-gray-300">
+            <div className="inline-flex max-w-full items-center gap-2 bg-white/5 border border-white/10 px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-gray-300">
               <Sparkles className="w-3.5 h-3.5" style={{ color: accentColor }} />
               <span>{lang === 'en' ? 'Fullstack & Mobile Specialist' : 'متخصص فول‌استک و موبایل'}</span>
             </div>
             
             <div className="space-y-1 text-left rtl:text-right">
               <span className="text-lg md:text-xl font-bold text-gray-400 uppercase tracking-widest block">{lang === 'en' ? "Hi, I'm" : 'من'}</span>
-              <h1 className="text-6xl md:text-7xl xl:text-8xl font-black uppercase text-white tracking-tighter leading-none relative">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl xl:text-8xl font-black uppercase text-white tracking-tighter leading-none relative break-words">
                 {t.hero.role}
                 <span className="absolute -bottom-1 left-0 rtl:right-0 w-24 h-1.5 rounded" style={{ backgroundColor: accentColor }} />
               </h1>
@@ -835,10 +835,10 @@ export default function App() {
               </div>
 
               {/* Watermark identity name in front of hoodies style portrait */}
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-black/90 border border-white/10 px-6 py-2 rounded-full shadow-2xl z-20 flex items-center gap-2">
-                <span className="text-[10px] tracking-widest font-black uppercase text-gray-300">ARSHIA KHANI</span>
+              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 max-w-[94%] whitespace-nowrap bg-black/90 border border-white/10 px-3 sm:px-6 py-2 rounded-full shadow-2xl z-20 flex items-center gap-2">
+                <span className="text-[9px] sm:text-[10px] tracking-widest font-black uppercase text-gray-300">ARSHIA KHANI</span>
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: accentColor }} />
-                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">{mode} SPECIFIED</span>
+                <span className="hidden text-[9px] text-gray-500 font-bold uppercase tracking-wider min-[380px]:inline">{mode} SPECIFIED</span>
               </div>
             </div>
           </div>
@@ -1096,7 +1096,7 @@ export default function App() {
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`py-24 relative z-10 bg-black/45 border-y border-white/5 scroll-mt-20 transition-all duration-500 ${
+        className={`py-16 sm:py-24 relative z-10 bg-black/45 border-y border-white/5 scroll-mt-20 transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#9EFF00]/40 bg-[#9EFF00]/[0.01]' : ''
         }`}
       >
@@ -1435,7 +1435,7 @@ export default function App() {
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`py-24 relative z-10 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-20 transition-all duration-500 ${
+        className={`py-16 sm:py-24 relative z-10 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-20 transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#FF6B00]/40 bg-[#FF6B00]/[0.01] rounded-3xl mt-4 relative' : ''
         }`}
       >
@@ -1498,8 +1498,8 @@ export default function App() {
             </div>
 
             {/* Simulated compiler line numbers */}
-            <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between font-mono text-[8px] text-gray-500">
-              <div className="flex gap-4">
+            <div className="mt-8 pt-4 border-t border-white/5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between font-mono text-[8px] text-gray-500">
+              <div className="flex flex-wrap gap-x-4 gap-y-1">
                 <span>LINE: 104 .. 240</span>
                 <span>COMPILER: FLUTTER_IMP_AOT</span>
               </div>
@@ -1586,7 +1586,7 @@ export default function App() {
           </div>
 
           {/* Core Stats Row: 4 sleek Grid Boxes */}
-          <div className="lg:col-span-12 grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4 font-sans">
+          <div className="lg:col-span-12 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-4 font-sans [&>div]:p-4 sm:[&>div]:p-6">
             
             {/* Stat Box 1 */}
             <div className="bg-zinc-950/40 border border-white/5 rounded-2xl p-6 hover:border-white/10 transition-all duration-300 relative group">
@@ -1647,7 +1647,7 @@ export default function App() {
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`py-24 relative z-10 bg-black/30 border-y border-white/5 scroll-mt-10 transition-all duration-500 ${
+        className={`py-16 sm:py-24 relative z-10 bg-black/30 border-y border-white/5 scroll-mt-10 transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#00D1FF]/40 bg-[#00D1FF]/[0.01]' : ''
         }`}
       >
@@ -1725,7 +1725,7 @@ export default function App() {
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`py-24 relative z-10 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-10 transition-all duration-500 ${
+        className={`py-16 sm:py-24 relative z-10 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-10 transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#7B61FF]/40 bg-[#7B61FF]/[0.01] rounded-3xl mt-4 relative' : ''
         }`}
       >
@@ -1768,7 +1768,7 @@ export default function App() {
                   setSimStep(null);
                   setActiveStepIndex(0);
                 }}
-                className={`px-4 py-2.5 rounded-xl border text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 relative overflow-hidden flex items-center gap-2 cursor-pointer ${
+                className={`max-w-full px-3 sm:px-4 py-2.5 rounded-xl border text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wide sm:tracking-wider transition-all duration-300 relative overflow-hidden flex items-center gap-2 cursor-pointer ${
                   isTabActive 
                     ? 'text-white border-white/10' 
                     : 'text-gray-400 border-white/5 bg-white/[0.01] hover:bg-white/5 hover:text-white'
@@ -1780,7 +1780,7 @@ export default function App() {
                 }}
               >
                 <div className={`w-1.5 h-1.5 rounded-full ${isTabActive ? 'animate-pulse' : ''}`} style={{ backgroundColor: tab.color }} />
-                <span>{tab.title}</span>
+                <span className="min-w-0 text-left rtl:text-right leading-relaxed">{tab.title}</span>
               </button>
             );
           })}
@@ -1922,18 +1922,18 @@ export default function App() {
 
               {/* Dynamic HUD Control Header */}
               <div className="flex flex-wrap items-center justify-between border-b border-white/5 pb-4 mb-8 gap-4">
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <div 
                     className={`w-3 h-3 rounded-full ${isWalkthroughActive ? 'animate-pulse' : 'animate-ping'}`} 
                     style={{ backgroundColor: blueprintColor }} 
                   />
-                  <span className="text-xs font-mono font-bold uppercase tracking-widest text-white flex items-center gap-2">
-                    <span>{currentBlueprint.projectName[languageKey]}</span>
-                    <span className="text-gray-500 text-[10px]">({activeBlueprintId}_blueprint.yml)</span>
+                  <span className="min-w-0 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wide sm:tracking-widest text-white flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    <span className="truncate">{currentBlueprint.projectName[languageKey]}</span>
+                    <span className="truncate text-gray-500 text-[9px] sm:text-[10px]">({activeBlueprintId}_blueprint.yml)</span>
                   </span>
                 </div>
                 
-                <div className="flex items-center gap-4 text-[10px] font-mono text-gray-400">
+                <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 text-[9px] sm:text-[10px] font-mono text-gray-400 lg:w-auto">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded bg-cyan-400 animate-pulse" />
                     <span>{lang === 'en' ? 'SRE status' : 'وضعیت مهندسی'}: {isWalkthroughActive ? 'TRANSMITTING' : 'HEARTBEAT_ACTIVE'}</span>
@@ -3226,7 +3226,7 @@ LIMIT 5;`
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`py-24 relative z-10 overflow-hidden scroll-mt-10 transition-all duration-500 ${
+        className={`py-16 sm:py-24 relative z-10 overflow-hidden scroll-mt-10 transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#FF6B00]/40 bg-[#FF6B00]/[0.01]' : ''
         }`}
       >
@@ -3253,7 +3253,7 @@ LIMIT 5;`
                 </span>
               </div>
                
-              <h2 className={`text-5xl md:text-6xl xl:text-7xl font-black text-white tracking-tighter leading-[0.95] ${isFa ? '' : 'uppercase'}`}>
+              <h2 className={`text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-black text-white tracking-tighter leading-[0.95] ${isFa ? '' : 'uppercase'}`}>
                 {isFa ? (
                   <>
                     بیایید یک <br />
@@ -3291,13 +3291,13 @@ LIMIT 5;`
                 <div className="pointer-events-none absolute -right-24 -top-32 h-72 w-72 rounded-full bg-[#00D1FF]/10 blur-[90px]" />
 
                 <div className="relative flex items-center justify-between border-b border-white/[0.07] px-5 py-4 md:px-6">
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                     <div className="flex gap-1.5" dir="ltr">
                       <span className="h-2 w-2 rounded-full bg-[#FF5F57]" />
                       <span className="h-2 w-2 rounded-full bg-[#FEBC2E]" />
                       <span className="h-2 w-2 rounded-full bg-[#28C840]" />
                     </div>
-                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600">contact.directory</span>
+                    <span className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 min-[360px]:inline">contact.directory</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -3403,9 +3403,9 @@ LIMIT 5;`
           </div>
 
           {/* Simple footer credentials matching layout */}
-          <div className="border-t border-white/5 pt-8 mt-16 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500 font-mono">
+          <div className="border-t border-white/5 pt-8 mt-12 sm:mt-16 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left text-[10px] sm:text-xs text-gray-500 font-mono">
             <span>© 2026 ARSHIA KHANI. ALL RIGHTS RESERVED.</span>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
               <span className="text-[#9EFF00]/80">LATENCY: 1ms</span>
               <span>HOST: GITHUB_PAGES</span>
               <span>v1.2.0-stable</span>
