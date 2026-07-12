@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { Github, ChevronLeft, ChevronRight, ArrowLeft, ArrowUpRight, Linkedin, GitBranch, Boxes, Cpu, Radio } from 'lucide-react';
+import { Github, ChevronLeft, ChevronRight, ArrowLeft, ArrowUpRight, Linkedin, GitBranch, Boxes, Cpu, Radio, Smartphone, Webhook, Database, Cloud, Share2, Server } from 'lucide-react';
 import type { ProjectSchema } from '../types/schema';
 import { projectsData } from '../data/projectsData';
+import ArchitectureMap from '../components/ArchitectureMap';
 import './caseStudy.css';
 
 interface ProjectDetailProps {
@@ -168,6 +169,37 @@ function PhoneMock({ title, active, accent, large }: { title: string; active: bo
   );
 }
 
+/* ---------- architecture model ----------
+   Maps each tech to a layer; ownership comes from the project scope.
+   Unmatched tech still ships via the "external" node, so new tools
+   light up automatically without code changes. */
+const ARCH_LAYERS = [
+  { id: 'client', icon: Smartphone, match: ['flutter', 'dart', 'react', 'riverpod', 'bloc', 'swift', 'kotlin', 'android', 'ios', 'mobile'] },
+  { id: 'api', icon: Webhook, match: ['fastapi', 'django', 'rest', 'graphql', 'express', 'node', 'websocket', 'api', 'laravel'] },
+  { id: 'services', icon: Cpu, match: ['ai', 'opencv', 'python', 'ml', 'celery', 'recommendation', 'on-device'] },
+  { id: 'data', icon: Database, match: ['postgresql', 'redis', 'sqlite', 'mongodb', 'mysql', 'database'] },
+  { id: 'infra', icon: Cloud, match: ['docker', 'aws', 's3', 'kubernetes', 'gcp', 'firebase', 'linux'] },
+];
+
+const OWNED_BY_SCOPE: Record<string, string[]> = {
+  MOBILE: ['client'],
+  FULLSTACK: ['client', 'api', 'services'],
+  BACKEND: ['api', 'services', 'data', 'infra'],
+};
+
+function buildArchitecture(techs: string[], scope: string) {
+  const owned = OWNED_BY_SCOPE[scope] || [];
+  const used = new Set<string>();
+  const layers = ARCH_LAYERS.map((l) => {
+    const items = techs.filter((t) => l.match.some((m) => t.toLowerCase().includes(m)));
+    items.forEach((t) => used.add(t));
+    return { ...l, items, owned: owned.includes(l.id), external: false };
+  }).filter((l) => l.items.length > 0);
+  const leftover = techs.filter((t) => !used.has(t));
+  if (leftover.length) layers.push({ id: 'external', icon: Share2, match: [], items: leftover, owned: false, external: true });
+  return layers;
+}
+
 export default function ProjectDetail({ project, languageKey, onBack, onContact, onOpenProject }: ProjectDetailProps) {
   const localized = project[languageKey] || project.en;
   const L = ui[languageKey] || ui.en;
@@ -181,7 +213,6 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
   const capabilities = localized.capabilities || [];
   const implementation = localized.implementation || [];
   const challenges = localized.challenges || [];
-  const architectureNodes = localized.architectureHighlights || [];
   const reflection = localized.reflection;
   const notes = [
     { key: 'realtime', icon: Radio, text: localized.realtimeFeatures },
@@ -223,6 +254,9 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
   const go = (dir: number) => setActive((i) => (i + dir + screens.length) % screens.length);
   const related = projectsData.filter((p) => p.id !== project.id).slice(0, 3);
+  const arch = buildArchitecture(project.tech, project.scope);
+  const ownedTechs = new Set<string>();
+  arch.forEach((l) => { if (l.owned) l.items.forEach((t) => ownedTechs.add(t)); });
 
   return (
     <div dir={isFa ? 'rtl' : 'ltr'} className="relative min-h-screen text-white" style={{ backgroundColor: '#08090C', ['--cs-accent' as any]: accent }}>
@@ -261,7 +295,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
       <main className="relative z-10 mx-auto max-w-6xl px-5 md:px-8">
         {/* ===== Hero ===== */}
-        <section id="overview" className="grid scroll-mt-24 grid-cols-1 items-center gap-12 py-20 lg:grid-cols-2 lg:py-28">
+        <section id="overview" className="grid scroll-mt-24 grid-cols-1 items-center gap-10 py-16 lg:grid-cols-2 lg:py-24">
           <div>
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EASE }} className="flex flex-wrap items-center gap-3">
               <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: accent }}>{localized.category}</span>
@@ -311,13 +345,13 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
         </section>
 
         {/* ===== Overview ===== */}
-        <section className="scroll-mt-24 border-t py-20 md:py-28" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <section className="scroll-mt-24 border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.4fr_1fr]">
             <Reveal>
               <span className="cs-eyebrow-line" />
               <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.projectOverview}</h2>
               <p className="mt-3 max-w-xl" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.overviewLead}</p>
-              <div className="mt-10 space-y-8">
+              <div className="mt-8 space-y-6">
                 <div><div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: accent }}>{L.problemLabel}</div><p className="mt-2 text-lg leading-relaxed text-white/90">{localized.problem}</p></div>
                 <div><div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: accent }}>{L.valueLabel}</div><p className="mt-2 text-lg leading-relaxed text-white/90">{localized.outcome}</p></div>
               </div>
@@ -341,14 +375,14 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
         {/* ===== Walkthrough ===== */}
         {screens.length > 0 && (
-          <section id="screens" className="scroll-mt-24 border-t py-20 md:py-28" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <section id="screens" className="scroll-mt-24 border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
             <Reveal>
               <span className="cs-eyebrow-line" />
               <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.walkthrough}</h2>
               <p className="mt-3 max-w-xl" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.walkthroughLead}</p>
             </Reveal>
 
-            <div className="mt-10 grid items-center gap-10 lg:grid-cols-[1fr_280px]">
+            <div className="mt-8 grid items-center gap-10 lg:grid-cols-[1fr_280px]">
               <div ref={trackRef} className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 no-scrollbar" style={{ paddingLeft: 'calc(50% - 115px)', paddingRight: 'calc(50% - 115px)' }}>
                 {screens.map((screen, i) => (
                   <motion.div
@@ -387,7 +421,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
         {/* ===== Development Highlights ===== */}
         {(capabilities.length > 0 || implementation.length > 0 || notes.length > 0) && (
-          <section id="tech" className="scroll-mt-24 border-t py-20 md:py-28" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <section id="tech" className="scroll-mt-24 border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
             <Reveal>
               <span className="cs-eyebrow-line" />
               <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.devHighlights}</h2>
@@ -395,7 +429,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
             </Reveal>
 
             {(capabilities.length > 0 || implementation.length > 0) && (
-              <div className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-2">
+              <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-2">
                 {capabilities.length > 0 && (
                   <Reveal>
                     <h3 className="text-xl font-semibold text-white">{L.productCapabilities}</h3>
@@ -416,7 +450,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
             )}
 
             {notes.length > 0 && (
-              <div className="mt-12">
+              <div className="mt-9">
                 <h3 className="text-xl font-semibold text-white">{L.engineeringNotes}</h3>
                 <div className="mt-4 grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4" style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, overflow: 'hidden' }}>
                   {notes.map((n, i) => { const Icon = n.icon; return (
@@ -436,45 +470,39 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
           </section>
         )}
 
-        {/* ===== Architecture ===== */}
-        {architectureNodes.length > 0 && (
-          <section id="architecture" className="scroll-mt-24 border-t py-20 md:py-28" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        {/* ===== Architecture map ===== */}
+        {arch.length > 0 && (
+          <section id="architecture" className="scroll-mt-24 border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
             <Reveal>
               <span className="cs-eyebrow-line" />
               <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.architecture}</h2>
               <p className="mt-3 max-w-xl" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.architectureLead}</p>
             </Reveal>
 
-            <div className="mt-12 flex flex-col items-center">
-              {architectureNodes.map((node, i) => (
-                <div key={i} className="flex flex-col items-center">
-                  <motion.div
-                    initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.5, delay: i * 0.09, ease: EASE }}
-                    className="flex w-full max-w-xl items-center gap-4 rounded-xl border px-5 py-4 transition-colors hover:border-white/20" style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.02)' }}
-                  >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-semibold" style={{ backgroundColor: `${accent}1a`, color: accent }}>{String(i + 1).padStart(2, '0')}</span>
-                    <span className="text-base font-medium text-white">{node}</span>
-                  </motion.div>
-                  {i < architectureNodes.length - 1 && (
-                    <motion.div className="h-9 w-px" style={{ background: `linear-gradient(rgba(255,255,255,0.12), ${accent}66)`, transformOrigin: 'top' }} initial={{ scaleY: 0, opacity: 0 }} whileInView={{ scaleY: 1, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.09 + 0.2, ease: EASE }} />
-                  )}
-                </div>
-              ))}
+            <div className="mt-10">
+              <ArchitectureMap tech={project.tech} name={localized.title} accent={accent} ownedTechs={ownedTechs} isFa={isFa} />
             </div>
-            <Reveal><p className="mt-8 text-center text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.architectureNote}</p></Reveal>
+
+            <Reveal>
+              <div className="mx-auto mt-10 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full" style={{ background: `${accent}59`, border: `1px solid ${accent}` }} /> {isFa ? 'تکنولوژی‌های بخش من' : 'My-scope technologies'}</span>
+                <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)' }} /> {isFa ? 'سایر تکنولوژی‌ها' : 'Other technologies'}</span>
+              </div>
+              <p className="mx-auto mt-4 max-w-2xl text-center text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.architectureNote}</p>
+            </Reveal>
           </section>
         )}
 
         {/* ===== Challenges & Solutions ===== */}
         {challenges.length > 0 && (
-          <section id="challenges" className="scroll-mt-24 border-t py-20 md:py-28" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <section id="challenges" className="scroll-mt-24 border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
             <Reveal>
               <span className="cs-eyebrow-line" />
               <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.challengesTitle}</h2>
               <p className="mt-3 max-w-xl" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.challengesLead}</p>
             </Reveal>
 
-            <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
               {challenges.map((item, i) => (
                 <Reveal key={i} delay={i * 0.08}>
                   <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.3, ease: EASE }} className="cs-sheen h-full rounded-2xl border p-6 md:p-7" style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
@@ -494,14 +522,14 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
         {/* ===== Gallery ===== */}
         {screens.length > 0 && (
-          <section className="scroll-mt-24 border-t py-20 md:py-28" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <section className="scroll-mt-24 border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
             <Reveal>
               <span className="cs-eyebrow-line" />
               <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.gallery}</h2>
               <p className="mt-3 max-w-xl" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.galleryLead}</p>
             </Reveal>
 
-            <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-6">
               {screens.map((screen, i) => (
                 <Reveal key={screen.id} delay={i * 0.05}>
                   <motion.button whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }} onClick={() => setLightbox(i)} className="group flex w-full flex-col items-center gap-3 text-center" aria-label={`Open ${screen.title}`}>
@@ -516,7 +544,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
         {/* ===== Reflection ===== */}
         {reflection && (
-          <section className="scroll-mt-24 border-t py-20 md:py-28" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <section className="scroll-mt-24 border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
             <Reveal>
               <span className="cs-eyebrow-line" />
               <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{L.reflection}</h2>
@@ -527,13 +555,13 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
         )}
 
         {/* ===== Next Projects ===== */}
-        <section className="scroll-mt-24 border-t py-20 md:py-28" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <section className="scroll-mt-24 border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
           <Reveal>
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">{L.nextProjects}</h2>
             <p className="mt-3 max-w-xl" style={{ color: 'rgba(255,255,255,0.6)' }}>{L.nextProjectsLead}</p>
           </Reveal>
 
-          <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
             {related.map((p, idx) => {
               const pl = p[languageKey] || p.en;
               return (
@@ -556,7 +584,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
         </section>
 
         {/* ===== Developer Profile ===== */}
-        <section className="border-t py-20 md:py-24" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <section className="border-t py-14 md:py-20" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
           <Reveal>
             <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
               <ProjectLogo title={localized.title} accent={accent} size={64} />
