@@ -5,10 +5,25 @@ export default {
   "dictionary": {
     "navbar": {
       "about": "About",
+      "resume": "Resume",
       "services": "Services & Skills",
       "projects": "Showcase",
       "contact": "Ping System",
       "architecture": "System Core"
+    },
+    "resume": {
+      "eyebrow": "For Employers & Collaborators",
+      "heading": "Download my resume",
+      "description": "Here to evaluate my work or discuss an opportunity? Download my complete, up-to-date resume in your preferred language. It is built directly from the same profile and project data you see on this website.",
+      "language": "Document language",
+      "download": "Download Arshia's Resume",
+      "generating": "Building your PDF…",
+      "success": "PDF downloaded successfully.",
+      "error": "PDF generation failed. Please try again.",
+      "selectable": "Selectable text",
+      "clickable": "Clickable links",
+      "synced": "Synced project data",
+      "preview": "Resume overview"
     },
     "hero": {
       "sub": "SYSTEM ARCHITECT & DEVELOPER",

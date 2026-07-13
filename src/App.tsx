@@ -38,7 +38,11 @@ import {
   Eye,
   Copy,
   Phone,
-  Youtube
+  Youtube,
+  FileText,
+  Download,
+  Loader2,
+  Link2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -47,6 +51,8 @@ import { projectsData } from './data/projectsData';
 import ProjectDetail from './pages/ProjectDetail';
 import { walkthroughData } from './data/walkthroughData';
 import { imageLinks } from './data/imageLinks';
+import { resumeProfile } from './data/resumeProfile';
+import type { ResumeLanguage } from './types/schema';
 
 const arshiaPortrait = imageLinks.arshiaPortrait;
 const aboutGeometric = imageLinks.aboutGeometric;
@@ -463,6 +469,26 @@ export default function App() {
   }, [activeBlueprintId, deploying]);
 
   const [copiedContact, setCopiedContact] = useState<string | null>(null);
+  const [resumeLanguage, setResumeLanguage] = useState<ResumeLanguage>(languageKey);
+  const [resumeStatus, setResumeStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const downloadResume = async () => {
+    if (resumeStatus === 'loading') return;
+    setResumeStatus('loading');
+    try {
+      const { generateResumePdf } = await import('./utils/generateResumePdf');
+      await generateResumePdf({
+        language: resumeLanguage,
+        profile: resumeProfile,
+        projects: projectsData,
+      });
+      setResumeStatus('success');
+      window.setTimeout(() => setResumeStatus('idle'), 3500);
+    } catch (error) {
+      console.error('Unable to generate resume PDF:', error);
+      setResumeStatus('error');
+    }
+  };
   const copyContact = async (key: string, value: string) => {
     try {
       await navigator.clipboard.writeText(value);
@@ -666,6 +692,7 @@ export default function App() {
         {/* Desktop navigation with bilingual support */}
         <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-xs font-semibold tracking-widest uppercase">
           <a href="#about" className="hover:text-white transition-colors duration-200">{t.navbar.about}</a>
+          <a href="#resume" className="hover:text-white transition-colors duration-200">{t.navbar.resume}</a>
           <a href="#services" className="hover:text-white transition-colors duration-200">{t.navbar.services}</a>
           <a href="#architecture" className="hover:text-white transition-colors duration-200">{t.navbar.architecture}</a>
           <a href="#projects" className="hover:text-white transition-colors duration-200">{t.navbar.projects}</a>
@@ -1691,6 +1718,111 @@ export default function App() {
 
           </div>
 
+        </div>
+      </section>
+
+
+      {/* LIVE, DATA-DRIVEN RESUME EXPORT */}
+      <section
+        id="resume"
+        className="relative z-10 scroll-mt-20 overflow-hidden border-y border-white/[0.06] bg-[#090a0c] py-16 sm:py-24"
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(0,209,255,0.09),transparent_34%),radial-gradient(circle_at_80%_70%,rgba(158,255,0,0.07),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.025] bg-[linear-gradient(rgba(255,255,255,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.8)_1px,transparent_1px)] bg-[size:32px_32px]" />
+
+        <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 md:px-8 lg:grid-cols-12 lg:gap-14">
+          <div className="flex flex-col justify-between lg:col-span-5">
+            <div>
+              <div className="mb-5 flex items-center gap-2">
+                <span className="h-0.5 w-6" style={{ backgroundColor: accentColor }} />
+                <span className="text-xs font-black uppercase tracking-[0.2em]" style={{ color: accentColor }}>
+                  {t.resume.eyebrow}
+                </span>
+              </div>
+              <h2 className="max-w-xl text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-5xl">
+                {t.resume.heading}
+              </h2>
+              <p className="mt-5 max-w-lg text-sm leading-7 text-gray-400">
+                {t.resume.description}
+              </p>
+            </div>
+
+            <div className="mt-8 grid grid-cols-1 gap-2.5 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              {[
+                { icon: <FileText className="h-3.5 w-3.5" />, label: t.resume.selectable },
+                { icon: <Link2 className="h-3.5 w-3.5" />, label: t.resume.clickable },
+                { icon: <RefreshCw className="h-3.5 w-3.5" />, label: t.resume.synced },
+              ].map((feature) => (
+                <div key={feature.label} className="flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3 py-3 text-[10px] font-bold text-gray-400">
+                  <span style={{ color: accentColor }}>{feature.icon}</span>
+                  <span>{feature.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="lg:col-span-7">
+            <div className="overflow-hidden rounded-[28px] border border-white/10 bg-black/50 shadow-[0_35px_100px_-45px_rgba(0,209,255,0.35)] backdrop-blur-xl">
+              <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-4 sm:px-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-1.5" dir="ltr">
+                    <span className="h-2 w-2 rounded-full bg-[#FF5F57]" />
+                    <span className="h-2 w-2 rounded-full bg-[#FEBC2E]" />
+                    <span className="h-2 w-2 rounded-full bg-[#28C840]" />
+                  </div>
+                  <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600">arshia.resume</span>
+                </div>
+                <span className="flex items-center gap-1.5 font-mono text-[9px] text-emerald-400/80">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" /> LIVE DATA
+                </span>
+              </div>
+
+              <div className="space-y-7 p-5 sm:p-7">
+                <fieldset>
+                  <legend className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">{t.resume.language}</legend>
+                  <div className="grid grid-cols-2 gap-3" dir="ltr">
+                    {(['en', 'fa'] as ResumeLanguage[]).map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => { setResumeLanguage(option); setResumeStatus('idle'); }}
+                        aria-pressed={resumeLanguage === option}
+                        className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-black transition-all ${resumeLanguage === option ? 'border-white/25 bg-white/[0.09] text-white' : 'border-white/[0.07] bg-white/[0.02] text-gray-500 hover:border-white/15 hover:text-gray-300'}`}
+                      >
+                        <span>{option === 'en' ? 'English' : 'فارسی'}</span>
+                        <span className="font-mono text-[9px] uppercase" style={{ color: resumeLanguage === option ? accentColor : undefined }}>{option.toUpperCase()}</span>
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <div className="rounded-2xl border border-white/[0.07] bg-[#060708] p-4">
+                  <span className="mb-3 block font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600">{t.resume.preview}</span>
+                  <div className="grid grid-cols-3 gap-x-4 gap-y-3 text-xs">
+                    <div><span className="block text-gray-600">LANG</span><strong className="mt-1 block text-white">{resumeLanguage.toUpperCase()}</strong></div>
+                    <div><span className="block text-gray-600">PROJECTS</span><strong className="mt-1 block text-white">{projectsData.length}</strong></div>
+                    <div><span className="block text-gray-600">OUTPUT</span><strong className="mt-1 block text-white">A4 · PDF</strong></div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={downloadResume}
+                  disabled={resumeStatus === 'loading'}
+                  className="flex w-full items-center justify-center gap-2.5 rounded-xl px-5 py-4 text-sm font-black text-black transition-all hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70 disabled:hover:translate-y-0"
+                  style={{ backgroundColor: accentColor, boxShadow: `0 16px 38px -20px ${accentColor}` }}
+                >
+                  {resumeStatus === 'loading' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  <span>{resumeStatus === 'loading' ? t.resume.generating : t.resume.download}</span>
+                </button>
+
+                <div aria-live="polite" className="min-h-5 text-center text-xs">
+                  {resumeStatus === 'success' && <span className="text-emerald-400">{t.resume.success}</span>}
+                  {resumeStatus === 'error' && <span className="text-red-400">{t.resume.error}</span>}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

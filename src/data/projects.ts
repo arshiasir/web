@@ -113,7 +113,7 @@ export const projectsData: ProjectSchema[] = [
       heroDescription: 'کالکیلو ثبت وعده‌های غذایی را با تشخیص غذا از روی تصویر، تخمین کالری و مواد مغذی، تحلیل رفتار غذایی و گزارش‌های شخصی‌سازی‌شده بر اساس تاریخچه، وزن و اهداف سلامتی ساده می‌کند.',
       screens: [
         { id: 'scan', title: 'اسکن غذا', description: 'ثبت تصویر وعده غذایی برای آغاز فرآیند شناسایی و تحلیل تغذیه‌ای.' , image: "calkilo_scan.png" },
-        { id: 'results', title: 'تحلیل تغذیه', description: 'نمایش کالری تخمینی و ترکیبات تغذیه‌ای وعده اسکن‌شده.' , image : "calkilo_nutrition_analysis.png" },
+        { id: 'results', title: 'تحلیل تغذیه', description: 'نمایش کالری تخمینی و ترکیبات تغذیه‌ای وعده اسکن‌شده.'  ,image : "calkilo_nutrition_analysis.png" },
         { id: 'history', title: 'تاریخچه مصرف', description: 'ثبت منظم وعده‌ها و مرور الگوهای مصرف در طول زمان.' },
         { id: 'goals', title: 'اهداف سلامتی', description: 'ارتباط گزارش‌های تغذیه‌ای با وزن و اهداف سلامتی کاربر.' },
         { id: 'insights', title: 'بینش‌های غذایی', description: 'شناسایی الگوهای تکرارشونده مصرف و ارائه هشدارهای سلامت‌محور.' },
@@ -267,7 +267,7 @@ export const projectsData: ProjectSchema[] = [
       ],
     },
     fa: {
-      title: 'کوچینی موزیک (Couchini)',
+      title: 'کوچینی موزیک Couchini',
       category: 'پلتفرم پخش جریانی صوت',
       desc: 'اپلیکیشن موسیقی لوکس با امکان استریم صوتی فوق‌العاده کم‌تاخیر، رمزگشایی آفلاین سخت‌افزاری و موتور کشف آهنگ مبتنی بر هوش محیطی.',
       role: 'توسعه تخصصی موبایل (MOBILE)',

@@ -67,7 +67,7 @@ const ui = {
     reflection: 'بازاندیشی توسعه‌دهنده', reflectionLead: 'آنچه به گذشته خودم می‌گفتم.',
     nextProjects: 'پروژه‌های بعدی', nextProjectsLead: 'کاوش در آثار مرتبط را ادامه دهید.',
     openProject: 'باز کردن مطالعه موردی',
-    builtBy: 'ساخته‌شده توسط آرشیا', builtByDesc: 'توسعه‌دهنده موبایل و فول‌استک با تمرکز بر اپلیکیشن‌های تمیز، مقیاس‌پذیر و کاربرمحور.',
+    builtBy: 'ساخته‌شده توسط عرشیا', builtByDesc: 'توسعه‌دهنده موبایل و فول‌استک با تمرکز بر اپلیکیشن‌های تمیز، مقیاس‌پذیر و کاربرمحور.',
     viewProfile: 'گیت‌هاب', roleLabel: 'نقش', platformsLabel: 'پلتفرم‌ها', statusLabel: 'وضعیت', yearLabel: 'سال',
     roleDev: { MOBILE: 'توسعه‌دهنده موبایل', FULLSTACK: 'توسعه‌دهنده فول‌استک', BACKEND: 'توسعه‌دهنده بک‌اند' },
     platforms: { MOBILE: 'اندروید و iOS', OTHER: 'وب و API' },
