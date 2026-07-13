@@ -23,6 +23,16 @@ export interface ChallengePair {
   solution: string;
 }
 
+export interface CapabilityRow {
+  title: string;
+  description: string;
+}
+
+export interface TechRow {
+  title: string;
+  description: string;
+}
+
 export interface ProjectLocalizedData {
   title: string;
   category: string;
@@ -43,6 +53,21 @@ export interface ProjectLocalizedData {
   features: FeatureCard[];
   timeline: TimelineStep[];
   challenges: ChallengePair[];
+  contribution?: string[];
+  capabilities?: CapabilityRow[];
+  implementation?: TechRow[];
+  reflection?: string;
+}
+
+export interface ProjectLinks {
+  github?: string;
+  live?: string;
+  store?: { label: string; url: string }[];
+}
+
+export interface ProjectImages {
+  mockup: string;
+  gallery?: string[];
 }
 
 export interface ProjectSchema {
@@ -50,10 +75,13 @@ export interface ProjectSchema {
   tech: string[];
   metrics: { label: { en: string; fa: string }; value: string }[];
   color: string;
-  visual: string;
+  images: ProjectImages;
+  links: ProjectLinks;
   scope: ProjectScope;
   year: string;
   status: string;
+  platforms?: { en: string; fa: string };
+  publicUrl?: { en: string; fa: string };
   en: ProjectLocalizedData;
   fa: ProjectLocalizedData;
   [languageCode: string]: any;
@@ -62,10 +90,25 @@ export interface ProjectSchema {
 export interface TranslationDictionary {
   navbar: {
     about: string;
+    resume: string;
     services: string;
     projects: string;
     contact: string;
     architecture: string;
+  };
+  resume: {
+    eyebrow: string;
+    heading: string;
+    description: string;
+    language: string;
+    download: string;
+    generating: string;
+    success: string;
+    error: string;
+    selectable: string;
+    clickable: string;
+    synced: string;
+    preview: string;
   };
   hero: {
     sub: string;
@@ -156,4 +199,53 @@ export interface TranslationDictionary {
     success: string;
     footerText: string;
   };
+}
+
+export type ResumeLanguage = 'en' | 'fa';
+export interface LocalizedText {
+  en: string;
+  fa: string;
+}
+
+export interface ResumeEntry {
+  title: LocalizedText;
+  organization: LocalizedText;
+  period: LocalizedText;
+  highlights: { en: string[]; fa: string[] };
+}
+
+export interface ResumeProfile {
+  name: LocalizedText;
+  role: LocalizedText;
+  summary: LocalizedText;
+  location: LocalizedText;
+  contact: {
+    email: string;
+    phone: string;
+    website: string;
+  };
+  social: { label: string; url: string }[];
+  skills: { title: LocalizedText; items: string[] }[];
+  experience?: ResumeEntry[];
+  education?: ResumeEntry[];
+  labels: Record<ResumeLanguage, {
+    summary: string;
+    skills: string;
+    projects: string;
+    experience: string;
+    education: string;
+    technologies: string;
+    highlights: string;
+    metrics: string;
+    caseStudy: string;
+    page: string;
+    generatedFrom: string;
+    status: string;
+    scope: string;
+    year: string;
+    role: string;
+    outcome: string;
+    scopes: Record<ProjectScope, string>;
+    statuses: Record<string, string>;
+  }>;
 }

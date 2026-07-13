@@ -1,0 +1,203 @@
+/* ============================================================
+   Case Study — premium motion & detail layer
+   All effects are color-driven via the --cs-accent variable,
+   which is set inline on the page root from the project color.
+   ============================================================ */
+
+@keyframes cs-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(6%, -5%, 0) scale(1.12); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes cs-drift-2 {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(-5%, 7%, 0) scale(1.08); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes cs-spin { to { transform: rotate(360deg); } }
+@keyframes cs-shimmer {
+  0%   { background-position: 200% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes cs-pulse-soft {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.9; }
+}
+@keyframes cs-scan {
+  0%   { transform: translateY(-130%); }
+  100% { transform: translateY(130%); }
+}
+
+.cs-aurora-1 { animation: cs-drift 19s ease-in-out infinite; }
+.cs-aurora-2 { animation: cs-drift-2 24s ease-in-out infinite; }
+.cs-spin-slow { animation: cs-spin 7s linear infinite; }
+.cs-pulse-soft { animation: cs-pulse-soft 4.5s ease-in-out infinite; }
+
+.cs-shimmer-text {
+  background: linear-gradient(100deg, #ffffff 18%, var(--cs-accent) 42%, #ffffff 66%, var(--cs-accent) 88%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: cs-shimmer 7s linear infinite;
+}
+
+/* conic ring around the project logo */
+.cs-ring {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--cs-accent) 55deg,
+    transparent 135deg,
+    var(--cs-accent) 220deg,
+    transparent 300deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+          mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+}
+
+/* top scroll-progress bar */
+.cs-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 100%;
+  z-index: 60;
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--cs-accent), #ffffff);
+  box-shadow: 0 0 12px var(--cs-accent);
+}
+
+/* sheen sweep on hover for cards */
+.cs-sheen { position: relative; overflow: hidden; }
+.cs-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(105deg, transparent 32%, rgba(255, 255, 255, 0.10) 50%, transparent 68%);
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.cs-sheen:hover::after { transform: translateX(120%); }
+
+/* animated eyebrow underline */
+.cs-eyebrow-line {
+  height: 1px;
+  width: 26px;
+  background: linear-gradient(90deg, var(--cs-accent), transparent);
+}
+
+/* Shared visual language with the portfolio home: restrained glass, neon accents,
+   generous radii and a subtle technical grid. */
+.cs-page { isolation: isolate; }
+.cs-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.cs-nav { box-shadow: 0 18px 55px -24px rgba(0,0,0,.95); }
+.cs-ambient {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+}
+.cs-nav-links a { padding: .55rem .75rem; border-radius: 999px; }
+.cs-nav-links a:hover { background: rgba(255,255,255,.06); }
+.cs-main { padding-top: 3.5rem; }
+.cs-hero {
+  position: relative;
+  border-color: rgba(255,255,255,.09);
+  background:
+    radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--cs-accent) 9%, transparent), transparent 38%),
+    linear-gradient(135deg, rgba(255,255,255,.055), rgba(255,255,255,.012));
+  box-shadow: 0 40px 120px -80px rgba(0,0,0,.9), inset 0 1px rgba(255,255,255,.06);
+}
+.cs-hero::after {
+  content: "";
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  inset-inline-end: -120px;
+  bottom: -140px;
+  border: 1px dashed color-mix(in srgb, var(--cs-accent) 28%, transparent);
+  border-radius: 50%;
+}
+.cs-meta { border-color: rgba(255,255,255,.08); background: rgba(255,255,255,.08); }
+.cs-meta > div { padding: .9rem; background: rgba(7,7,7,.72); }
+.cs-hero-visual > div { transform: rotate(1.5deg); transition: transform .7s cubic-bezier(.22,1,.36,1); }
+.cs-hero-visual:hover > div { transform: rotate(0) translateY(-6px); }
+.cs-section {
+  position: relative;
+  margin-top: 1.25rem;
+  padding-inline: clamp(1.25rem, 3vw, 2.5rem);
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 2rem;
+  background: linear-gradient(145deg, rgba(255,255,255,.018), rgba(255,255,255,.006));
+}
+.cs-section::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  inset-inline-start: 2rem;
+  width: 72px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cs-accent), transparent);
+}
+.cs-glass-card, .cs-profile {
+  border-color: rgba(255,255,255,.09);
+  background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.015));
+  box-shadow: inset 0 1px rgba(255,255,255,.05), 0 24px 70px -55px rgba(0,0,0,.9);
+}
+.cs-walkthrough { border-color: rgba(255,255,255,.075); background: rgba(255,255,255,.012); }
+.cs-screen-list { border-color: rgba(255,255,255,.075); background: rgba(0,0,0,.18); }
+.cs-architecture { border-color: rgba(255,255,255,.075); background: rgba(0,0,0,.16); }
+.cs-architecture-map {
+  border-color: rgba(255,255,255,.07);
+  background: linear-gradient(145deg, rgba(255,255,255,.018), rgba(0,0,0,.18));
+}
+.cs-profile { position: relative; overflow: hidden; }
+.cs-profile::after {
+  content: ""; position: absolute; width: 180px; height: 180px; inset-inline-end: -70px; top: -90px;
+  border-radius: 50%; background: var(--cs-accent); filter: blur(80px); opacity: .12; pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .cs-main { padding-top: 2rem; }
+  .cs-nav { top: .75rem; width: calc(100% - 1rem); }
+  .cs-section { border-radius: 1.5rem; padding-inline: 1.1rem; }
+  .cs-hero { border-radius: 1.5rem; }
+  .architecture-orbit { max-width: 330px; }
+  .architecture-core { width: 108px !important; height: 108px !important; }
+  .architecture-core > div:last-child { padding-inline: .65rem; }
+  .architecture-core .text-base { font-size: .78rem; }
+  .architecture-tech-node { width: 46px !important; height: 46px !important; }
+  .architecture-tech-label { margin-top: .3rem; max-width: 64px; overflow: hidden; text-overflow: ellipsis; font-size: 9px; }
+  .cs-architecture-map { overflow: hidden; }
+}
+
+@media (max-width: 380px) {
+  .architecture-orbit { max-width: 280px; }
+  .architecture-core { width: 92px !important; height: 92px !important; }
+  .architecture-tech-node { width: 40px !important; height: 40px !important; }
+  .architecture-tech-label { max-width: 54px; font-size: 8px; }
+}
+
+/* subtle moving scanline inside the active phone screen */
+.cs-scan {
+  position: absolute;
+  left: 0; right: 0;
+  height: 36%;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  animation: cs-scan 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-aurora-1, .cs-aurora-2, .cs-spin-slow, .cs-shimmer-text,
+  .cs-pulse-soft, .cs-scan { animation: none !important; }
+}

@@ -36,14 +36,23 @@ import {
   GitBranch,
   Sliders,
   Eye,
-  Copy
+  Copy,
+  Phone,
+  Youtube,
+  FileText,
+  Download,
+  Loader2,
+  Link2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { translations, languageMeta, supportedLanguages } from './data/translations';
 import { projectsData } from './data/projectsData';
+import ProjectDetail from './pages/ProjectDetail';
 import { walkthroughData } from './data/walkthroughData';
 import { imageLinks } from './data/imageLinks';
+import { resumeProfile } from './data/resumeProfile';
+import type { ResumeLanguage } from './types/schema';
 
 const arshiaPortrait = imageLinks.arshiaPortrait;
 const aboutGeometric = imageLinks.aboutGeometric;
@@ -55,9 +64,9 @@ const faceauthMockup = imageLinks.faceauthMockup;
 
 export default function App() {
   // Global Bilingual State ('en' for English LTR, 'fa' for Persian / Farsi RTL)
-  const initialLang = supportedLanguages.includes(navigator.language.slice(0, 2))
-    ? navigator.language.slice(0, 2)
-    : 'en';
+  const urlLanguage = window.location.pathname.match(/^\/(en|fa)(?:\/|$)/)?.[1];
+  const browserLanguage = navigator.language.slice(0, 2);
+  const initialLang = urlLanguage || (supportedLanguages.includes(browserLanguage) ? browserLanguage : 'en');
   const [lang, setLang] = useState<string>(initialLang);
   const languageKey = supportedLanguages.includes(lang) ? (lang as 'en' | 'fa') : 'en';
   const t = translations[languageKey] || translations.en;
@@ -81,6 +90,18 @@ export default function App() {
   // Project detail page state
   const [selectedProjId, setSelectedProjId] = useState<string | null>(null);
   const [currentPath, setCurrentPath] = useState<string>(() => window.location.pathname);
+
+  const pathForLanguage = (nextLanguage: string, path = window.location.pathname) => {
+    const pathWithoutLanguage = path.replace(/^\/(en|fa)(?=\/|$)/, '') || '/';
+    return `/${nextLanguage}${pathWithoutLanguage === '/' ? '' : pathWithoutLanguage}`;
+  };
+
+  const changeLanguage = (nextLanguage: string) => {
+    const nextPath = pathForLanguage(nextLanguage);
+    window.history.pushState({}, '', nextPath);
+    setLang(nextLanguage);
+    setCurrentPath(nextPath);
+  };
 
   // Floating Developer HUD console states
   const [devMode, setDevMode] = useState<boolean>(false);
@@ -175,7 +196,19 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const projectMatch = currentPath.match(/^\/projects\/([^/]+)\/?$/);
+    const languageFromPath = currentPath.match(/^\/(en|fa)(?:\/|$)/)?.[1];
+    if (languageFromPath && languageFromPath !== lang) setLang(languageFromPath);
+  }, [currentPath, lang]);
+
+  useEffect(() => {
+    if (/^\/(en|fa)(?:\/|$)/.test(window.location.pathname)) return;
+    const localizedPath = pathForLanguage(languageKey);
+    window.history.replaceState({}, '', localizedPath);
+    setCurrentPath(localizedPath);
+  }, []);
+
+  useEffect(() => {
+    const projectMatch = currentPath.match(/^\/(?:(?:en|fa)\/)?projects\/([^/]+)\/?$/);
     setSelectedProjId(projectMatch ? projectMatch[1] : null);
   }, [currentPath]);
 
@@ -193,7 +226,7 @@ export default function App() {
 
   const openProjectPage = (projectId: string) => {
     setSelectedProjId(projectId);
-    window.history.pushState({}, '', `/projects/${projectId}`);
+    window.history.pushState({}, '', `/${languageKey}/projects/${projectId}`);
     setCurrentPath(window.location.pathname);
   };
 
@@ -435,9 +468,36 @@ export default function App() {
     return () => clearInterval(logInterval);
   }, [activeBlueprintId, deploying]);
 
-  // Form submission handling
-  const [formState, setFormState] = useState({ name: '', email: '', message: '' });
-  const [formSent, setFormSent] = useState(false);
+  const [copiedContact, setCopiedContact] = useState<string | null>(null);
+  const [resumeLanguage, setResumeLanguage] = useState<ResumeLanguage>(languageKey);
+  const [resumeStatus, setResumeStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const downloadResume = async () => {
+    if (resumeStatus === 'loading') return;
+    setResumeStatus('loading');
+    try {
+      const { generateResumePdf } = await import('./utils/generateResumePdf');
+      await generateResumePdf({
+        language: resumeLanguage,
+        profile: resumeProfile,
+        projects: projectsData,
+      });
+      setResumeStatus('success');
+      window.setTimeout(() => setResumeStatus('idle'), 3500);
+    } catch (error) {
+      console.error('Unable to generate resume PDF:', error);
+      setResumeStatus('error');
+    }
+  };
+  const copyContact = async (key: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedContact(key);
+      window.setTimeout(() => setCopiedContact((current) => current === key ? null : current), 1800);
+    } catch (error) {
+      console.error('Unable to copy contact information:', error);
+    }
+  };
 
   // Rotating subtitle ticks
   useEffect(() => {
@@ -547,29 +607,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const subject = isFa ? 'پیام از وبسایت' : 'Message from website';
-    const body = [
-      `${isFa ? 'نام' : 'Name'}: ${formState.name}`,
-      `${isFa ? 'ایمیل' : 'Email'}: ${formState.email}`,
-      '',
-      `${isFa ? 'پیام' : 'Message'}:`,
-      formState.message,
-    ].join('\n');
-
-    const mailto = `mailto:khaniarshia7@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailto;
-
-    setFormSent(true);
-    setTimeout(() => {
-      setFormSent(false);
-      setFormState({ name: '', email: '', message: '' });
-    }, 4000);
-  };
-
-  const projectRouteMatch = currentPath.match(/^\/projects\/([^/]+)\/?$/);
+  const projectRouteMatch = currentPath.match(/^\/(?:(?:en|fa)\/)?projects\/([^/]+)\/?$/);
 
   if (projectRouteMatch) {
     const projectId = projectRouteMatch[1];
@@ -585,7 +623,7 @@ export default function App() {
             </p>
             <button
               onClick={() => {
-                window.history.pushState({}, '', '/');
+                window.history.pushState({}, '', `/${languageKey}`);
                 setCurrentPath(window.location.pathname);
               }}
               className="px-5 py-3 rounded-full bg-white text-black font-black uppercase tracking-wider text-xs"
@@ -597,168 +635,29 @@ export default function App() {
       );
     }
 
-    const projectLocal = project[languageKey] || project.en;
-    const highlights = lang === 'en' ? project.en.highlights : project.fa.highlights;
-
     return (
-      <div dir={lang === 'fa' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#070707] text-[#D7E2EA] overflow-x-hidden relative">
-        <div className="absolute top-0 left-0 w-full h-[120vh] pointer-events-none overflow-hidden z-0">
-          <div className="absolute -top-[20%] left-[10%] w-[500px] h-[500px] rounded-full blur-[140px] opacity-25" style={{ backgroundColor: project.color }} />
-          <div className="absolute top-[40%] -right-[10%] w-[600px] h-[600px] rounded-full blur-[180px] opacity-[0.12]" style={{ backgroundColor: secondaryAccent }} />
-        </div>
-
-        <main className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-10">
-          <div className="flex items-center justify-between gap-4 mb-8">
-            <button
-              onClick={() => {
-                window.history.pushState({}, '', '/');
-                setCurrentPath(window.location.pathname);
-                setSelectedProjId(null);
-              }}
-              className="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs uppercase tracking-wider font-black text-white transition-colors"
-            >
-              {lang === 'en' ? 'Back to Projects' : 'بازگشت به پروژه‌ها'}
-            </button>
-
-            <button
-              onClick={() => {
-                window.history.pushState({}, '', '/');
-                setCurrentPath(window.location.pathname);
-                setSelectedProjId(null);
-                window.setTimeout(() => {
-                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 50);
-              }}
-              className="px-4 py-2 rounded-full bg-white text-black text-xs uppercase tracking-wider font-black hover:bg-white/90 transition-colors"
-            >
-              {lang === 'en' ? 'Contact Me' : 'تماس'}
-            </button>
-          </div>
-
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-5 space-y-6">
-              <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/60">
-                <img src={project.visual} alt={projectLocal.title} referrerPolicy="no-referrer" className="w-full h-[360px] object-cover" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {project.metrics.map((metric, metricIdx) => {
-                  const metricLabel = metric.label[languageKey] || metric.label.en;
-                  return (
-                    <div key={metricIdx} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                      <span className="text-[10px] uppercase tracking-widest text-gray-500 font-mono block mb-2">{metricLabel}</span>
-                      <span className="text-2xl font-black" style={{ color: project.color }}>{metric.value}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="lg:col-span-7 space-y-6">
-              <div className="rounded-3xl border border-white/10 bg-black/50 p-6 md:p-8">
-                <div className="flex flex-col gap-3 mb-5">
-                  <span className="text-[10px] uppercase tracking-widest font-black text-gray-500 font-mono">{project.scope}</span>
-                  <h1 className="text-4xl md:text-5xl font-black uppercase text-white tracking-tight">{projectLocal.title}</h1>
-                  <p className="text-gray-400 text-sm leading-relaxed max-w-3xl">
-                    {lang === 'en'
-                      ? 'This case study is structured to answer the questions recruiters scan for first: what the project solves, what you owned, what stack was used, and what proof exists.'
-                      : 'این case study طوری چیده شده که سؤال‌های اصلی خواننده را سریع جواب دهد: پروژه چه مشکلی را حل می‌کند، شما چه بخشی را مالک بودید، چه استکی استفاده شده، و چه مدرکی برای اثرش وجود دارد.'}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                    <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">
-                      {lang === 'en' ? 'Problem / Context' : 'مسئله / زمینه'}
-                    </div>
-                    <p className="text-sm leading-relaxed text-gray-300">{projectLocal.desc}</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                    <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">
-                      {lang === 'en' ? 'My Role' : 'نقش من'}
-                    </div>
-                    <p className="text-sm leading-relaxed text-gray-300">{projectLocal.role}</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                    <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">
-                      {lang === 'en' ? 'Proof / Outcome' : 'مدرک / نتیجه'}
-                    </div>
-                    <div className="space-y-2">
-                      {project.metrics.map((metric, metricIdx) => {
-                  const metricLabel = metric.label[languageKey] || metric.label.en;
-                        return (
-                          <div key={metricIdx} className="flex items-center justify-between gap-3">
-                            <span className="text-[10px] uppercase tracking-wider text-gray-500">{metricLabel}</span>
-                            <span className="text-sm font-black" style={{ color: project.color }}>{metric.value}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {project.tech.map((tech, techIdx) => (
-                    <span key={techIdx} className="text-[9px] font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-2.5 py-1 rounded-full text-gray-300">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { label: lang === 'en' ? 'Process / Architecture' : 'فرآیند / معماری', value: projectLocal.architectureHighlights.join(' • ') },
-                    { label: lang === 'en' ? 'Real-time signals' : 'سیگنال‌های بلادرنگ', value: projectLocal.realtimeFeatures },
-                    { label: lang === 'en' ? 'AI / automation' : 'هوش مصنوعی / اتوماسیون', value: projectLocal.aiFeatures },
-                    { label: lang === 'en' ? 'Scale / performance' : 'مقیاس / کارایی', value: `${projectLocal.scalabilityDetails} ${projectLocal.performanceOptimizations}` },
-                  ].map((item) => (
-                    <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                      <div className="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-2">{item.label}</div>
-                      <p className="text-sm leading-relaxed text-gray-300">{item.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-                  <h2 className="text-xs uppercase tracking-widest font-black text-white mb-3">
-                    {lang === 'en' ? 'What I Built' : 'آنچه ساختم'}
-                  </h2>
-                  <div className="space-y-2">
-                    {highlights.map((item, itemIdx) => (
-                      <div key={itemIdx} className="flex gap-2 text-sm text-gray-300 leading-relaxed">
-                        <span className="text-[10px] mt-1" style={{ color: project.color }}>●</span>
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-                  <h2 className="text-xs uppercase tracking-widest font-black text-white mb-3">
-                    {lang === 'en' ? 'Why It Works for a Portfolio' : 'چرا برای پورتفولیو جواب می‌دهد'}
-                  </h2>
-                  <div className="space-y-3 text-sm text-gray-300 leading-relaxed">
-                    <p>
-                      {lang === 'en'
-                        ? 'It gives a recruiter a 30-second scan path: problem, role, stack, proof, then deeper engineering detail.'
-                        : 'برای خواننده یک مسیر ۳۰ ثانیه‌ای می‌سازد: مسئله، نقش، استک، مدرک، و بعد جزئیات فنی عمیق‌تر.'}
-                    </p>
-                    <p>
-                      {lang === 'en'
-                        ? 'That is the right balance between attractive presentation and practical signal.'
-                        : 'این همان تعادل درست بین ارائهٔ جذاب و سیگنال کاربردی است.'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </main>
-      </div>
+      <ProjectDetail
+        project={project}
+        languageKey={languageKey}
+        onLanguageToggle={() => changeLanguage(languageKey === 'fa' ? 'en' : 'fa')}
+        onBack={() => {
+          window.history.pushState({}, '', `/${languageKey}`);
+          setCurrentPath(window.location.pathname);
+          setSelectedProjId(null);
+        }}
+        onContact={() => {
+          window.history.pushState({}, '', `/${languageKey}`);
+          setCurrentPath(window.location.pathname);
+          setSelectedProjId(null);
+          window.setTimeout(() => {
+            document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 50);
+        }}
+        onOpenProject={(id) => {
+          window.history.pushState({}, '', `/${languageKey}/projects/${id}`);
+          setCurrentPath(window.location.pathname);
+        }}
+      />
     );
   }
 
@@ -782,10 +681,10 @@ export default function App() {
       </div>
 
       {/* FLOATING NAVBAR */}
-      <header className="fixed top-5 left-1/2 -translate-x-1/2 w-[94%] max-w-7xl h-16 bg-black/50 backdrop-blur-xl border border-white/10 rounded-full z-50 px-4 md:px-8 flex items-center justify-between transition-all duration-300 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.8)]">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-full transition-all duration-500 animate-pulse" style={{ backgroundColor: accentColor }} />
-          <span className="font-black text-lg tracking-wider bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent uppercase">
+      <header className="fixed top-3 sm:top-5 left-1/2 -translate-x-1/2 w-[calc(100%-1rem)] sm:w-[94%] max-w-7xl h-14 sm:h-16 bg-black/70 sm:bg-black/50 backdrop-blur-xl border border-white/10 rounded-full z-50 px-3 sm:px-4 md:px-8 flex items-center justify-between transition-all duration-300 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.8)]">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <div className="h-2 w-2 shrink-0 rounded-full transition-all duration-500 animate-pulse sm:h-2.5 sm:w-2.5" style={{ backgroundColor: accentColor }} />
+          <span className="truncate font-black text-sm sm:text-lg tracking-wider bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent uppercase">
             {lang === 'en' ? 'ARSHIA.' : 'عرشیا.'}
           </span>
         </div>
@@ -793,6 +692,7 @@ export default function App() {
         {/* Desktop navigation with bilingual support */}
         <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-xs font-semibold tracking-widest uppercase">
           <a href="#about" className="hover:text-white transition-colors duration-200">{t.navbar.about}</a>
+          <a href="#resume" className="hover:text-white transition-colors duration-200">{t.navbar.resume}</a>
           <a href="#services" className="hover:text-white transition-colors duration-200">{t.navbar.services}</a>
           <a href="#architecture" className="hover:text-white transition-colors duration-200">{t.navbar.architecture}</a>
           <a href="#projects" className="hover:text-white transition-colors duration-200">{t.navbar.projects}</a>
@@ -800,7 +700,7 @@ export default function App() {
         </nav>
 
         {/* Action Widgets Zone */}
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
           
           {/* Dev Mode Layout Inspector Toggle */}
           <button
@@ -834,16 +734,48 @@ export default function App() {
 
           {/* Global Bilingual Switcher Toggle Button */}
           <button 
-            onClick={() => setLang(nextLang)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 hover:border-white/15 hover:bg-white/10 text-[10px] font-black tracking-widest uppercase transition-all duration-300 text-gray-300 cursor-pointer"
+            onClick={() => changeLanguage(nextLang)}
+            className="flex h-9 w-9 items-center justify-center gap-1.5 rounded-full bg-white/5 border border-white/5 hover:border-white/15 hover:bg-white/10 text-[10px] font-black tracking-widest uppercase transition-all duration-300 text-gray-300 cursor-pointer sm:h-auto sm:w-auto sm:px-3 sm:py-1.5"
             title={isFa ? 'تغییر زبان' : 'Toggle language'}
           >
             <Globe className="w-3.5 h-3.5 text-gray-400 rotate-0 hover:rotate-45 transition-transform" />
-            <span>{localeMeta.label}</span>
+            <span className="hidden sm:inline">{localeMeta.label}</span>
           </button>
 
+          {/* Compact mobile mode switcher */}
+          <div className="flex items-center gap-0.5 rounded-full border border-white/[0.07] bg-white/[0.04] p-1 shadow-inner md:hidden" dir="ltr">
+            <button
+              type="button"
+              onClick={() => setMode('MOBILE')}
+              aria-label={isFa ? 'حالت موبایل' : 'Mobile mode'}
+              aria-pressed={mode === 'MOBILE'}
+              title={isFa ? 'حالت موبایل' : 'Mobile mode'}
+              className={`flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${
+                mode === 'MOBILE'
+                  ? 'bg-[#7B61FF] text-white shadow-[0_0_12px_rgba(123,97,255,0.45)]'
+                  : 'text-gray-500 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Smartphone className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('BACKEND')}
+              aria-label={isFa ? 'حالت بک‌اند' : 'Backend mode'}
+              aria-pressed={mode === 'BACKEND'}
+              title={isFa ? 'حالت بک‌اند' : 'Backend mode'}
+              className={`flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${
+                mode === 'BACKEND'
+                  ? 'bg-[#9EFF00] text-black shadow-[0_0_12px_rgba(158,255,0,0.4)]'
+                  : 'text-gray-500 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Server className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
           {/* Dynamic Mode Switcher on Navigation Bar */}
-          <div className="flex items-center gap-1 bg-white/5 border border-white/5 py-1 px-1 rounded-full shadow-inner scale-90 md:scale-100">
+          <div className="hidden md:flex items-center gap-1 bg-white/5 border border-white/5 py-1 px-1 rounded-full shadow-inner">
             <button 
               onClick={() => setMode('MOBILE')}
               className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all duration-300 ${isFa ? '' : 'tracking-wider uppercase'} ${
@@ -878,7 +810,7 @@ export default function App() {
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`relative min-h-screen pt-28 pb-16 flex items-center justify-center z-10 px-4 md:px-8 max-w-7xl mx-auto transition-all duration-500 ${
+        className={`relative min-h-screen pt-24 sm:pt-28 pb-14 sm:pb-16 flex items-center justify-center z-10 px-4 md:px-8 max-w-7xl mx-auto transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#00D1FF]/40 bg-[#00D1FF]/[0.01] rounded-3xl mt-2 relative' : ''
         }`}
       >
@@ -892,14 +824,14 @@ export default function App() {
           
           {/* Hero Left Side: Intro and main headline */}
           <div className="lg:col-span-4 flex flex-col justify-center items-start space-y-6">
-            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase text-gray-300">
+            <div className="inline-flex max-w-full items-center gap-2 bg-white/5 border border-white/10 px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-gray-300">
               <Sparkles className="w-3.5 h-3.5" style={{ color: accentColor }} />
               <span>{lang === 'en' ? 'Fullstack & Mobile Specialist' : 'متخصص فول‌استک و موبایل'}</span>
             </div>
             
             <div className="space-y-1 text-left rtl:text-right">
               <span className="text-lg md:text-xl font-bold text-gray-400 uppercase tracking-widest block">{lang === 'en' ? "Hi, I'm" : 'من'}</span>
-              <h1 className="text-6xl md:text-7xl xl:text-8xl font-black uppercase text-white tracking-tighter leading-none relative">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl xl:text-8xl font-black uppercase text-white tracking-tighter leading-none relative break-words">
                 {t.hero.role}
                 <span className="absolute -bottom-1 left-0 rtl:right-0 w-24 h-1.5 rounded" style={{ backgroundColor: accentColor }} />
               </h1>
@@ -987,10 +919,10 @@ export default function App() {
               </div>
 
               {/* Watermark identity name in front of hoodies style portrait */}
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-black/90 border border-white/10 px-6 py-2 rounded-full shadow-2xl z-20 flex items-center gap-2">
-                <span className="text-[10px] tracking-widest font-black uppercase text-gray-300">ARSHIA KHANI</span>
+              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 max-w-[94%] whitespace-nowrap bg-black/90 border border-white/10 px-3 sm:px-6 py-2 rounded-full shadow-2xl z-20 flex items-center gap-2">
+                <span className="text-[9px] sm:text-[10px] tracking-widest font-black uppercase text-gray-300">ARSHIA KHANI</span>
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: accentColor }} />
-                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">{mode} SPECIFIED</span>
+                <span className="hidden text-[9px] text-gray-500 font-bold uppercase tracking-wider min-[380px]:inline">{mode} SPECIFIED</span>
               </div>
             </div>
           </div>
@@ -1248,7 +1180,7 @@ export default function App() {
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`py-24 relative z-10 bg-black/45 border-y border-white/5 scroll-mt-20 transition-all duration-500 ${
+        className={`py-16 sm:py-24 relative z-10 bg-black/45 border-y border-white/5 scroll-mt-20 transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#9EFF00]/40 bg-[#9EFF00]/[0.01]' : ''
         }`}
       >
@@ -1347,7 +1279,7 @@ export default function App() {
                       <div className="relative w-full h-[210px] rounded-2xl overflow-hidden border border-white/[0.08] flex items-center justify-center p-1.5 transition-all duration-500 group-hover:border-white/20" style={{ boxShadow: `0 20px 60px -30px ${proj.color}40` }}>
                         <div className="absolute inset-6 rounded-full blur-[35px] opacity-20 group-hover:scale-110 group-hover:opacity-40 transition-all duration-700" style={{ backgroundColor: proj.color }} />
                         <img
-                          src={proj.visual}
+                          src={proj.images.mockup}
                           alt={lang === 'en' ? `${projLocal.title} preview` : `پیش‌نمایش ${projLocal.title}`}
                           referrerPolicy="no-referrer"
                           loading="lazy"
@@ -1457,7 +1389,7 @@ export default function App() {
                 <div className="lg:col-span-5 space-y-6">
                   <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/60">
                     <img
-                      src={project.visual}
+                      src={project.images.mockup}
                       alt={projectLocal.title}
                       referrerPolicy="no-referrer"
                       className="w-full h-[320px] object-cover"
@@ -1587,7 +1519,7 @@ export default function App() {
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`py-24 relative z-10 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-20 transition-all duration-500 ${
+        className={`py-16 sm:py-24 relative z-10 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-20 transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#FF6B00]/40 bg-[#FF6B00]/[0.01] rounded-3xl mt-4 relative' : ''
         }`}
       >
@@ -1650,8 +1582,8 @@ export default function App() {
             </div>
 
             {/* Simulated compiler line numbers */}
-            <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between font-mono text-[8px] text-gray-500">
-              <div className="flex gap-4">
+            <div className="mt-8 pt-4 border-t border-white/5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between font-mono text-[8px] text-gray-500">
+              <div className="flex flex-wrap gap-x-4 gap-y-1">
                 <span>LINE: 104 .. 240</span>
                 <span>COMPILER: FLUTTER_IMP_AOT</span>
               </div>
@@ -1738,7 +1670,7 @@ export default function App() {
           </div>
 
           {/* Core Stats Row: 4 sleek Grid Boxes */}
-          <div className="lg:col-span-12 grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4 font-sans">
+          <div className="lg:col-span-12 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-4 font-sans [&>div]:p-4 sm:[&>div]:p-6">
             
             {/* Stat Box 1 */}
             <div className="bg-zinc-950/40 border border-white/5 rounded-2xl p-6 hover:border-white/10 transition-all duration-300 relative group">
@@ -1790,6 +1722,111 @@ export default function App() {
       </section>
 
 
+      {/* LIVE, DATA-DRIVEN RESUME EXPORT */}
+      <section
+        id="resume"
+        className="relative z-10 scroll-mt-20 overflow-hidden border-y border-white/[0.06] bg-[#090a0c] py-16 sm:py-24"
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(0,209,255,0.09),transparent_34%),radial-gradient(circle_at_80%_70%,rgba(158,255,0,0.07),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.025] bg-[linear-gradient(rgba(255,255,255,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.8)_1px,transparent_1px)] bg-[size:32px_32px]" />
+
+        <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 md:px-8 lg:grid-cols-12 lg:gap-14">
+          <div className="flex flex-col justify-between lg:col-span-5">
+            <div>
+              <div className="mb-5 flex items-center gap-2">
+                <span className="h-0.5 w-6" style={{ backgroundColor: accentColor }} />
+                <span className="text-xs font-black uppercase tracking-[0.2em]" style={{ color: accentColor }}>
+                  {t.resume.eyebrow}
+                </span>
+              </div>
+              <h2 className="max-w-xl text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-5xl">
+                {t.resume.heading}
+              </h2>
+              <p className="mt-5 max-w-lg text-sm leading-7 text-gray-400">
+                {t.resume.description}
+              </p>
+            </div>
+
+            <div className="mt-8 grid grid-cols-1 gap-2.5 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              {[
+                { icon: <FileText className="h-3.5 w-3.5" />, label: t.resume.selectable },
+                { icon: <Link2 className="h-3.5 w-3.5" />, label: t.resume.clickable },
+                { icon: <RefreshCw className="h-3.5 w-3.5" />, label: t.resume.synced },
+              ].map((feature) => (
+                <div key={feature.label} className="flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3 py-3 text-[10px] font-bold text-gray-400">
+                  <span style={{ color: accentColor }}>{feature.icon}</span>
+                  <span>{feature.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="lg:col-span-7">
+            <div className="overflow-hidden rounded-[28px] border border-white/10 bg-black/50 shadow-[0_35px_100px_-45px_rgba(0,209,255,0.35)] backdrop-blur-xl">
+              <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-4 sm:px-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-1.5" dir="ltr">
+                    <span className="h-2 w-2 rounded-full bg-[#FF5F57]" />
+                    <span className="h-2 w-2 rounded-full bg-[#FEBC2E]" />
+                    <span className="h-2 w-2 rounded-full bg-[#28C840]" />
+                  </div>
+                  <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600">arshia.resume</span>
+                </div>
+                <span className="flex items-center gap-1.5 font-mono text-[9px] text-emerald-400/80">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" /> LIVE DATA
+                </span>
+              </div>
+
+              <div className="space-y-7 p-5 sm:p-7">
+                <fieldset>
+                  <legend className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">{t.resume.language}</legend>
+                  <div className="grid grid-cols-2 gap-3" dir="ltr">
+                    {(['en', 'fa'] as ResumeLanguage[]).map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => { setResumeLanguage(option); setResumeStatus('idle'); }}
+                        aria-pressed={resumeLanguage === option}
+                        className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-black transition-all ${resumeLanguage === option ? 'border-white/25 bg-white/[0.09] text-white' : 'border-white/[0.07] bg-white/[0.02] text-gray-500 hover:border-white/15 hover:text-gray-300'}`}
+                      >
+                        <span>{option === 'en' ? 'English' : 'فارسی'}</span>
+                        <span className="font-mono text-[9px] uppercase" style={{ color: resumeLanguage === option ? accentColor : undefined }}>{option.toUpperCase()}</span>
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <div className="rounded-2xl border border-white/[0.07] bg-[#060708] p-4">
+                  <span className="mb-3 block font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600">{t.resume.preview}</span>
+                  <div className="grid grid-cols-3 gap-x-4 gap-y-3 text-xs">
+                    <div><span className="block text-gray-600">LANG</span><strong className="mt-1 block text-white">{resumeLanguage.toUpperCase()}</strong></div>
+                    <div><span className="block text-gray-600">PROJECTS</span><strong className="mt-1 block text-white">{projectsData.length}</strong></div>
+                    <div><span className="block text-gray-600">OUTPUT</span><strong className="mt-1 block text-white">A4 · PDF</strong></div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={downloadResume}
+                  disabled={resumeStatus === 'loading'}
+                  className="flex w-full items-center justify-center gap-2.5 rounded-xl px-5 py-4 text-sm font-black text-black transition-all hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70 disabled:hover:translate-y-0"
+                  style={{ backgroundColor: accentColor, boxShadow: `0 16px 38px -20px ${accentColor}` }}
+                >
+                  {resumeStatus === 'loading' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  <span>{resumeStatus === 'loading' ? t.resume.generating : t.resume.download}</span>
+                </button>
+
+                <div aria-live="polite" className="min-h-5 text-center text-xs">
+                  {resumeStatus === 'success' && <span className="text-emerald-400">{t.resume.success}</span>}
+                  {resumeStatus === 'error' && <span className="text-red-400">{t.resume.error}</span>}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
       {/* CORE SERVICES */}
       <section 
         id="services" 
@@ -1799,7 +1836,7 @@ export default function App() {
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`py-24 relative z-10 bg-black/30 border-y border-white/5 scroll-mt-10 transition-all duration-500 ${
+        className={`py-16 sm:py-24 relative z-10 bg-black/30 border-y border-white/5 scroll-mt-10 transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#00D1FF]/40 bg-[#00D1FF]/[0.01]' : ''
         }`}
       >
@@ -1877,7 +1914,7 @@ export default function App() {
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`py-24 relative z-10 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-10 transition-all duration-500 ${
+        className={`py-16 sm:py-24 relative z-10 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-10 transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#7B61FF]/40 bg-[#7B61FF]/[0.01] rounded-3xl mt-4 relative' : ''
         }`}
       >
@@ -1920,7 +1957,7 @@ export default function App() {
                   setSimStep(null);
                   setActiveStepIndex(0);
                 }}
-                className={`px-4 py-2.5 rounded-xl border text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 relative overflow-hidden flex items-center gap-2 cursor-pointer ${
+                className={`max-w-full px-3 sm:px-4 py-2.5 rounded-xl border text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wide sm:tracking-wider transition-all duration-300 relative overflow-hidden flex items-center gap-2 cursor-pointer ${
                   isTabActive 
                     ? 'text-white border-white/10' 
                     : 'text-gray-400 border-white/5 bg-white/[0.01] hover:bg-white/5 hover:text-white'
@@ -1932,7 +1969,7 @@ export default function App() {
                 }}
               >
                 <div className={`w-1.5 h-1.5 rounded-full ${isTabActive ? 'animate-pulse' : ''}`} style={{ backgroundColor: tab.color }} />
-                <span>{tab.title}</span>
+                <span className="min-w-0 text-left rtl:text-right leading-relaxed">{tab.title}</span>
               </button>
             );
           })}
@@ -2074,18 +2111,18 @@ export default function App() {
 
               {/* Dynamic HUD Control Header */}
               <div className="flex flex-wrap items-center justify-between border-b border-white/5 pb-4 mb-8 gap-4">
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <div 
                     className={`w-3 h-3 rounded-full ${isWalkthroughActive ? 'animate-pulse' : 'animate-ping'}`} 
                     style={{ backgroundColor: blueprintColor }} 
                   />
-                  <span className="text-xs font-mono font-bold uppercase tracking-widest text-white flex items-center gap-2">
-                    <span>{currentBlueprint.projectName[languageKey]}</span>
-                    <span className="text-gray-500 text-[10px]">({activeBlueprintId}_blueprint.yml)</span>
+                  <span className="min-w-0 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wide sm:tracking-widest text-white flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    <span className="truncate">{currentBlueprint.projectName[languageKey]}</span>
+                    <span className="truncate text-gray-500 text-[9px] sm:text-[10px]">({activeBlueprintId}_blueprint.yml)</span>
                   </span>
                 </div>
                 
-                <div className="flex items-center gap-4 text-[10px] font-mono text-gray-400">
+                <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 text-[9px] sm:text-[10px] font-mono text-gray-400 lg:w-auto">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded bg-cyan-400 animate-pulse" />
                     <span>{lang === 'en' ? 'SRE status' : 'وضعیت مهندسی'}: {isWalkthroughActive ? 'TRANSMITTING' : 'HEARTBEAT_ACTIVE'}</span>
@@ -3201,7 +3238,7 @@ LIMIT 5;`
                           {/* Reflective shine sweep image overlay */}
                           <div className="absolute top-0 right-[-100%] w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-[30deg] animate-[shine_5s_ease-in-out_infinite]" />
                           <img 
-                            src={project.visual} 
+                            src={project.images.mockup} 
                             alt={`${projectLocal.title} Full visual`} 
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-cover rounded-lg"
@@ -3378,7 +3415,7 @@ LIMIT 5;`
         onMouseLeave={() => {
           if (devMode) setHoveredComponent(null);
         }}
-        className={`py-24 relative z-10 overflow-hidden scroll-mt-10 transition-all duration-500 ${
+        className={`py-16 sm:py-24 relative z-10 overflow-hidden scroll-mt-10 transition-all duration-500 ${
           devMode ? 'border border-dashed border-[#FF6B00]/40 bg-[#FF6B00]/[0.01]' : ''
         }`}
       >
@@ -3394,10 +3431,10 @@ LIMIT 5;`
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[300px] bg-[radial-gradient(circle,rgba(158,255,0,0.05)_0%,transparent_70%)] pointer-events-none z-0" />
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             
             {/* CTA Massive Left description */}
-            <div className="lg:col-span-6 flex flex-col justify-center space-y-6">
+            <div className="lg:col-span-5 flex flex-col justify-center space-y-6">
               <div className="flex items-center gap-2">
                 <span className="w-6 h-0.5 animate-pulse" style={{ backgroundColor: accentColor }} />
                 <span className={`text-xs font-black ${isFa ? '' : 'tracking-widest uppercase'}`} style={{ color: accentColor }}>
@@ -3405,11 +3442,11 @@ LIMIT 5;`
                 </span>
               </div>
                
-              <h2 className="text-5xl md:text-6xl xl:text-7xl font-black uppercase text-white tracking-tighter leading-none">
+              <h2 className={`text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-black text-white tracking-tighter leading-[0.95] ${isFa ? '' : 'uppercase'}`}>
                 {isFa ? (
                   <>
-                    بیایید <br />
-                    چیزی <br />
+                    بیایید یک <br />
+                    گفت‌وگو را <br />
                   </>
                 ) : (
                   <>
@@ -3418,168 +3455,146 @@ LIMIT 5;`
                   </>
                 )}
                 <span className="bg-gradient-to-r bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(90deg, #D7E2EA 0%, ${accentColor} 100%)` }}>
-                  {isFa ? 'قدرتمند' : 'POWERFUL'}
+                  {isFa ? 'شروع کنیم' : 'POWERFUL'}
                 </span>
               </h2>
 
               <p className="text-gray-400 text-sm max-w-sm leading-relaxed">
                 {isFa
-                  ? 'چه یک اپ Flutter سطح‌بالا برای انتشار در اپ‌استور بخواهید، چه یک معماری FastAPI فوق‌سریع و بلادرنگ برای ترافیک بالا—آماده‌ام آن را مهندسی کنم.'
-                  : 'Whether you need a high-end Flutter application deployed to the App Store or an ultra-fast FastAPI real-time architecture capable of millions of hits, I am ready to engineer it.'}
+                  ? 'برای همکاری، مشاوره یا صحبت درباره یک ایده تازه، از یکی از راه‌های روبه‌رو مستقیم با من در ارتباط باشید.'
+                  : 'Have a project, an idea, or just want to talk? Choose the channel that works best for you and reach me directly.'}
               </p>
-
-              {/* Dynamic contact lists metrics widgets */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md pt-4">
-                
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">system_email</span>
-                  <a href="mailto:khaniarshia7@gmail.com" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1 truncate">
-                    khaniarshia7@gmail.com
-                  </a>
-                </div>
-
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">system_phone</span>
-                  <a href="tel:+989038510475" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1 truncate">
-                    09038510475
-                  </a>
-                </div>
-
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">social_github</span>
-                  <a href="https://github.com/arshiasir" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
-                    github.com/arshiasir
-                  </a>
-                </div>
-
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">social_x</span>
-                  <a href="https://x.com/arshia_sir" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
-                    x.com/arshia_sir
-                  </a>
-                </div>
-
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">telegram_broker</span>
-                  <a href="https://t.me/arshia_sir" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1">
-                    t.me/arshia_sir
-                  </a>
-                </div>
-
-                <div className="bg-white/2 px-4 py-3 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
-                  <span className="text-[10px] text-gray-500 uppercase block font-mono">social_youtube</span>
-                  <a href="https://m.youtube.com/@arshia_sir/playlists" target="_blank" rel="noreferrer" className="text-xs font-bold text-white tracking-wider hover:underline transition-all block mt-1 truncate">
-                    youtube.com/@arshia_sir
-                  </a>
-                </div>
-
+              <div className="flex items-center gap-3 pt-2 text-[11px] text-gray-500">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                </span>
+                <span>{isFa ? 'در دسترس برای پروژه‌های جدید' : 'Available for new projects'}</span>
               </div>
             </div>
 
-            {/* Email Contact Form Container */}
-            <div className="lg:col-span-6">
-              <div className="glass-card rounded-2xl p-6 md:p-8 border border-white/5 relative">
-                
-                <div className="flex items-center gap-2 mb-6 text-gray-400">
-                  <MessageSquare className="w-4 h-4" />
-                  <span className={`text-[10px] font-black text-gray-400 ${isFa ? '' : 'tracking-widest uppercase'} ${isFa ? 'text-right w-full' : ''}`}>
-                    {isFa ? 'کانال ارتباط امن' : 'secured_communication_tunnel'}
-                  </span>
+            {/* Direct contact channels */}
+            <div className="lg:col-span-7">
+              <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#090a0c] shadow-[0_35px_100px_-45px_rgba(0,209,255,0.25)]">
+                <div className="pointer-events-none absolute inset-0 opacity-[0.035] bg-[linear-gradient(rgba(255,255,255,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.8)_1px,transparent_1px)] bg-[size:32px_32px]" />
+                <div className="pointer-events-none absolute -right-24 -top-32 h-72 w-72 rounded-full bg-[#00D1FF]/10 blur-[90px]" />
+
+                <div className="relative flex items-center justify-between border-b border-white/[0.07] px-5 py-4 md:px-6">
+                  <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                    <div className="flex gap-1.5" dir="ltr">
+                      <span className="h-2 w-2 rounded-full bg-[#FF5F57]" />
+                      <span className="h-2 w-2 rounded-full bg-[#FEBC2E]" />
+                      <span className="h-2 w-2 rounded-full bg-[#28C840]" />
+                    </div>
+                    <span className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 min-[360px]:inline">contact.directory</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => copyContact('all', ['Telegram: @arshia_sir', 'Email: khaniarshia7@gmail.com', 'Phone: +989038510475', 'Website: https://arshiasir.ir'].join('\n'))}
+                      className="flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.025] px-2.5 font-mono text-[9px] text-gray-500 transition-all hover:border-white/20 hover:text-white"
+                    >
+                      {copiedContact === 'all' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                      <span>{copiedContact === 'all' ? (isFa ? 'همه کپی شد' : 'ALL COPIED') : (isFa ? 'کپی همه' : 'COPY ALL')}</span>
+                    </button>
+                    <span className="hidden font-mono text-[9px] text-emerald-400/70 sm:block">● ONLINE</span>
+                  </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  
-                  <div>
-                    <label className={`text-[10px] text-gray-400 block mb-2 ${isFa ? '' : 'font-mono uppercase tracking-wider'}`}>
-                      {isFa ? 'نام' : 'Sender Name'}
-                    </label>
-                    <input 
-                      type="text" 
-                      required
-                      placeholder={isFa ? 'مثلاً: علی رضایی' : 'e.g. Satoshi Nakamoto'} 
-                      value={formState.name}
-                      onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                      className="w-full bg-[#0b0b0d] border border-white/5 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-white/20 transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className={`text-[10px] text-gray-400 block mb-2 ${isFa ? '' : 'font-mono uppercase tracking-wider'}`}>
-                      {isFa ? 'ایمیل' : 'Sender Email Address'}
-                    </label>
-                    <input 
-                      type="email" 
-                      required
-                      placeholder={isFa ? 'مثلاً: name@example.com' : 'e.g. satoshi@bitcoin.org'} 
-                      value={formState.email}
-                      onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-                      className="w-full bg-[#0b0b0d] border border-white/5 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-white/20 transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className={`text-[10px] text-gray-400 block mb-2 ${isFa ? '' : 'font-mono uppercase tracking-wider'}`}>
-                      {isFa ? 'پیام' : 'Transmission Message payload'}
-                    </label>
-                    <textarea 
-                      rows={4}
-                      required
-                      placeholder={isFa ? 'جزئیات پروژه یا نیازمندی‌ها را بنویسید…' : 'Type details about your project architecture request...'} 
-                      value={formState.message}
-                      onChange={(e) => setFormState({ ...formState, message: e.target.value })}
-                      className="w-full bg-[#0b0b0d] border border-white/5 rounded-lg p-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-white/20 transition-all resize-none"
-                    />
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    className="w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300 relative overflow-hidden group/btn text-black flex items-center justify-center gap-2"
-                    style={{ 
-                      backgroundColor: accentColor,
-                      boxShadow: `0 8px 32px -8px ${accentColor}`
-                    }}
-                  >
-                    <span>{isFa ? 'ارسال پیام' : 'Transmit Message Payload'}</span>
-                    <Send className="w-3.5 h-3.5 shrink-0 text-black group-hover/btn:translate-x-1 transition-transform" />
-                  </button>
-
-                </form>
-
-                {/* Secure successful banner message transmission feedback */}
-                <AnimatePresence>
-                  {formSent && (
-                    <motion.div 
-                      key="form-success-banner"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute inset-0 bg-[#070707]/95 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-6 text-center border border-[#9EFF00]/30"
-                    >
-                      <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
-                        <CheckCircle className="w-6 h-6 text-emerald-400" />
+                <div className="relative grid grid-cols-1 gap-px bg-white/[0.07] sm:grid-cols-2">
+                  <div className="group relative min-h-48 overflow-hidden bg-[#0a0b0e] p-6 transition-colors hover:bg-[#0d151b] md:p-7">
+                    <div className="absolute -bottom-16 -right-12 h-40 w-40 rounded-full bg-[#2AABEE]/0 blur-3xl transition-colors group-hover:bg-[#2AABEE]/15" />
+                    <div className="relative flex h-full flex-col justify-between gap-8">
+                      <div className="flex items-start justify-between">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#2AABEE]/25 bg-[#2AABEE]/10 text-[#4bc2ff]">
+                          <Send className="h-5 w-5 -translate-x-px" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={() => copyContact('telegram', '@arshia_sir')} className="relative z-10 flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/20 px-2.5 font-mono text-[9px] text-gray-500 transition-all hover:border-[#2AABEE]/30 hover:text-[#4bc2ff]" title={isFa ? 'کپی آیدی تلگرام' : 'Copy Telegram ID'}>
+                            {copiedContact === 'telegram' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                            <span>{copiedContact === 'telegram' ? (isFa ? 'کپی شد' : 'COPIED') : (isFa ? 'کپی' : 'COPY')}</span>
+                          </button>
+                          <a href="https://t.me/arshia_sir" target="_blank" rel="noreferrer" aria-label="Open Telegram" className="p-2"><ExternalLink className="h-4 w-4 text-gray-700 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#4bc2ff]" /></a>
+                        </div>
                       </div>
-                      <h4 className={`text-lg font-bold text-white tracking-tight ${isFa ? '' : 'uppercase'}`}>
-                        {isFa ? 'ارسال انجام شد' : 'Transmission complete!'}
-                      </h4>
-                      <p className="text-gray-400 text-xs max-w-xs mt-2 leading-relaxed">
-                        {isFa
-                          ? 'پیام شما با موفقیت ثبت شد. در اسرع وقت پاسخ می‌دهم.'
-                          : "Message packet has been successfully published to Arshia's personal inbox. I will reply to you in under 12 hours."}
-                      </p>
-                      <span className="text-[9px] text-[#9EFF00] font-mono uppercase tracking-widest mt-4">SYS_PACKET_STDOUT: 202_ACCEPTED</span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      <div>
+                        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-[#4bc2ff]/70">01 / QUICK CHAT</span>
+                        <a href="https://t.me/arshia_sir" target="_blank" rel="noreferrer"><h3 className="mt-2 text-xl font-black text-white transition-colors group-hover:text-[#4bc2ff]">Telegram</h3></a>
+                        <p className="mt-1 text-xs text-gray-500">@arshia_sir</p>
+                      </div>
+                    </div>
+                  </div>
 
+                  <div className="group relative min-h-48 overflow-hidden bg-[#0a0b0e] p-6 transition-colors hover:bg-[#101010] md:p-7">
+                    <div className="relative flex h-full flex-col justify-between gap-8">
+                      <div className="flex items-start justify-between">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white shadow-[0_8px_25px_-12px_rgba(255,255,255,.8)]">
+                          <img src="https://img.icons8.com/color/96/000000/gmail.png" alt="Gmail" className="h-7 w-7 object-contain" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={() => copyContact('email', 'khaniarshia7@gmail.com')} className="flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/20 px-2.5 font-mono text-[9px] text-gray-500 transition-all hover:border-white/20 hover:text-white" title={isFa ? 'کپی ایمیل' : 'Copy email'}>
+                            {copiedContact === 'email' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                            <span>{copiedContact === 'email' ? (isFa ? 'کپی شد' : 'COPIED') : (isFa ? 'کپی' : 'COPY')}</span>
+                          </button>
+                          <a href="mailto:khaniarshia7@gmail.com" aria-label="Send email" className="p-2"><ArrowRight className={`h-4 w-4 text-gray-700 transition-all group-hover:text-white ${isFa ? 'rotate-180 group-hover:-translate-x-0.5' : 'group-hover:translate-x-0.5'}`} /></a>
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-gray-600">02 / EMAIL</span>
+                        <a href="mailto:khaniarshia7@gmail.com"><h3 className="mt-2 text-xl font-black text-white transition-colors group-hover:text-gray-200">Gmail</h3></a>
+                        <p className="mt-1 truncate text-xs text-gray-500">khaniarshia7@gmail.com</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group relative flex items-center gap-4 border-t border-white/[0.07] bg-white/[0.018] px-5 py-5 transition-colors hover:bg-white/[0.045] md:px-6">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-gray-300 transition-colors group-hover:border-emerald-400/30 group-hover:text-emerald-400">
+                    <Phone className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="block font-mono text-[9px] uppercase tracking-[0.18em] text-gray-600">03 / {isFa ? 'تماس مستقیم' : 'DIRECT LINE'}</span>
+                    <a href="tel:+989038510475" className="mt-1 block text-sm font-bold tracking-wide text-white" dir="ltr">+98 903 851 0475</a>
+                  </div>
+                  <button type="button" onClick={() => copyContact('phone', '+989038510475')} className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/20 px-2.5 font-mono text-[9px] text-gray-500 transition-all hover:border-emerald-400/30 hover:text-emerald-400">
+                    {copiedContact === 'phone' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                    <span className="hidden sm:inline">{copiedContact === 'phone' ? (isFa ? 'کپی شد' : 'COPIED') : (isFa ? 'کپی' : 'COPY')}</span>
+                  </button>
+                  <a href="tel:+989038510475" aria-label="Call"><ChevronRight className={`h-4 w-4 text-gray-700 transition-transform group-hover:text-white ${isFa ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} /></a>
+                </div>
+
+                <div className="group relative flex items-center gap-4 border-t border-white/[0.07] bg-white/[0.018] px-5 py-5 transition-colors hover:bg-white/[0.045] md:px-6">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-gray-300 transition-colors group-hover:border-[#00D1FF]/30 group-hover:text-[#00D1FF]">
+                    <Globe className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="block font-mono text-[9px] uppercase tracking-[0.18em] text-gray-600">04 / {isFa ? 'وب‌سایت' : 'WEBSITE'}</span>
+                    <a href="https://arshiasir.ir" target="_blank" rel="noreferrer" className="mt-1 block text-sm font-bold tracking-wide text-white" dir="ltr">arshiasir.ir</a>
+                  </div>
+                  <button type="button" onClick={() => copyContact('website', 'https://arshiasir.ir')} className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/20 px-2.5 font-mono text-[9px] text-gray-500 transition-all hover:border-[#00D1FF]/30 hover:text-[#00D1FF]">
+                    {copiedContact === 'website' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                    <span className="hidden sm:inline">{copiedContact === 'website' ? (isFa ? 'کپی شد' : 'COPIED') : (isFa ? 'کپی' : 'COPY')}</span>
+                  </button>
+                  <a href="https://arshiasir.ir" target="_blank" rel="noreferrer" aria-label="Open website"><ExternalLink className="h-4 w-4 text-gray-700 transition-all group-hover:text-white" /></a>
+                </div>
+
+                <div className="relative flex flex-col gap-4 border-t border-white/[0.07] px-5 py-4 sm:flex-row sm:items-center sm:justify-between md:px-6">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-gray-600">{isFa ? 'در شبکه‌های دیگر' : 'ELSEWHERE ON THE WEB'}</span>
+                  <div className="flex flex-wrap items-center gap-2" dir="ltr">
+                    <a href="https://github.com/arshiasir" target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-[10px] font-bold text-gray-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-white"><Github className="h-3.5 w-3.5" /> GitHub</a>
+                    <a href="https://x.com/arshia_sir" target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-[10px] font-bold text-gray-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-white"><span className="text-xs text-white">𝕏</span> X</a>
+                    <a href="https://m.youtube.com/@arshia_sir/playlists" target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-[10px] font-bold text-gray-400 transition-all hover:border-red-500/30 hover:bg-red-500/[0.05] hover:text-white"><Youtube className="h-3.5 w-3.5" /> YouTube</a>
+                  </div>
+                </div>
               </div>
             </div>
 
           </div>
 
           {/* Simple footer credentials matching layout */}
-          <div className="border-t border-white/5 pt-8 mt-16 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500 font-mono">
+          <div className="border-t border-white/5 pt-8 mt-12 sm:mt-16 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left text-[10px] sm:text-xs text-gray-500 font-mono">
             <span>© 2026 ARSHIA KHANI. ALL RIGHTS RESERVED.</span>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
               <span className="text-[#9EFF00]/80">LATENCY: 1ms</span>
               <span>HOST: GITHUB_PAGES</span>
               <span>v1.2.0-stable</span>
