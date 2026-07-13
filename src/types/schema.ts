@@ -80,6 +80,7 @@ export interface ProjectSchema {
   scope: ProjectScope;
   year: string;
   status: string;
+  platforms?: { en: string; fa: string };
   publicUrl?: { en: string; fa: string };
   en: ProjectLocalizedData;
   fa: ProjectLocalizedData;

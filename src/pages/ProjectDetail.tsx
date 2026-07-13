@@ -223,7 +223,11 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
   const accent = project.color || '#2563EB';
   const reduce = useReducedMotion() || false;
 
-  const screens = localized.screens || [];
+  // Screen walkthroughs are visual product tours: backend projects do not
+  // expose them, and entries without a resolvable image are omitted entirely.
+  const screens = project.scope === 'BACKEND'
+    ? []
+    : (localized.screens || []).filter((screen) => Boolean(resolveAsset(screen.image)));
   const contribution = localized.contribution || [];
   const responsibilities = contribution.length > 0 ? contribution : (localized.highlights || []);
   const capabilities = localized.capabilities || [];
@@ -238,7 +242,8 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
   ].filter((n) => n.text);
 
   const role = L.roleDev[project.scope] || project.scope;
-  const platforms = L.platforms[project.scope === 'MOBILE' ? 'MOBILE' : 'OTHER'];
+  const platforms = project.platforms?.[languageKey]
+    || L.platforms[project.scope === 'MOBILE' ? 'MOBILE' : 'OTHER'];
   const status = L.statusMap[project.status as keyof typeof L.statusMap] || project.status;
 
   const [active, setActive] = useState(0);
@@ -302,7 +307,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
 
           <nav className="cs-nav-links hidden items-center gap-1 text-xs font-semibold md:flex" style={{ color: 'rgba(255,255,255,0.55)' }}>
             <a href="#overview" className="transition-colors hover:text-white">{L.navOverview}</a>
-            <a href="#screens" className="transition-colors hover:text-white">{L.navScreens}</a>
+            {screens.length > 0 && <a href="#screens" className="transition-colors hover:text-white">{L.navScreens}</a>}
             <a href="#tech" className="transition-colors hover:text-white">{L.navTechnical}</a>
             <a href="#architecture" className="transition-colors hover:text-white">{L.navArchitecture}</a>
             <a href="#challenges" className="transition-colors hover:text-white">{L.navChallenges}</a>
@@ -362,7 +367,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
             )}
 
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5, ease: EASE }} className="mt-9 flex flex-wrap gap-3">
-              <motion.a href="#screens" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="rounded-lg px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90" style={{ backgroundColor: accent }}>{L.explore}</motion.a>
+              {screens.length > 0 && <motion.a href="#screens" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="rounded-lg px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90" style={{ backgroundColor: accent }}>{L.explore}</motion.a>}
               <motion.button onClick={onBack} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 rounded-lg border px-5 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(255,255,255,0.12)' }}><ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {L.back}</motion.button>
             </motion.div>
           </div>
