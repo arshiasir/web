@@ -49,6 +49,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { translations, languageMeta, supportedLanguages } from './data/translations';
 import { projectsData } from './data/projectsData';
 import ProjectDetail from './pages/ProjectDetail';
+import NotFound from './pages/NotFound';
 import { walkthroughData } from './data/walkthroughData';
 import { imageLinks } from './data/imageLinks';
 import { resumeProfile } from './data/resumeProfile';
@@ -608,6 +609,22 @@ export default function App() {
   }, []);
 
   const projectRouteMatch = currentPath.match(/^\/(?:(?:en|fa)\/)?projects\/([^/]+)\/?$/);
+  const isHomeRoute = /^\/(?:en|fa)\/?$/.test(currentPath);
+  const requestedProjectExists = projectRouteMatch
+    ? projectsData.some((item) => item.id === projectRouteMatch[1])
+    : false;
+
+  if ((!isHomeRoute && !projectRouteMatch) || (projectRouteMatch && !requestedProjectExists)) {
+    return (
+      <NotFound
+        language={languageKey}
+        onBack={() => {
+          window.history.pushState({}, '', `/${languageKey}`);
+          setCurrentPath(window.location.pathname);
+        }}
+      />
+    );
+  }
 
   if (projectRouteMatch) {
     const projectId = projectRouteMatch[1];
