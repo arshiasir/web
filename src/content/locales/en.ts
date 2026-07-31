@@ -42,7 +42,7 @@ export default {
       "stats": {
         "projects": "15+",
         "projectsSub": "Industrial Apps Built",
-        "experience": "4+ Years",
+        "experience": "5+ Years",
         "experienceSub": "System Core Experience",
         "clients": "20+",
         "clientsSub": "Ecosystem Deliveries",

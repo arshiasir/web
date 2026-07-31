@@ -7,8 +7,8 @@ export const resumeProfile: ResumeProfile = {
     fa: 'مهندس فلاتر · توسعه‌دهنده بک‌اند · معمار سیستم',
   },
   summary: {
-    en: 'System-oriented software engineer with 4+ years of experience building polished Flutter products and high-throughput backend services. Focused on real-time systems, machine-learning pipelines, scalable databases, and reliable end-to-end delivery.',
-    fa: 'مهندس نرم‌افزار سیستم‌محور با بیش از ۴ سال تجربه در ساخت محصولات حرفه‌ای Flutter و سرویس‌های بک‌اند پربازده؛ متمرکز بر سیستم‌های بلادرنگ، پایپ‌لاین‌های یادگیری ماشین، پایگاه‌داده‌های مقیاس‌پذیر و تحویل کامل محصول.',
+    en: 'System-oriented software engineer with 5+ years of experience building polished Flutter products and high-throughput backend services. Focused on real-time systems, machine-learning pipelines, scalable databases, and reliable end-to-end delivery.',
+    fa: 'مهندس نرم‌افزار سیستم‌محور با بیش از5 سال تجربه در ساخت محصولات حرفه‌ای Flutter و سرویس‌های بک‌اند پربازده؛ متمرکز بر سیستم‌های بلادرنگ، پایپ‌لاین‌های یادگیری ماشین، پایگاه‌داده‌های مقیاس‌پذیر و تحویل کامل محصول.',
   },
   location: { en: 'Tehran, Iran', fa: 'تهران، ایران' },
   contact: {
