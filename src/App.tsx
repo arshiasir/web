@@ -50,9 +50,9 @@ import { translations, languageMeta, supportedLanguages } from './data/translati
 import { projectsData } from './data/projectsData';
 import ProjectDetail from './pages/ProjectDetail';
 import NotFound from './pages/NotFound';
+import ResumePage from './pages/ResumePage';
 import { walkthroughData } from './data/walkthroughData';
 import { imageLinks } from './data/imageLinks';
-import { resumeProfile } from './data/resumeProfile';
 import type { ResumeLanguage } from './types/schema';
 
 const arshiaPortrait = imageLinks.arshiaPortrait;
@@ -473,22 +473,12 @@ export default function App() {
   const [resumeLanguage, setResumeLanguage] = useState<ResumeLanguage>(languageKey);
   const [resumeStatus, setResumeStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  const downloadResume = async () => {
-    if (resumeStatus === 'loading') return;
-    setResumeStatus('loading');
-    try {
-      const { generateResumePdf } = await import('./utils/generateResumePdf');
-      await generateResumePdf({
-        language: resumeLanguage,
-        profile: resumeProfile,
-        projects: projectsData,
-      });
-      setResumeStatus('success');
-      window.setTimeout(() => setResumeStatus('idle'), 3500);
-    } catch (error) {
-      console.error('Unable to generate resume PDF:', error);
-      setResumeStatus('error');
-    }
+  const downloadResume = () => {
+    const nextPath = `/${resumeLanguage}/resume`;
+    window.history.pushState({}, '', nextPath);
+    setLang(resumeLanguage);
+    setCurrentPath(nextPath);
+    window.scrollTo({ top: 0, behavior: 'auto' });
   };
   const copyContact = async (key: string, value: string) => {
     try {
@@ -610,17 +600,36 @@ export default function App() {
 
   const projectRouteMatch = currentPath.match(/^\/(?:(?:en|fa)\/)?projects\/([^/]+)\/?$/);
   const isHomeRoute = /^\/(?:en|fa)\/?$/.test(currentPath);
+  const isResumeRoute = /^\/(?:en|fa)\/resume\/?$/.test(currentPath);
   const requestedProjectExists = projectRouteMatch
     ? projectsData.some((item) => item.id === projectRouteMatch[1])
     : false;
 
-  if ((!isHomeRoute && !projectRouteMatch) || (projectRouteMatch && !requestedProjectExists)) {
+  if ((!isHomeRoute && !isResumeRoute && !projectRouteMatch) || (projectRouteMatch && !requestedProjectExists)) {
     return (
       <NotFound
         language={languageKey}
         onBack={() => {
           window.history.pushState({}, '', `/${languageKey}`);
           setCurrentPath(window.location.pathname);
+        }}
+      />
+    );
+  }
+
+  if (isResumeRoute) {
+    return (
+      <ResumePage
+        language={languageKey}
+        onBack={() => {
+          window.history.pushState({}, '', `/${languageKey}`);
+          setCurrentPath(window.location.pathname);
+        }}
+        onLanguageChange={(nextLanguage) => {
+          const nextPath = `/${nextLanguage}/resume`;
+          window.history.pushState({}, '', nextPath);
+          setLang(nextLanguage);
+          setCurrentPath(nextPath);
         }}
       />
     );
@@ -1742,12 +1751,12 @@ export default function App() {
       {/* LIVE, DATA-DRIVEN RESUME EXPORT */}
       <section
         id="resume"
-        className="relative z-10 scroll-mt-20 overflow-hidden border-y border-white/[0.06] bg-[#090a0c] py-16 sm:py-24"
+        className="relative z-10 scroll-mt-20 overflow-hidden border-y border-white/[0.07] bg-[#070b0f] py-20 sm:py-28"
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(0,209,255,0.09),transparent_34%),radial-gradient(circle_at_80%_70%,rgba(158,255,0,0.07),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(0,209,255,0.11),transparent_30%),radial-gradient(circle_at_85%_80%,rgba(123,97,255,0.09),transparent_28%)]" />
         <div className="pointer-events-none absolute inset-0 opacity-[0.025] bg-[linear-gradient(rgba(255,255,255,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.8)_1px,transparent_1px)] bg-[size:32px_32px]" />
 
-        <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 md:px-8 lg:grid-cols-12 lg:gap-14">
+        <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 md:px-8 lg:grid-cols-12 lg:gap-16">
           <div className="flex flex-col justify-between lg:col-span-5">
             <div>
               <div className="mb-5 flex items-center gap-2">
@@ -1756,11 +1765,13 @@ export default function App() {
                   {t.resume.eyebrow}
                 </span>
               </div>
-              <h2 className="max-w-xl text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-5xl">
-                {t.resume.heading}
+              <h2 className="max-w-xl text-4xl font-black leading-[1.03] tracking-tight text-white sm:text-6xl">
+                {languageKey === 'fa' ? 'رزومه آنلاین؛ همیشه آماده ارسال' : 'A live resume, always ready to share'}
               </h2>
               <p className="mt-5 max-w-lg text-sm leading-7 text-gray-400">
-                {t.resume.description}
+                {languageKey === 'fa'
+                  ? 'یک لینک مستقیم برای مشاهده رزومه کامل فارسی یا انگلیسی؛ با خروجی دقیق A4 برای زمانی که کارفرما فایل PDF می‌خواهد.'
+                  : 'Share one direct link to the complete English or Persian resume, with a print-perfect A4 export whenever a recruiter needs a PDF.'}
               </p>
             </div>
 
@@ -1770,7 +1781,7 @@ export default function App() {
                 { icon: <Link2 className="h-3.5 w-3.5" />, label: t.resume.clickable },
                 { icon: <RefreshCw className="h-3.5 w-3.5" />, label: t.resume.synced },
               ].map((feature) => (
-                <div key={feature.label} className="flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3 py-3 text-[10px] font-bold text-gray-400">
+                <div key={feature.label} className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 py-3 text-[10px] font-bold text-gray-300 backdrop-blur">
                   <span style={{ color: accentColor }}>{feature.icon}</span>
                   <span>{feature.label}</span>
                 </div>
@@ -1779,7 +1790,7 @@ export default function App() {
           </div>
 
           <div className="lg:col-span-7">
-            <div className="overflow-hidden rounded-[28px] border border-white/10 bg-black/50 shadow-[0_35px_100px_-45px_rgba(0,209,255,0.35)] backdrop-blur-xl">
+            <div className="overflow-hidden rounded-[30px] border border-white/[0.12] bg-[#0a0e13]/95 shadow-[0_40px_120px_-45px_rgba(0,209,255,0.4)] backdrop-blur-xl">
               <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-4 sm:px-6">
                 <div className="flex items-center gap-3">
                   <div className="flex gap-1.5" dir="ltr">
@@ -1817,8 +1828,8 @@ export default function App() {
                   <span className="mb-3 block font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600">{t.resume.preview}</span>
                   <div className="grid grid-cols-3 gap-x-4 gap-y-3 text-xs">
                     <div><span className="block text-gray-600">LANG</span><strong className="mt-1 block text-white">{resumeLanguage.toUpperCase()}</strong></div>
-                    <div><span className="block text-gray-600">PROJECTS</span><strong className="mt-1 block text-white">{projectsData.length}</strong></div>
-                    <div><span className="block text-gray-600">OUTPUT</span><strong className="mt-1 block text-white">A4 · PDF</strong></div>
+                    <div><span className="block text-gray-600">SELECTED</span><strong className="mt-1 block text-white">{Math.min(projectsData.length, 4)}</strong></div>
+                    <div><span className="block text-gray-600">OUTPUT</span><strong className="mt-1 block text-white">WEB · A4</strong></div>
                   </div>
                 </div>
 
@@ -1830,7 +1841,7 @@ export default function App() {
                   style={{ backgroundColor: accentColor, boxShadow: `0 16px 38px -20px ${accentColor}` }}
                 >
                   {resumeStatus === 'loading' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                  <span>{resumeStatus === 'loading' ? t.resume.generating : t.resume.download}</span>
+                  <span>{languageKey === 'fa' ? 'مشاهده رزومه آنلاین' : 'Open live resume'}</span>
                 </button>
 
                 <div aria-live="polite" className="min-h-5 text-center text-xs">
