@@ -13,7 +13,7 @@
 .cv-toolbar button:disabled { opacity: .65; cursor: wait; }
 
 .cv-page { position: relative; width: 210mm; height: 297mm; margin: 0 auto 24px; overflow: hidden; box-sizing: border-box; background: var(--paper); box-shadow: 0 34px 100px #0009; }
-.cv-hero { height: 49mm; box-sizing: border-box; padding: 13mm 13mm 10mm; display: grid; grid-template-columns: 23mm 1fr 57mm; gap: 8mm; align-items: end; background: var(--ink); color: #fff; }
+.cv-hero { height: 40mm; box-sizing: border-box; padding: 7mm 13mm; display: grid; grid-template-columns: 23mm 1fr 57mm; gap: 8mm; align-items: center; background: var(--ink); color: #fff; }
 .cv-monogram { width: 21mm; height: 21mm; display: grid; place-items: center; position: relative; border: 1px solid #ffffff55; border-radius: 50%; font-family: Arial, sans-serif; font-size: 19pt; font-weight: 900; letter-spacing: -2px; }
 .cv-monogram span { position: absolute; inset: 1mm 1mm auto auto; color: var(--accent); font-size: 9pt; }
 .cv-overline { margin: 0 0 2mm; color: var(--accent); font: 700 6.3pt/1 Arial, sans-serif; letter-spacing: 1.2px; }
@@ -63,6 +63,12 @@
 .cv-metrics b { margin-inline-end: 1mm; color: var(--ink); font: 900 6.4pt/1 Arial, sans-serif; }
 
 .cv-footer { position: absolute; inset: auto 13mm 7mm; padding-top: 2.5mm; display: flex; justify-content: space-between; border-top: 1px solid var(--line); color: var(--muted); font-size: 5.5pt; }
+.cv-page-one-band { position: absolute; inset: auto 13mm 18mm; min-height: 32mm; box-sizing: border-box; padding: 6mm; display: grid; grid-template-columns: 42mm 1fr auto; gap: 7mm; align-items: center; background: var(--ink); color: #fff; }
+.cv-page-one-band>div { display: grid; gap: 1.5mm; }
+.cv-page-one-band>div span { color: var(--accent); font: 900 5.6pt/1 Arial, sans-serif; letter-spacing: 1px; }
+.cv-page-one-band strong { font-size: 10pt; }
+.cv-page-one-band p { margin: 0; color: #c7c7c7; font-size: 6.2pt; line-height: 1.65; }
+.cv-page-one-band a { color: #fff; font: 700 6.2pt/1 Arial, sans-serif; direction: ltr; unicode-bidi: isolate; }
 .cv-page-header { height: 28mm; padding: 8mm 13mm 6mm; box-sizing: border-box; display: grid; grid-template-columns: 13mm 1fr auto; gap: 5mm; align-items: center; border-bottom: 1px solid var(--line); }
 .cv-monogram.small { width: 11mm; height: 11mm; border-color: var(--ink); color: var(--ink); font-size: 9pt; }
 .cv-page-header>div:nth-child(2) { display: grid; gap: .5mm; }

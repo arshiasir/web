@@ -152,6 +152,11 @@ export default function ResumePage({ language, onBack, onLanguageChange }: Resum
             {projects.slice(0, 3).map((project, index) => renderProject(project, index + 1, index === 0))}
           </div>
         </div>
+        <div className="cv-page-one-band">
+          <div><span>AVAILABLE / 2026</span><strong>{t.availability}</strong></div>
+          <p>{t.availabilityText}</p>
+          <a href={`mailto:${resumeProfile.contact.email}`}>{resumeProfile.contact.email}</a>
+        </div>
         <CvFooter page={1} language={language} label={t.footer} pageLabel={t.page} />
       </section>
 
