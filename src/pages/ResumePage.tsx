@@ -1,4 +1,6 @@
 import { ArrowLeft, Copy, ExternalLink, Globe2, Printer } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import { useEffect, useState } from 'react';
 import { projectsData } from '../data/projectsData';
 import { resumeProfile } from '../data/resumeProfile';
@@ -38,8 +40,6 @@ function clean(value: string) {
     .trim();
 }
 
-const selectedProjectIds = ['tvarx', 'calkilo', 'tipax', 'faceauth'];
-
 const copy = {
   fa: {
     back: 'بازگشت به سایت',
@@ -62,7 +62,9 @@ const copy = {
       ['هوش مصنوعی کاربردی', 'تبدیل مدل و داده به قابلیت واقعی محصول'],
     ],
     availabilityText: 'آماده همکاری روی محصولات موبایل، بک‌اند و سامانه‌های هوشمند؛ حضوری در تهران یا به‌صورت دورکاری.',
-    footer: 'رزومه تک‌صفحه‌ای · جزئیات و مطالعات پروژه در وب‌سایت',
+    footer: 'رزومه حرفه‌ای دوصفحه‌ای · جزئیات و مطالعات پروژه در وب‌سایت',
+    exporting: 'در حال ساخت PDF…',
+    continued: 'ادامه پروژه‌ها',
   },
   en: {
     back: 'Back to portfolio',
@@ -85,7 +87,9 @@ const copy = {
       ['Applied AI', 'Turning models and data into useful product features'],
     ],
     availabilityText: 'Available for mobile, backend, and intelligent product teams - onsite in Tehran or remote.',
-    footer: 'One-page resume · Full project case studies online',
+    footer: 'Professional two-page resume · Full project case studies online',
+    exporting: 'Creating PDF…',
+    continued: 'More projects',
   },
 } as const;
 
@@ -94,9 +98,9 @@ export default function ResumePage({ language, onBack, onLanguageChange }: Resum
   const isFa = language === 'fa';
   const labels = resumeProfile.labels[language];
   const ui = copy[language];
-  const projects = selectedProjectIds
-    .map((id) => projectsData.find((project) => project.id === id))
-    .filter(Boolean) as ProjectSchema[];
+  const [exporting, setExporting] = useState(false);
+  const projects = projectsData as ProjectSchema[];
+  const projectPages = [projects.slice(0, 2), projects.slice(2)];
 
   useEffect(() => {
     document.title = `${resumeProfile.name[language]} | ${isFa ? 'رزومه حرفه‌ای' : 'Professional Resume'}`;
@@ -107,6 +111,37 @@ export default function ResumePage({ language, onBack, onLanguageChange }: Resum
     await navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
+  };
+
+  const downloadPdf = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      await document.fonts.ready;
+      const sheets = Array.from(document.querySelectorAll<HTMLElement>('.resume-paper'));
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+      const previousScroll = window.scrollY;
+
+      for (let index = 0; index < sheets.length; index += 1) {
+        sheets[index].scrollIntoView({ block: 'start' });
+        await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+        const canvas = await html2canvas(sheets[index], {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          width: sheets[index].scrollWidth,
+          height: sheets[index].scrollHeight,
+        });
+        if (index > 0) pdf.addPage('a4', 'portrait');
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.96), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+      }
+
+      window.scrollTo({ top: previousScroll });
+      pdf.save(`Arshia-Khani-Resume-${language.toUpperCase()}.pdf`);
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -130,20 +165,21 @@ export default function ResumePage({ language, onBack, onLanguageChange }: Resum
             <Copy size={16} />
             <span>{copied ? ui.copied : ui.copyLink}</span>
           </button>
-          <button type="button" className="resume-tool primary" onClick={() => window.print()}>
+          <button type="button" className="resume-tool primary" onClick={downloadPdf} disabled={exporting}>
             <Printer size={16} />
-            <span>{ui.print}</span>
+            <span>{exporting ? ui.exporting : ui.print}</span>
           </button>
         </div>
       </nav>
 
-      <article className="resume-paper" aria-label={`${resumeProfile.name[language]} resume`}>
+      {projectPages.map((pageProjects, pageIndex) => <article className="resume-paper" aria-label={`${resumeProfile.name[language]} resume - ${pageIndex + 1}`} key={pageIndex}>
         <header className="resume-header">
           <div>
             <h1>{resumeProfile.name[language]}</h1>
             <p className="resume-role">{resumeProfile.role[language]}</p>
             <p className="resume-location">{resumeProfile.location[language]}</p>
           </div>
+          {pageIndex > 0 && <span className="resume-page-kicker">{ui.continued}</span>}
         </header>
 
         <div className="resume-layout">
@@ -159,7 +195,7 @@ export default function ResumePage({ language, onBack, onLanguageChange }: Resum
               </div>
             </ResumeSection>
 
-            <ResumeSection title={ui.value} compact>
+            {pageIndex === 0 && <ResumeSection title={ui.value} compact>
               <div className="resume-value-list">
                 {ui.values.map(([title, description]) => (
                   <div className="resume-value" key={title}>
@@ -171,7 +207,7 @@ export default function ResumePage({ language, onBack, onLanguageChange }: Resum
                   </div>
                 ))}
               </div>
-            </ResumeSection>
+            </ResumeSection>}
 
             <ResumeSection title={ui.skills} compact>
               <div className="resume-skill-list">
@@ -184,25 +220,25 @@ export default function ResumePage({ language, onBack, onLanguageChange }: Resum
               </div>
             </ResumeSection>
 
-            <ResumeSection title={ui.availability} compact>
+            {pageIndex === 0 && <ResumeSection title={ui.availability} compact>
               <p className="resume-availability">{ui.availabilityText}</p>
-            </ResumeSection>
+            </ResumeSection>}
           </aside>
 
           <div className="resume-content">
-            <ResumeSection title={ui.summary}>
+            {pageIndex === 0 && <ResumeSection title={ui.summary}>
               <p className="resume-summary">{resumeProfile.summary[language]}</p>
-            </ResumeSection>
+            </ResumeSection>}
 
             <ResumeSection title={ui.impact}>
               <div className="resume-project-list">
-                {projects.map((project, index) => {
+                {pageProjects.map((project, index) => {
                   const item = project[language];
                   const projectUrl = project.publicUrl?.[language] ?? `${resumeProfile.contact.website}/${language}/projects/${project.id}`;
                   const metrics = project.metrics.slice(0, 3);
                   return (
                     <section className="resume-project" key={project.id}>
-                      <h3><span>{String(index + 1).padStart(2, '0')}</span> {clean(item.title)}</h3>
+                      <h3><span>{String((pageIndex === 0 ? 0 : 2) + index + 1).padStart(2, '0')}</span> {clean(item.title)}</h3>
                       <p className="resume-project-meta">
                         {project.year} · {labels.scopes[project.scope]} · {labels.statuses[project.status] ?? project.status}
                       </p>
@@ -229,7 +265,7 @@ export default function ResumePage({ language, onBack, onLanguageChange }: Resum
           <span>{ui.footer}</span>
           <a href={resumeProfile.contact.website}>arshiasir.ir</a>
         </footer>
-      </article>
+      </article>)}
     </main>
   );
 }

@@ -11,6 +11,7 @@
   color: var(--resume-ink);
   padding: 24px 16px 56px;
   font-family: var(--font-sans);
+  overflow-x: auto;
 }
 
 .resume-toolbar {
@@ -51,9 +52,10 @@
 .resume-tool.primary { color: #061016; background: #35c3df; box-shadow: 0 10px 30px rgba(41,165,193,.25); }
 
 .resume-paper {
-  width: min(1080px, calc(100vw - 32px));
+  width: 210mm;
+  height: 297mm;
   min-height: 297mm;
-  margin: 0 auto;
+  margin: 0 auto 24px;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 40px 120px rgba(0,0,0,.48);
@@ -67,7 +69,9 @@
   color: #fff;
   border-inline-end: 12px solid var(--resume-cyan);
   background: var(--resume-navy);
+  justify-content: space-between;
 }
+.resume-page-kicker { color: #8ed7e7; font-size: 12px; font-weight: 800; }
 .resume-header h1 { margin: 0; font-size: 38px; line-height: 1; font-weight: 900; letter-spacing: -.03em; }
 .resume-role { margin: 10px 0 0; color: #bfdce8; font-size: 15px; font-weight: 500; }
 .resume-location { margin: 10px 0 0; color: #dbe9ee; font-size: 12px; }
@@ -147,15 +151,7 @@
   .resume-tool { min-height: 38px; padding-inline: 11px; }
   .resume-tool span { display: none; }
   .resume-tool.primary span { display: inline; }
-  .resume-paper { width: calc(100vw - 20px); min-height: 0; }
-  .resume-header { min-height: 0; padding: 30px 24px; }
-  .resume-header h1 { font-size: 32px; }
-  .resume-role { font-size: 13px; line-height: 1.5; }
-  .resume-layout, [dir="rtl"] .resume-layout { display: flex; flex-direction: column; padding: 24px 20px; gap: 24px; }
-  [dir="rtl"] .resume-sidebar, [dir="rtl"] .resume-content { grid-column: auto; grid-row: auto; }
-  .resume-content { order: 1; }
-  .resume-sidebar { order: 2; }
-  .resume-footer { margin-inline: 20px; flex-direction: column; }
+  .resume-paper { margin-inline: 0; }
 }
 
 @media print {
@@ -164,7 +160,8 @@
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   .resume-web { width: 210mm; height: 297mm; min-height: 297mm; padding: 0; background: #fff; }
   .resume-toolbar { display: none !important; }
-  .resume-paper { width: 210mm; height: 297mm; min-height: 297mm; margin: 0; box-shadow: none; overflow: hidden; break-after: avoid; page-break-after: avoid; }
+  .resume-paper { width: 210mm; height: 297mm; min-height: 297mm; margin: 0; box-shadow: none; overflow: hidden; break-after: page; page-break-after: always; }
+  .resume-paper:last-child { break-after: auto; page-break-after: auto; }
   .resume-header { min-height: 43mm; padding: 8mm 14mm; }
   .resume-header h1 { font-size: 22pt; }
   .resume-role { font-size: 9pt; }
