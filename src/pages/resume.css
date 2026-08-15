@@ -17,8 +17,8 @@
 .cv-monogram { width: 21mm; height: 21mm; display: grid; place-items: center; position: relative; border: 1px solid #ffffff55; border-radius: 50%; font-family: Arial, sans-serif; font-size: 19pt; font-weight: 900; letter-spacing: -2px; }
 .cv-monogram span { position: absolute; inset: 1mm 1mm auto auto; color: var(--accent); font-size: 9pt; }
 .cv-overline { margin: 0 0 2mm; color: var(--accent); font: 700 6.3pt/1 Arial, sans-serif; letter-spacing: 1.2px; }
-.cv-identity h1 { margin: 0; font-size: 27pt; line-height: 1.05; letter-spacing: -.8px; }
-.cv-role { margin: 2.3mm 0 0; color: #bdbdbd; font-size: 7.8pt; line-height: 1.45; }
+.cv-identity h1 { margin: 0; padding-block: 1mm; font-size: 27pt; line-height: 1.35; letter-spacing: -.8px; }
+.cv-role { margin: .8mm 0 0; color: #bdbdbd; font-size: 7.8pt; line-height: 1.55; }
 .cv-contact { display: grid; gap: 1.5mm; text-align: end; font: 400 6.7pt/1.25 Arial, sans-serif; }
 .cv-contact a, .cv-contact span { color: #d8d8d8; text-decoration: none; }
 .cv-contact a { direction: ltr; unicode-bidi: isolate; }

@@ -90,7 +90,17 @@ export default function App() {
     : ['مهندس ارشد فلاتر', 'توسعه‌دهنده بک‌اند', 'معمار سیستم', 'یکپارچه‌ساز هوش مصنوعی'];
   // Project detail page state
   const [selectedProjId, setSelectedProjId] = useState<string | null>(null);
-  const [currentPath, setCurrentPath] = useState<string>(() => window.location.pathname);
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    const rawPath = window.location.pathname;
+    if (/^\/(en|fa)(?:\/|$)/.test(rawPath)) return rawPath;
+    // The bare domain (/) is not a valid route on its own: normalize the URL to
+    // the language-prefixed path synchronously, before the first paint, so the
+    // NotFound page never flashes before the localization effect runs.
+    const pathWithoutLanguage = rawPath.replace(/^\/(en|fa)(?=\/|$)/, '') || '/';
+    const localizedPath = `/${initialLang}${pathWithoutLanguage === '/' ? '' : pathWithoutLanguage}`;
+    window.history.replaceState({}, '', localizedPath);
+    return localizedPath;
+  });
 
   const pathForLanguage = (nextLanguage: string, path = window.location.pathname) => {
     const pathWithoutLanguage = path.replace(/^\/(en|fa)(?=\/|$)/, '') || '/';
@@ -200,13 +210,6 @@ export default function App() {
     const languageFromPath = currentPath.match(/^\/(en|fa)(?:\/|$)/)?.[1];
     if (languageFromPath && languageFromPath !== lang) setLang(languageFromPath);
   }, [currentPath, lang]);
-
-  useEffect(() => {
-    if (/^\/(en|fa)(?:\/|$)/.test(window.location.pathname)) return;
-    const localizedPath = pathForLanguage(languageKey);
-    window.history.replaceState({}, '', localizedPath);
-    setCurrentPath(localizedPath);
-  }, []);
 
   useEffect(() => {
     const projectMatch = currentPath.match(/^\/(?:(?:en|fa)\/)?projects\/([^/]+)\/?$/);
