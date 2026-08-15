@@ -1,5 +1,5 @@
 import { ArrowLeft, Check, Copy, Download, ExternalLink, Globe2 } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import { jsPDF } from 'jspdf';
 import { useEffect, useState } from 'react';
 import { projectsData } from '../data/projectsData';
