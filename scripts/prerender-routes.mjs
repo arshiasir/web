@@ -180,9 +180,36 @@ for (const lang of LANGS) {
 }
 
 const lastmod = new Date().toISOString().split('T')[0];
+
+function sitemapAlternates(url) {
+  const base = url === '/' ? '' : url.replace(/^\/(en|fa)(?=\/)/, '');
+  const alternates = LANGS.map(
+    (lang) => `      <xhtml:link rel="alternate" hreflang="${lang}" href="${siteUrl}${base === '' ? `/${lang}/` : `/${lang}${base}`}" />`,
+  ).join('\n');
+  return `${alternates}\n      <xhtml:link rel="alternate" hreflang="x-default" href="${siteUrl}/" />`;
+}
+
+function sitemapEntry(url) {
+  const segments = url.split('/').filter(Boolean);
+  const isHome = url === '/';
+  const isLocalizedHome = segments.length === 1;
+  const isResume = segments.length === 2 && segments[1] === 'resume';
+  const isProject = segments.length === 3 && segments[1] === 'projects';
+  const priority = isHome || isLocalizedHome ? '1.0' : isResume ? '0.9' : isProject ? '0.8' : '0.5';
+  const changefreq = isHome || isLocalizedHome || isResume ? 'weekly' : isProject ? 'monthly' : 'yearly';
+  return `  <url>
+    <loc>${siteUrl}${url}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+${sitemapAlternates(url)}
+  </url>`;
+}
+
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${siteUrls.map((url) => `  <url>\n    <loc>${siteUrl}${url}</loc>\n    <lastmod>${lastmod}</lastmod>\n  </url>`).join('\n')}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${siteUrls.map(sitemapEntry).join('\n')}
 </urlset>
 `;
 writeRoute(resolve(distDir, 'sitemap.xml'), sitemap);
