@@ -1273,14 +1273,15 @@ export default function App() {
               {filteredProjects.map((proj, idx) => {
                 const projLocal = proj[languageKey] || proj.en;
                 return (
-                  <motion.div
+                  <motion.a
                     layout
                     key={proj.id}
                     initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96 }}
                     transition={{ type: 'spring', stiffness: 90, damping: 18, delay: idx * 0.06 }}
-                    onClick={() => openProjectPage(proj.id)}
+                    href={`/${languageKey}/projects/${proj.id}`}
+                    onClick={(e) => { e.preventDefault(); openProjectPage(proj.id); }}
                     className="group relative cursor-pointer flex flex-col rounded-3xl overflow-hidden bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-white/20 transition-colors duration-500 min-h-[600px]"
                     style={{
                       boxShadow: selectedProjId === proj.id
@@ -1352,7 +1353,7 @@ export default function App() {
                         </span>
                       </div>
                     </div>
-                  </motion.div>
+                  </motion.a>
                 );
               })}
             </AnimatePresence>

@@ -742,7 +742,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
               const pl = p[languageKey] || p.en;
               return (
                 <Reveal key={p.id} delay={idx * 0.08}>
-                  <motion.button whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} onClick={() => onOpenProject?.(p.id)} className="cs-sheen group flex h-full w-full flex-col rounded-2xl border p-6 text-left" style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                  <motion.a whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} href={`/${languageKey}/projects/${p.id}`} onClick={(e) => { e.preventDefault(); onOpenProject?.(p.id); }} className="cs-sheen group flex h-full w-full flex-col rounded-2xl border p-6 text-left" style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: p.color }}>{pl.category}</span>
                       <ArrowUpRight className="h-4 w-4 text-white/40 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 rtl:group-hover:-translate-x-0.5 rtl:group-hover:translate-y-0.5" />
@@ -752,7 +752,7 @@ export default function ProjectDetail({ project, languageKey, onBack, onContact,
                     <div className="mt-4 flex flex-wrap gap-1.5">
                       {p.tech.slice(0, 3).map((t, i) => (<span key={i} className="rounded-full border px-2.5 py-0.5 text-[11px] text-white/60" style={{ borderColor: 'rgba(255,255,255,0.12)' }}>{t}</span>))}
                     </div>
-                  </motion.button>
+                  </motion.a>
                 </Reveal>
               );
             })}

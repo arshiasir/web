@@ -1,11 +1,11 @@
-import aboutGeometric from '../assets/images/about_geometric_shapes_1779712914711.png';
-import arshiaPortrait from '../assets/images/arshia.png';
-import calkiloMockup from '../assets/images/calkilo_mockup_1779713789930.png';
-import couchiniMockup from '../assets/images/couchini_mockup_1779713805197.png';
-import faceauthMockup from '../assets/images/faceauth_mockup_1779713858799.png';
-import hyperstarMockup from '../assets/images/hyperstar_mockup_1779713838569.png';
-import tipaxMockup from '../assets/images/tipax_mockup_1779713822171.png';
-import tvarxMockup from '../assets/images/tvarx.png';
+import aboutGeometric from '../assets/images/about_geometric_shapes_1779712914711.webp';
+import arshiaPortrait from '../assets/images/arshia.webp';
+import calkiloMockup from '../assets/images/calkilo_mockup_1779713789930.webp';
+import couchiniMockup from '../assets/images/couchini_mockup_1779713805197.webp';
+import faceauthMockup from '../assets/images/faceauth_mockup_1779713858799.webp';
+import hyperstarMockup from '../assets/images/hyperstar_mockup_1779713838569.webp';
+import tipaxMockup from '../assets/images/tipax_mockup_1779713822171.webp';
+import tvarxMockup from '../assets/images/tvarx.webp';
 
 const screenAssets = import.meta.glob('../assets/images/*', {
   eager: true,

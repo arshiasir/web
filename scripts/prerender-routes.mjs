@@ -84,14 +84,18 @@ function escapeAttr(value) {
   return escapeHtml(value).replace(/'/g, '&#39;');
 }
 
-function buildRouteHtml({ lang, title, description, ogTitle, path }) {
+function buildRouteHtml({ lang, title, description, ogTitle, path, isHome = false }) {
   const info = LANG_INFO[lang];
   const otherLocale = LANGS.find((l) => l !== lang);
   const canonical = `<link rel="canonical" href="${siteUrl}/${path}" />`;
   const hreflang = LANGS.map(
     (l) => `<link rel="alternate" hreflang="${l}" href="${siteUrl}/${path.replace(/^[^/]+\//, `${l}/`)}" />`,
   ).join('    \n');
-  const xDefault = `<link rel="alternate" hreflang="x-default" href="${siteUrl}/" />`;
+  // x-default only belongs to the homepage cluster (the auto-language entry
+  // point); on deep pages it would falsely advertise "/" as an alternate.
+  const xDefault = isHome
+    ? `\n    <link rel="alternate" hreflang="x-default" href="${siteUrl}/" />`
+    : '';
 
   return baseHtml
     .replace('<html lang="en">', `<html lang="${lang}"${info.dir === 'rtl' ? ' dir="rtl"' : ''}>`)
@@ -109,6 +113,14 @@ function buildRouteHtml({ lang, title, description, ogTitle, path }) {
       `<meta property="og:description" content="${escapeAttr(description)}" />`,
     )
     .replace(
+      /<meta name="twitter:title" content="[^"]*" \/>/,
+      `<meta name="twitter:title" content="${escapeAttr(ogTitle)}" />`,
+    )
+    .replace(
+      /<meta name="twitter:description" content="[^"]*" \/>/,
+      `<meta name="twitter:description" content="${escapeAttr(description)}" />`,
+    )
+    .replace(
       /<meta property="og:locale" content="[^"]*" \/>/,
       `<meta property="og:locale" content="${info.ogLocale}" />`,
     )
@@ -118,11 +130,11 @@ function buildRouteHtml({ lang, title, description, ogTitle, path }) {
     )
     .replace(
       '<head>',
-      `<head>\n    <base href="/">\n    ${canonical}\n    ${hreflang}\n    ${xDefault}\n    <meta property="og:url" content="${siteUrl}/${path}" />`,
+      `<head>\n    <base href="/">\n    ${canonical}\n    ${hreflang}${xDefault}\n    <meta property="og:url" content="${siteUrl}/${path}" />`,
     );
 }
 
-const siteUrls = ['/'];
+const siteUrls = [];
 
 rmSync(resolve(distDir, 'en'), { recursive: true, force: true });
 rmSync(resolve(distDir, 'fa'), { recursive: true, force: true });
@@ -142,6 +154,7 @@ for (const lang of LANGS) {
     description: homeDescription,
     ogTitle: homeOgTitle,
     path: homePath,
+    isHome: true,
   });
   writeRoute(resolve(distDir, lang, 'index.html'), homeHtml);
   siteUrls.push(`/${homePath}`);
@@ -182,21 +195,25 @@ for (const lang of LANGS) {
 const lastmod = new Date().toISOString().split('T')[0];
 
 function sitemapAlternates(url) {
-  const base = url === '/' ? '' : url.replace(/^\/(en|fa)(?=\/)/, '');
+  const base = url.replace(/^\/(en|fa)(?=\/)/, '');
+  const isHome = base === '' || base === '/';
   const alternates = LANGS.map(
-    (lang) => `      <xhtml:link rel="alternate" hreflang="${lang}" href="${siteUrl}${base === '' ? `/${lang}/` : `/${lang}${base}`}" />`,
+    (lang) => `      <xhtml:link rel="alternate" hreflang="${lang}" href="${siteUrl}${isHome ? `/${lang}/` : `/${lang}${base}`}" />`,
   ).join('\n');
-  return `${alternates}\n      <xhtml:link rel="alternate" hreflang="x-default" href="${siteUrl}/" />`;
+  const lines = [alternates];
+  if (isHome) {
+    lines.push(`      <xhtml:link rel="alternate" hreflang="x-default" href="${siteUrl}/" />`);
+  }
+  return lines.join('\n');
 }
 
 function sitemapEntry(url) {
   const segments = url.split('/').filter(Boolean);
-  const isHome = url === '/';
   const isLocalizedHome = segments.length === 1;
   const isResume = segments.length === 2 && segments[1] === 'resume';
   const isProject = segments.length === 3 && segments[1] === 'projects';
-  const priority = isHome || isLocalizedHome ? '1.0' : isResume ? '0.9' : isProject ? '0.8' : '0.5';
-  const changefreq = isHome || isLocalizedHome || isResume ? 'weekly' : isProject ? 'monthly' : 'yearly';
+  const priority = isLocalizedHome ? '1.0' : isResume ? '0.9' : isProject ? '0.8' : '0.5';
+  const changefreq = isLocalizedHome || isResume ? 'weekly' : isProject ? 'monthly' : 'yearly';
   return `  <url>
     <loc>${siteUrl}${url}</loc>
     <lastmod>${lastmod}</lastmod>
@@ -214,11 +231,25 @@ ${siteUrls.map(sitemapEntry).join('\n')}
 `;
 writeRoute(resolve(distDir, 'sitemap.xml'), sitemap);
 
+// The bare domain serves the same English content as /en/. Canonicalize it to
+// the language-prefixed home so search engines consolidate "/" into "/en/"
+// instead of treating them as duplicate pages.
+const rootCanonical = `<link rel="canonical" href="${siteUrl}/en/" />`;
+const rootHreflang = LANGS.map(
+  (l) => `<link rel="alternate" hreflang="${l}" href="${siteUrl}/${l}/" />`,
+).join('\n    ');
+const rootHtml = baseHtml
+  .replace(
+    '<head>',
+    `<head>\n    <base href="/">\n    ${rootCanonical}\n    ${rootHreflang}\n    <link rel="alternate" hreflang="x-default" href="${siteUrl}/" />\n    <meta property="og:url" content="${siteUrl}/en/" />`,
+  );
+writeRoute(resolve(distDir, 'index.html'), rootHtml);
+
 writeRoute(resolve(distDir, 'robots.txt'),
   `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`,
   'utf8',
 );
 
 console.log(
-  `[prerender-routes] generated ${siteUrls.length - 1} prerendered pages (${projects.length} projects x ${LANGS.length} langs), sitemap.xml (${siteUrls.length} urls), robots.txt`,
+  `[prerender-routes] generated ${siteUrls.length} prerendered pages (${projects.length} projects x ${LANGS.length} langs), root canonicalized to /en/, sitemap.xml (${siteUrls.length} urls), robots.txt`,
 );

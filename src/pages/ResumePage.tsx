@@ -1,6 +1,4 @@
 import { ArrowLeft, Check, Copy, Download, ExternalLink, Globe2 } from 'lucide-react';
-import html2canvas from 'html2canvas-pro';
-import { jsPDF } from 'jspdf';
 import { useEffect, useState } from 'react';
 import { projectsData } from '../data/projectsData';
 import { resumeProfile } from '../data/resumeProfile';
@@ -59,6 +57,12 @@ export default function ResumePage({ language, onBack, onLanguageChange }: Resum
     const previousScroll = window.scrollY;
     try {
       await document.fonts.ready;
+      // jspdf + html2canvas-pro weigh several hundred KB; load them only when
+      // the visitor actually exports the resume so they stay out of the main bundle.
+      const [{ jsPDF }, { default: html2canvas }] = await Promise.all([
+        import('jspdf'),
+        import('html2canvas-pro'),
+      ]);
       const pages = Array.from(document.querySelectorAll<HTMLElement>('.cv-page'));
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
       for (let index = 0; index < pages.length; index += 1) {

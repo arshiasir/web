@@ -12,7 +12,7 @@ import type { ProjectSchema } from '../types/schema';
  *   - change the hero/cover image -> edit `images.mockup`
  *   - add gallery shots -> push into `images.gallery`
  *   - add / remove a GitHub, live, or store link -> edit `links`
- *   - add a screen screenshot -> set `image: 'filename.png'` in a `screens` entry
+ *   - add a screen screenshot -> set `image: 'filename.webp'` in a `screens` entry
  *       (file lives in src/assets/images/; leave it out to use the default mock)
  */
 export const projectsData: ProjectSchema[] = [
@@ -40,11 +40,11 @@ export const projectsData: ProjectSchema[] = [
       tagline: 'Train smarter. Move better. Progress with intelligence.',
       heroDescription: 'TvarX brings personalized workout planning, real-time pose analysis, exercise tracking, nutrition assistance, and actionable progress analytics into one multilingual mobile and web product.',
       screens: [
-        { id: 'home', title: 'Fitness Home', description: 'Daily training overview, recommendations, progress signals, and quick access to the next workout.', image: 'tvarx_home.png' },
-        { id: 'sports', title: 'Sports & Training', description: 'Browse focused training experiences and select a workout based on the current goal.', image: 'tvarx_Sports.png' },
-        { id: 'sports-list', title: 'Workout Library', description: 'Explore structured workout categories and programs from the complete training library.', image: 'tavrx_Sports_list.png' },
-        { id: 'body-analysis', title: 'Body Analysis', description: 'Review body composition and fitness indicators in a clear, actionable analysis view.', image: 'tvarx_body_analysis.png' },
-        { id: 'analysis', title: 'Performance Analytics', description: 'Track training progress, performance trends, and the metrics that shape future recommendations.', image: 'tvarx_analysis.png' },
+        { id: 'home', title: 'Fitness Home', description: 'Daily training overview, recommendations, progress signals, and quick access to the next workout.', image: 'tvarx_home.webp' },
+        { id: 'sports', title: 'Sports & Training', description: 'Browse focused training experiences and select a workout based on the current goal.', image: 'tvarx_Sports.webp' },
+        { id: 'sports-list', title: 'Workout Library', description: 'Explore structured workout categories and programs from the complete training library.', image: 'tavrx_Sports_list.webp' },
+        { id: 'body-analysis', title: 'Body Analysis', description: 'Review body composition and fitness indicators in a clear, actionable analysis view.', image: 'tvarx_body_analysis.webp' },
+        { id: 'analysis', title: 'Performance Analytics', description: 'Track training progress, performance trends, and the metrics that shape future recommendations.', image: 'tvarx_analysis.webp' },
       ],
       features: [
         { title: 'AI Workout Coach', description: 'Creates personalized, goal-based training plans and adapts routines as the user progresses.', icon: 'Brain' },
@@ -123,11 +123,11 @@ export const projectsData: ProjectSchema[] = [
       tagline: 'هوشمندتر تمرین کن، بهتر حرکت کن و دقیق‌تر پیشرفت کن.',
       heroDescription: 'TvarX برنامه‌ریزی شخصی تمرین، تحلیل زنده وضعیت بدن، ثبت هوشمند تمرین، راهنمای تغذیه و تحلیل قابل‌فهم پیشرفت را در یک محصول موبایل و وب دوزبانه یکپارچه می‌کند.',
       screens: [
-        { id: 'home', title: 'خانه تناسب اندام', description: 'نمای روزانه تمرین، پیشنهادها، وضعیت پیشرفت و دسترسی سریع به تمرین بعدی.', image: 'tvarx_home.png' },
-        { id: 'sports', title: 'ورزش و تمرین', description: 'مرور تجربه‌های تمرینی هدفمند و انتخاب تمرین متناسب با هدف فعلی.', image: 'tvarx_Sports.png' },
-        { id: 'sports-list', title: 'کتابخانه تمرین', description: 'مشاهده دسته‌بندی‌ها و برنامه‌های ساختاریافته در کتابخانه کامل تمرین.', image: 'tavrx_Sports_list.png' },
-        { id: 'body-analysis', title: 'تحلیل بدن', description: 'مشاهده ترکیب بدنی و شاخص‌های تناسب اندام در نمایی شفاف و قابل استفاده.', image: 'tvarx_body_analysis.png' },
-        { id: 'analysis', title: 'تحلیل عملکرد', description: 'بررسی پیشرفت، روند عملکرد و معیارهایی که پیشنهادهای آینده را شکل می‌دهند.', image: 'tvarx_analysis.png' },
+        { id: 'home', title: 'خانه تناسب اندام', description: 'نمای روزانه تمرین، پیشنهادها، وضعیت پیشرفت و دسترسی سریع به تمرین بعدی.', image: 'tvarx_home.webp' },
+        { id: 'sports', title: 'ورزش و تمرین', description: 'مرور تجربه‌های تمرینی هدفمند و انتخاب تمرین متناسب با هدف فعلی.', image: 'tvarx_Sports.webp' },
+        { id: 'sports-list', title: 'کتابخانه تمرین', description: 'مشاهده دسته‌بندی‌ها و برنامه‌های ساختاریافته در کتابخانه کامل تمرین.', image: 'tavrx_Sports_list.webp' },
+        { id: 'body-analysis', title: 'تحلیل بدن', description: 'مشاهده ترکیب بدنی و شاخص‌های تناسب اندام در نمایی شفاف و قابل استفاده.', image: 'tvarx_body_analysis.webp' },
+        { id: 'analysis', title: 'تحلیل عملکرد', description: 'بررسی پیشرفت، روند عملکرد و معیارهایی که پیشنهادهای آینده را شکل می‌دهند.', image: 'tvarx_analysis.webp' },
       ],
       features: [
         { title: 'مربی هوشمند تمرین', description: 'برنامه‌های شخصی و هدف‌محور می‌سازد و روتین تمرینی را هم‌زمان با پیشرفت کاربر تطبیق می‌دهد.', icon: 'Brain' },
@@ -224,9 +224,9 @@ export const projectsData: ProjectSchema[] = [
       screens: [
         { id: 'scan', title: 'Food Scan', description: 'Capture a meal image to begin recognition and nutritional analysis.' , image: "calkilo_scan.png" },
         { id: 'results', title: 'Nutrition Analysis', description: 'Review the estimated calories and nutritional composition of the scanned meal.' , image : "calkilo_nutrition_analysis.png" },
-        { id: 'history', title: 'Consumption History', description: 'Keep a structured record of meals and review consumption patterns over time.', image: 'calkilo_home.png' },
-        { id: 'goals', title: 'Health Goals', description: 'Connect nutritional reports to personal weight and health objectives.', image: 'calkilo_Gamifcation.png' },
-        { id: 'insights', title: 'Eating Insights', description: 'Identify recurring consumption patterns and receive health-oriented alerts.', image: 'calkilo_analysis.png' },
+        { id: 'history', title: 'Consumption History', description: 'Keep a structured record of meals and review consumption patterns over time.', image: 'calkilo_home.webp' },
+        { id: 'goals', title: 'Health Goals', description: 'Connect nutritional reports to personal weight and health objectives.', image: 'calkilo_Gamifcation.webp' },
+        { id: 'insights', title: 'Eating Insights', description: 'Identify recurring consumption patterns and receive health-oriented alerts.', image: 'calkilo_analysis.webp' },
         { id: 'reports', title: 'Personal Reports', description: 'View analysis tailored to meal history, weight, and individual goals.' },
       ],
       features: [
@@ -298,9 +298,9 @@ export const projectsData: ProjectSchema[] = [
       screens: [
         { id: 'scan', title: 'اسکن غذا', description: 'ثبت تصویر وعده غذایی برای آغاز فرآیند شناسایی و تحلیل تغذیه‌ای.' , image: "calkilo_scan.png" },
         { id: 'results', title: 'تحلیل تغذیه', description: 'نمایش کالری تخمینی و ترکیبات تغذیه‌ای وعده اسکن‌شده.'  ,image : "calkilo_nutrition_analysis.png" },
-        { id: 'history', title: 'تاریخچه مصرف', description: 'ثبت منظم وعده‌ها و مرور الگوهای مصرف در طول زمان.', image: 'calkilo_home.png' },
-        { id: 'goals', title: 'اهداف سلامتی', description: 'ارتباط گزارش‌های تغذیه‌ای با وزن و اهداف سلامتی کاربر.', image: 'calkilo_Gamifcation.png' },
-        { id: 'insights', title: 'بینش‌های غذایی', description: 'شناسایی الگوهای تکرارشونده مصرف و ارائه هشدارهای سلامت‌محور.', image: 'calkilo_analysis.png' },
+        { id: 'history', title: 'تاریخچه مصرف', description: 'ثبت منظم وعده‌ها و مرور الگوهای مصرف در طول زمان.', image: 'calkilo_home.webp' },
+        { id: 'goals', title: 'اهداف سلامتی', description: 'ارتباط گزارش‌های تغذیه‌ای با وزن و اهداف سلامتی کاربر.', image: 'calkilo_Gamifcation.webp' },
+        { id: 'insights', title: 'بینش‌های غذایی', description: 'شناسایی الگوهای تکرارشونده مصرف و ارائه هشدارهای سلامت‌محور.', image: 'calkilo_analysis.webp' },
         { id: 'reports', title: 'گزارش شخصی', description: 'تحلیل متناسب با تاریخچه وعده‌ها، وزن و اهداف فردی.' },
       ],
       features: [
@@ -385,13 +385,13 @@ export const projectsData: ProjectSchema[] = [
       tagline: 'Your music. Your world.',
       heroDescription: 'An immersive audio experience with ultra-low latency streaming, offline playback, and AI-powered recommendations that learn your taste.',
       screens: [
-        { id: 'home', title: 'Home', description: 'A personalized starting point for recent listening, recommendations, and quick playback.', image: 'couchini_home.png' },
-        { id: 'player', title: 'Player', description: 'Full-screen player with gesture control, gapless playback and live lyric sync.', image: 'couchini_play.png' },
-        { id: 'explore', title: 'Explore', description: 'Personalized home feed with smart mixes, new releases and curated radio.', image: 'couchini_Explore.png' },
-        { id: 'search', title: 'Search', description: 'Instant search across tracks, artists, albums and playlists with filters.', image: 'couchini_Search.png' },
-        { id: 'playlist', title: 'Playlist', description: 'Create and edit playlists with smart auto-ordering and collaborative editing.', image: 'couchini_playlist.png' },
-        { id: 'lyrics', title: 'Lyrics', description: 'Time-coded synchronized lyrics with karaoke-style word highlighting.', image: 'couchini_Lyrics.png' },
-        { id: 'library', title: 'Library', description: 'All your saved music, downloads and listening history in one organized place.', image: 'couchini_Library.png' },
+        { id: 'home', title: 'Home', description: 'A personalized starting point for recent listening, recommendations, and quick playback.', image: 'couchini_home.webp' },
+        { id: 'player', title: 'Player', description: 'Full-screen player with gesture control, gapless playback and live lyric sync.', image: 'couchini_play.webp' },
+        { id: 'explore', title: 'Explore', description: 'Personalized home feed with smart mixes, new releases and curated radio.', image: 'couchini_Explore.webp' },
+        { id: 'search', title: 'Search', description: 'Instant search across tracks, artists, albums and playlists with filters.', image: 'couchini_Search.webp' },
+        { id: 'playlist', title: 'Playlist', description: 'Create and edit playlists with smart auto-ordering and collaborative editing.', image: 'couchini_playlist.webp' },
+        { id: 'lyrics', title: 'Lyrics', description: 'Time-coded synchronized lyrics with karaoke-style word highlighting.', image: 'couchini_Lyrics.webp' },
+        { id: 'library', title: 'Library', description: 'All your saved music, downloads and listening history in one organized place.', image: 'couchini_Library.webp' },
       ],
       features: [
         { title: 'Immersive Audio', description: 'Ultra-low latency streaming with hardware-accelerated decoding for pristine sound.', icon: 'Music' },
@@ -460,13 +460,13 @@ export const projectsData: ProjectSchema[] = [
       tagline: 'موسیقی تو. دنیای تو.',
       heroDescription: 'یک تجربه موسیقی غوطه‌ور با استریم فوق‌العاده کم‌تأخیر، پخش آفلاین و توصیه‌گر هوشمند که سلیقه‌ات را یاد می‌گیرد.',
       screens: [
-        { id: 'home', title: 'خانه', description: 'شروع شخصی‌سازی‌شده برای شنیده‌های اخیر، پیشنهادها و دسترسی سریع به پخش.', image: 'couchini_home.png' },
-        { id: 'player', title: 'پخش‌کننده', description: 'پخش‌کننده تمام‌صفحه با کنترل حرکتی، پخش بدون وقفه و هماهنگ‌سازی زنده متن.', image: 'couchini_play.png' },
-        { id: 'explore', title: 'کاوش', description: 'فید خانگی شخصی‌سازی‌شده با میکس‌های هوشمند، انتشارهای جدید و رادیو.', image: 'couchini_Explore.png' },
-        { id: 'search', title: 'جستجو', description: 'جستجوی آنی در آهنگ‌ها، خوانندگان، آلبوم‌ها و لیست‌های پخش با فیلتر.', image: 'couchini_Search.png' },
-        { id: 'playlist', title: 'لیست پخش', description: 'ساخت و ویرایش لیست پخش با مرتب‌سازی هوشمند و ویرایش اشتراکی.', image: 'couchini_playlist.png' },
-        { id: 'lyrics', title: 'متن آهنگ', description: 'متن هماهنگ‌شده زمان‌بندی‌شده با برجسته‌سازی سبک کارائوکه.', image: 'couchini_Lyrics.png' },
-        { id: 'library', title: 'کتابخانه', description: 'تمام موزیک‌های ذخیره‌شده، دانلودها و تاریخچه شنیدن در یک جا.', image: 'couchini_Library.png' },
+        { id: 'home', title: 'خانه', description: 'شروع شخصی‌سازی‌شده برای شنیده‌های اخیر، پیشنهادها و دسترسی سریع به پخش.', image: 'couchini_home.webp' },
+        { id: 'player', title: 'پخش‌کننده', description: 'پخش‌کننده تمام‌صفحه با کنترل حرکتی، پخش بدون وقفه و هماهنگ‌سازی زنده متن.', image: 'couchini_play.webp' },
+        { id: 'explore', title: 'کاوش', description: 'فید خانگی شخصی‌سازی‌شده با میکس‌های هوشمند، انتشارهای جدید و رادیو.', image: 'couchini_Explore.webp' },
+        { id: 'search', title: 'جستجو', description: 'جستجوی آنی در آهنگ‌ها، خوانندگان، آلبوم‌ها و لیست‌های پخش با فیلتر.', image: 'couchini_Search.webp' },
+        { id: 'playlist', title: 'لیست پخش', description: 'ساخت و ویرایش لیست پخش با مرتب‌سازی هوشمند و ویرایش اشتراکی.', image: 'couchini_playlist.webp' },
+        { id: 'lyrics', title: 'متن آهنگ', description: 'متن هماهنگ‌شده زمان‌بندی‌شده با برجسته‌سازی سبک کارائوکه.', image: 'couchini_Lyrics.webp' },
+        { id: 'library', title: 'کتابخانه', description: 'تمام موزیک‌های ذخیره‌شده، دانلودها و تاریخچه شنیدن در یک جا.', image: 'couchini_Library.webp' },
       ],
       features: [
         { title: 'صدای غوطه‌ور', description: 'استریم با تأخیر فوق‌العاده کم و رمزگشایی سخت‌افزاری برای صدای زلال.', icon: 'Music' },
@@ -550,9 +550,9 @@ export const projectsData: ProjectSchema[] = [
       tagline: 'Deliver at scale',
       heroDescription: 'Enterprise logistics network connecting 12,000+ drivers with microsecond-accurate real-time tracking and intelligent route optimization.',
       screens: [
-        { id: 'driver', title: 'Driver View', description: 'Real-time navigation with optimized delivery routes.', image: 'Tipax_home.png' },
-        { id: 'map', title: 'Live Map', description: 'Track all active drivers with microsecond updates.', image: 'Tipax_page.png' },
-        { id: 'orders', title: 'Order Management', description: 'Automated assignment and dispatch system.', image: 'Tipax_Archive.png' },
+        { id: 'driver', title: 'Driver View', description: 'Real-time navigation with optimized delivery routes.', image: 'Tipax_home.webp' },
+        { id: 'map', title: 'Live Map', description: 'Track all active drivers with microsecond updates.', image: 'Tipax_page.webp' },
+        { id: 'orders', title: 'Order Management', description: 'Automated assignment and dispatch system.', image: 'Tipax_Archive.webp' },
         { id: 'analytics', title: 'Analytics', description: 'Fleet performance and delivery metrics dashboard.' },
         { id: 'profile', title: 'Driver Profile', description: 'Rating, history, and performance stats.' },
         { id: 'admin', title: 'Admin Panel', description: 'Full control over fleet, zones, and pricing.' },
@@ -605,9 +605,9 @@ export const projectsData: ProjectSchema[] = [
       tagline: 'تحویل در مقیاس بزرگ',
       heroDescription: 'شبکه لجستیک سازمانی که ۱۲٬۰۰۰+ راننده را با ردیابی لحظه‌ای میکروثانیه‌ای و بهینه‌سازی هوشمند مسیر به هم متصل می‌کند.',
       screens: [
-        { id: 'driver', title: 'نمای راننده', description: 'ناوبری لحظه‌ای با مسیرهای بهینه تحویل.', image: 'Tipax_home.png' },
-        { id: 'map', title: 'نقشه زنده', description: 'ردیابی همه رانندگان فعال با بروزرسانی میکروثانیه‌ای.', image: 'Tipax_page.png' },
-        { id: 'orders', title: 'مدیریت سفارش', description: 'سیستم تخصیص و اعزام خودکار.', image: 'Tipax_Archive.png' },
+        { id: 'driver', title: 'نمای راننده', description: 'ناوبری لحظه‌ای با مسیرهای بهینه تحویل.', image: 'Tipax_home.webp' },
+        { id: 'map', title: 'نقشه زنده', description: 'ردیابی همه رانندگان فعال با بروزرسانی میکروثانیه‌ای.', image: 'Tipax_page.webp' },
+        { id: 'orders', title: 'مدیریت سفارش', description: 'سیستم تخصیص و اعزام خودکار.', image: 'Tipax_Archive.webp' },
         { id: 'analytics', title: 'تحلیل', description: 'داشبورد عملکرد ناوگان و شاخص‌های تحویل.' },
         { id: 'profile', title: 'پروفایل راننده', description: 'امتیاز، تاریخچه و آمار عملکرد.' },
         { id: 'admin', title: 'پنل مدیریت', description: 'کنترل کامل ناوگان، مناطق و قیمت‌گذاری.' },
